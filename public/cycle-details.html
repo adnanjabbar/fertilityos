@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cycle Details - IVF Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 IVF Platform</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span>📊</span> Dashboard
+                </a>
+                <a href="patients.html" class="nav-item">
+                    <span>👥</span> Patients
+                </a>
+                <a href="cycles.html" class="nav-item active">
+                    <span>🔬</span> IVF Cycles
+                </a>
+                <a href="lab.html" class="nav-item">
+                    <span>🧪</span> Lab
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span>📈</span> Reports
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span>⚙️</span> Settings
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div>
+                    <h1 id="cycleCode">Loading...</h1>
+                    <p id="cycleInfo" class="text-muted"></p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="window.location.href='cycles.html'">
+                        ← Back to Cycles
+                    </button>
+                </div>
+            </header>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2>Cycle Details</h2>
+                </div>
+                <div class="card-body" id="cycleDetailsContent">
+                    <p>Loading cycle details...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+    <script>
+        let cycleId = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!requireAuth()) return;
+            loadUserInfo();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            cycleId = urlParams.get('id');
+            
+            if (!cycleId) {
+                alert('No cycle ID provided');
+                window.location.href = 'cycles.html';
+                return;
+            }
+            
+            loadCycleDetails();
+        });
+        
+        async function loadCycleDetails() {
+            try {
+                const data = await apiCall(`/cycles/${cycleId}`);
+                
+                if (data && data.cycle) {
+                    const cycle = data.cycle;
+                    
+                    document.getElementById('cycleCode').textContent = cycle.cycle_code;
+                    document.getElementById('cycleInfo').textContent = 
+                        `Patient: ${cycle.patient_name} | Type: ${cycle.cycle_type} | Stage: ${cycle.current_stage}`;
+                    
+                    const content = document.getElementById('cycleDetailsContent');
+                    content.innerHTML = `
+                        <div class="detail-section">
+                            <h3>Basic Information</h3>
+                            <div class="detail-row"><strong>Cycle Number:</strong> ${cycle.cycle_number}</div>
+                            <div class="detail-row"><strong>Type:</strong> ${cycle.cycle_type}</div>
+                            <div class="detail-row"><strong>Protocol:</strong> ${cycle.protocol || 'N/A'}</div>
+                            <div class="detail-row"><strong>Current Stage:</strong> ${cycle.current_stage}</div>
+                            <div class="detail-row"><strong>Start Date:</strong> ${formatDate(cycle.start_date)}</div>
+                            <div class="detail-row"><strong>Expected Egg Retrieval:</strong> ${cycle.expected_egg_retrieval ? formatDate(cycle.expected_egg_retrieval) : 'N/A'}</div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3>Team</h3>
+                            <div class="detail-row"><strong>Doctor:</strong> ${cycle.doctor_name || 'N/A'}</div>
+                            <div class="detail-row"><strong>Embryologist:</strong> ${cycle.embryologist_name || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3>Status</h3>
+                            <div class="detail-row"><strong>Outcome:</strong> ${cycle.cycle_outcome || 'Ongoing'}</div>
+                            <div class="detail-row"><strong>Pregnancy Result:</strong> ${cycle.pregnancy_result === null ? 'Pending' : (cycle.pregnancy_result ? 'Positive' : 'Negative')}</div>
+                        </div>
+                        
+                        ${cycle.notes ? `
+                        <div class="detail-section">
+                            <h3>Notes</h3>
+                            <p>${cycle.notes}</p>
+                        </div>
+                        ` : ''}
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading cycle:', error);
+                alert('Error loading cycle details');
+            }
+        }
+    </script>
+</body>
+</html>

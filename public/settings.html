@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - IVF Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 IVF Platform</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item active"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Settings</h1>
+            </header>
+            
+            <!-- Settings Tabs -->
+            <div class="settings-tabs">
+                <button class="settings-tab-btn active" onclick="showTab('profile')">My Profile</button>
+                <button class="settings-tab-btn" onclick="showTab('users')" id="usersTabBtn">User Management</button>
+                <button class="settings-tab-btn" onclick="showTab('clinic')" id="clinicTabBtn">Clinic Settings</button>
+            </div>
+            
+            <!-- My Profile Tab -->
+            <div id="profileTab" class="settings-tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>My Profile</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="profileForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="profileFullName">Full Name</label>
+                                    <input type="text" id="profileFullName" name="fullName">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="profileEmail">Email (cannot be changed)</label>
+                                    <input type="email" id="profileEmail" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="profilePhone">Phone</label>
+                                    <input type="tel" id="profilePhone" name="phone">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="profileRole">Role (cannot be changed)</label>
+                                    <input type="text" id="profileRole" disabled>
+                                </div>
+                            </div>
+                            
+                            <hr style="margin: 30px 0;">
+                            
+                            <h3 style="margin-bottom: 20px;">Change Password</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" name="currentPassword">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" name="newPassword">
+                                </div>
+                            </div>
+                            
+                            <div id="profileError" class="error-message" style="display: none;"></div>
+                            <div id="profileSuccess" class="success-message" style="display: none;"></div>
+                            
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Management Tab -->
+            <div id="usersTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>User Management</h2>
+                        <button class="btn btn-primary" onclick="showAddUserModal()">
+                            ➕ Add User
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Last Login</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <tr>
+                                    <td colspan="7" class="text-center">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Clinic Settings Tab -->
+            <div id="clinicTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Clinic Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="clinicForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicNameInput">Clinic Name</label>
+                                    <input type="text" id="clinicNameInput" name="clinicName">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clinicSubdomain">Subdomain (cannot be changed)</label>
+                                    <input type="text" id="clinicSubdomain" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicEmail">Email</label>
+                                    <input type="email" id="clinicEmail" name="email">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clinicPhone">Phone</label>
+                                    <input type="tel" id="clinicPhone" name="phone">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicAddress">Address</label>
+                                    <input type="text" id="clinicAddress" name="address">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clinicCity">City</label>
+                                    <input type="text" id="clinicCity" name="city">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicLicense">License Number</label>
+                                    <input type="text" id="clinicLicense" name="licenseNumber">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clinicPHC">PHC Registration</label>
+                                    <input type="text" id="clinicPHC" name="phcRegistration">
+                                </div>
+                            </div>
+                            
+                            <div id="clinicError" class="error-message" style="display: none;"></div>
+                            <div id="clinicSuccess" class="success-message" style="display: none;"></div>
+                            
+                            <button type="submit" class="btn btn-primary">Update Clinic Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New User</h2>
+                <span class="close" onclick="closeAddUserModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userFullName">Full Name *</label>
+                            <input type="text" id="userFullName" name="fullName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userEmail">Email *</label>
+                            <input type="email" id="userEmail" name="email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userPassword">Password *</label>
+                            <input type="password" id="userPassword" name="password" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userPhone">Phone</label>
+                            <input type="tel" id="userPhone" name="phone">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userRole">Role *</label>
+                        <select id="userRole" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="embryologist">Embryologist</option>
+                            <option value="ivf_consultant">IVF Consultant</option>
+                            <option value="lab_director">Lab Director</option>
+                            <option value="lab_tech">Lab Technician</option>
+                            <option value="nurse">Nurse</option>
+                            <option value="quality_manager">Quality Manager</option>
+                            <option value="receptionist">Receptionist</option>
+                        </select>
+                    </div>
+                    
+                    <div id="addUserError" class="error-message" style="display: none;"></div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddUserModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+    <script src="/js/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Settings - IVF Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .logo-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        .logo-upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .logo-upload-area.dragover {
+            border-color: #667eea;
+            background: #e0e7ff;
+        }
+        .logo-preview {
+            max-width: 200px;
+            max-height: 100px;
+            margin: 10px auto;
+            display: block;
+        }
+        .country-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .country-card:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+        }
+        .country-card.selected {
+            border-color: #667eea;
+            background: #eff6ff;
+        }
+        .country-flag {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .feature-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin: 2px;
+        }
+        .feature-badge.allowed { background: #dcfce7; color: #166534; }
+        .feature-badge.restricted { background: #fee2e2; color: #991b1b; }
+        .section-divider {
+            border-top: 2px solid #e2e8f0;
+            margin: 30px 0;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 IVF Platform</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item active"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>🏢 Organization Settings</h1>
+            </div>
+
+            <!-- Tabs -->
+            <div class="settings-tabs">
+                <button class="settings-tab-btn active" data-tab="general">General Info</button>
+                <button class="settings-tab-btn" data-tab="branding">Branding & Logo</button>
+                <button class="settings-tab-btn" data-tab="regional">Regional Settings</button>
+                <button class="settings-tab-btn" data-tab="compliance">Compliance & Regulations</button>
+                <button class="settings-tab-btn" data-tab="billing">Billing & Banking</button>
+            </div>
+
+            <!-- General Info Tab -->
+            <div id="generalTab" class="settings-tab-content active">
+                <div class="card">
+                    <div class="card-header"><h2>🏥 Clinic Information</h2></div>
+                    <div class="card-body">
+                        <form id="generalForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Clinic Name *</label>
+                                    <input type="text" class="form-control" id="orgClinicName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Clinic Code *</label>
+                                    <input type="text" class="form-control" id="orgClinicCode" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Email *</label>
+                                    <input type="email" class="form-control" id="orgEmail" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone *</label>
+                                    <input type="tel" class="form-control" id="orgPhone" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Website</label>
+                                    <input type="url" class="form-control" id="orgWebsite" placeholder="https://">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Full Address *</label>
+                                <textarea class="form-control" id="orgAddress" rows="2" required></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>City *</label>
+                                    <input type="text" class="form-control" id="orgCity" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Country *</label>
+                                    <select class="form-control" id="orgCountry" required>
+                                        <option value="">Select Country</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="section-divider">
+                                <h3>👤 Primary Contact Person</h3>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Contact Name</label>
+                                    <input type="text" class="form-control" id="orgContactName">
+                                </div>
+                                <div class="form-group">
+                                    <label>Contact Phone</label>
+                                    <input type="tel" class="form-control" id="orgContactPhone">
+                                </div>
+                                <div class="form-group">
+                                    <label>Contact Email</label>
+                                    <input type="email" class="form-control" id="orgContactEmail">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">💾 Save General Information</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branding Tab -->
+            <div id="brandingTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header"><h2>🎨 Branding & Logo</h2></div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Clinic Logo</label>
+                            <p class="text-muted" style="font-size:12px;margin-bottom:10px;">This logo will appear on all reports, receipts, and patient communications. Recommended size: 300x100px, PNG or JPG.</p>
+                            
+                            <div class="logo-upload-area" id="logoUploadArea">
+                                <div id="logoPlaceholder">
+                                    <p style="font-size:40px;margin:0;">🖼️</p>
+                                    <p>Drag & drop your logo here or click to browse</p>
+                                    <p class="text-muted" style="font-size:11px;">PNG, JPG up to 2MB</p>
+                                </div>
+                                <img id="logoPreview" class="logo-preview" style="display:none;">
+                                <input type="file" id="logoInput" accept="image/png,image/jpeg" style="display:none;">
+                            </div>
+                            <button class="btn btn-secondary btn-sm" style="margin-top:10px;" onclick="removeLogo()">🗑️ Remove Logo</button>
+                        </div>
+
+                        <div class="section-divider">
+                            <h3>📄 Report Header Preview</h3>
+                        </div>
+                        <div style="border:1px solid #ddd;padding:20px;border-radius:8px;background:#fff;">
+                            <div style="display:flex;align-items:center;gap:20px;border-bottom:2px solid #1a365d;padding-bottom:15px;">
+                                <img id="previewLogo" src="" style="max-height:60px;display:none;">
+                                <div>
+                                    <h2 style="margin:0;color:#1a365d;" id="previewClinicName">Your Clinic Name</h2>
+                                    <p style="margin:5px 0 0;color:#666;" id="previewAddress">Your clinic address will appear here</p>
+                                    <p style="margin:0;color:#666;font-size:12px;" id="previewContact">Phone: XXX | Email: XXX</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top:20px;" onclick="saveBranding()">💾 Save Branding</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regional Settings Tab -->
+            <div id="regionalTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header"><h2>🌍 Regional Settings</h2></div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Currency</label>
+                                <select class="form-control" id="orgCurrency">
+                                    <option value="">Auto (based on country)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Timezone</label>
+                                <select class="form-control" id="orgTimezone">
+                                    <option value="Asia/Karachi">Asia/Karachi (PKT)</option>
+                                    <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                                    <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                                    <option value="Europe/London">Europe/London (GMT/BST)</option>
+                                    <option value="America/New_York">America/New_York (EST/EDT)</option>
+                                    <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date Format</label>
+                                <select class="form-control" id="orgDateFormat">
+                                    <option value="DD/MM/YYYY">DD/MM/YYYY (31/12/2024)</option>
+                                    <option value="MM/DD/YYYY">MM/DD/YYYY (12/31/2024)</option>
+                                    <option value="YYYY-MM-DD">YYYY-MM-DD (2024-12-31)</option>
+                                    <option value="DD-MMM-YYYY">DD-MMM-YYYY (31-Dec-2024)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Language</label>
+                                <select class="form-control" id="orgLanguage">
+                                    <option value="en">English</option>
+                                    <option value="ur">Urdu</option>
+                                    <option value="ar">Arabic</option>
+                                    <option value="hi">Hindi</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="section-divider">
+                            <h3>📋 Country-Specific Regulations</h3>
+                            <p class="text-muted">Based on your selected country, these regulations apply:</p>
+                        </div>
+                        
+                        <div id="countryRegulations" style="background:#f8fafc;padding:20px;border-radius:8px;">
+                            <p class="text-muted">Select a country to see applicable regulations</p>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top:20px;" onclick="saveRegionalSettings()">💾 Save Regional Settings</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compliance Tab -->
+            <div id="complianceTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header"><h2>📜 Compliance & Regulatory</h2></div>
+                    <div class="card-body">
+                        <div id="complianceFields">
+                            <!-- Dynamic based on country -->
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label id="licenseLabel">Regulatory License Number</label>
+                                <input type="text" class="form-control" id="orgLicense">
+                            </div>
+                            <div class="form-group">
+                                <label>License Expiry Date</label>
+                                <input type="date" class="form-control" id="orgLicenseExpiry">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Tax ID / Registration Number</label>
+                            <input type="text" class="form-control" id="orgTaxId">
+                        </div>
+
+                        <div class="section-divider">
+                            <h3>🔐 KYC/AML Settings</h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Patient Verification Provider</label>
+                            <select class="form-control" id="orgKycProvider">
+                                <option value="none">None (Manual Verification)</option>
+                                <option value="didit">Didit.me (Recommended)</option>
+                                <option value="onfido">Onfido</option>
+                                <option value="jumio">Jumio</option>
+                            </select>
+                        </div>
+                        <div id="diditSettings" style="display:none;background:#f8fafc;padding:15px;border-radius:8px;margin-top:10px;">
+                            <h4>Didit.me Configuration</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>API Key</label>
+                                    <input type="password" class="form-control" id="diditApiKey" placeholder="Enter your Didit.me API key">
+                                </div>
+                                <div class="form-group">
+                                    <label>Webhook Secret</label>
+                                    <input type="password" class="form-control" id="diditWebhook" placeholder="Webhook secret">
+                                </div>
+                            </div>
+                            <p class="text-muted" style="font-size:11px;">Get your API credentials at <a href="https://didit.me" target="_blank">didit.me</a></p>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top:20px;" onclick="saveCompliance()">💾 Save Compliance Settings</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Tab -->
+            <div id="billingTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header"><h2>💳 Billing & Banking</h2></div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Billing Address (if different from clinic address)</label>
+                            <textarea class="form-control" id="orgBillingAddress" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="section-divider">
+                            <h3>🏦 Bank Account Details</h3>
+                            <p class="text-muted">For patient payments and refunds</p>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Bank Name</label>
+                                <input type="text" class="form-control" id="orgBankName">
+                            </div>
+                            <div class="form-group">
+                                <label>Account Number</label>
+                                <input type="text" class="form-control" id="orgBankAccount">
+                            </div>
+                            <div class="form-group">
+                                <label>IBAN / SWIFT</label>
+                                <input type="text" class="form-control" id="orgBankIban">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top:20px;" onclick="saveBilling()">💾 Save Billing Information</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            requireAuth();
+            loadUserInfo();
+            loadCountries();
+            loadOrganizationSettings();
+            setupTabNavigation();
+            setupLogoUpload();
+        });
+
+        function setupTabNavigation() {
+            document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.settings-tab-content').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab + 'Tab').classList.add('active');
+                });
+            });
+        }
+
+        async function loadCountries() {
+            try {
+                const data = await apiCall('/countries');
+                if (data && data.success) {
+                    const select = document.getElementById('orgCountry');
+                    select.innerHTML = '<option value="">Select Country</option>' +
+                        data.data.map(c => `<option value="${c.id}" data-code="${c.country_code}" data-currency="${c.currency_code}">${c.country_name}</option>`).join('');
+                    
+                    // Currency dropdown
+                    const currencies = [...new Set(data.data.map(c => c.currency_code))];
+                    document.getElementById('orgCurrency').innerHTML = 
+                        '<option value="">Auto (based on country)</option>' +
+                        currencies.map(c => `<option value="${c}">${c}</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error loading countries:', error);
+            }
+        }
+
+        async function loadOrganizationSettings() {
+            try {
+                const data = await apiCall('/clinic/settings');
+                if (data && data.success) {
+                    const s = data.data;
+                    document.getElementById('orgClinicName').value = s.clinic_name || '';
+                    document.getElementById('orgClinicCode').value = s.clinic_code || '';
+                    document.getElementById('orgEmail').value = s.email || '';
+                    document.getElementById('orgPhone').value = s.phone || '';
+                    document.getElementById('orgWebsite').value = s.website || '';
+                    document.getElementById('orgAddress').value = s.address || '';
+                    document.getElementById('orgCity').value = s.city || '';
+                    document.getElementById('orgCountry').value = s.country_id || '';
+                    document.getElementById('orgContactName').value = s.primary_contact_name || '';
+                    document.getElementById('orgContactPhone').value = s.primary_contact_phone || '';
+                    document.getElementById('orgContactEmail').value = s.primary_contact_email || '';
+                    document.getElementById('orgLicense').value = s.regulatory_license || '';
+                    document.getElementById('orgLicenseExpiry').value = s.regulatory_expiry || '';
+                    document.getElementById('orgTaxId').value = s.tax_id || '';
+                    document.getElementById('orgBillingAddress').value = s.billing_address || '';
+                    document.getElementById('orgBankName').value = s.bank_name || '';
+                    document.getElementById('orgBankAccount').value = s.bank_account || '';
+                    document.getElementById('orgBankIban').value = s.bank_iban || '';
+                    document.getElementById('orgCurrency').value = s.currency_code || '';
+                    document.getElementById('orgTimezone').value = s.timezone || 'Asia/Karachi';
+                    document.getElementById('orgDateFormat').value = s.date_format || 'DD/MM/YYYY';
+                    document.getElementById('orgLanguage').value = s.language || 'en';
+                    
+                    // Logo
+                    if (s.logo_base64) {
+                        document.getElementById('logoPreview').src = s.logo_base64;
+                        document.getElementById('logoPreview').style.display = 'block';
+                        document.getElementById('logoPlaceholder').style.display = 'none';
+                        document.getElementById('previewLogo').src = s.logo_base64;
+                        document.getElementById('previewLogo').style.display = 'block';
+                    }
+                    
+                    // Update preview
+                    document.getElementById('previewClinicName').textContent = s.clinic_name || 'Your Clinic Name';
+                    document.getElementById('previewAddress').textContent = s.address || 'Address';
+                    document.getElementById('previewContact').textContent = `Phone: ${s.phone || 'XXX'} | Email: ${s.email || 'XXX'}`;
+                    
+                    // Load country regulations if country selected
+                    if (s.country_id) {
+                        loadCountryRegulations(s.country_id);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        function setupLogoUpload() {
+            const uploadArea = document.getElementById('logoUploadArea');
+            const input = document.getElementById('logoInput');
+            
+            uploadArea.addEventListener('click', () => input.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    handleLogoFile(e.dataTransfer.files[0]);
+                }
+            });
+            
+            input.addEventListener('change', () => {
+                if (input.files.length) {
+                    handleLogoFile(input.files[0]);
+                }
+            });
+        }
+
+        function handleLogoFile(file) {
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File too large. Maximum size is 2MB.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64 = e.target.result;
+                document.getElementById('logoPreview').src = base64;
+                document.getElementById('logoPreview').style.display = 'block';
+                document.getElementById('logoPlaceholder').style.display = 'none';
+                document.getElementById('previewLogo').src = base64;
+                document.getElementById('previewLogo').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeLogo() {
+            document.getElementById('logoPreview').style.display = 'none';
+            document.getElementById('logoPlaceholder').style.display = 'block';
+            document.getElementById('previewLogo').style.display = 'none';
+            document.getElementById('logoInput').value = '';
+        }
+
+        async function loadCountryRegulations(countryId) {
+            try {
+                const data = await apiCall(`/countries/${countryId}`);
+                if (data && data.success) {
+                    const c = data.data;
+                    document.getElementById('countryRegulations').innerHTML = `
+                        <h4>${c.country_name} Regulations</h4>
+                        <p><strong>Regulatory Body:</strong> ${c.regulatory_body || 'N/A'}</p>
+                        <p><strong>License Required:</strong> ${c.license_required ? 'Yes' : 'No'}</p>
+                        <div style="margin-top:15px;">
+                            <strong>Fertility Services:</strong><br>
+                            <span class="feature-badge ${c.sperm_donation_allowed ? 'allowed' : 'restricted'}">${c.sperm_donation_allowed ? '✓' : '✗'} Sperm Donation</span>
+                            <span class="feature-badge ${c.egg_donation_allowed ? 'allowed' : 'restricted'}">${c.egg_donation_allowed ? '✓' : '✗'} Egg Donation</span>
+                            <span class="feature-badge ${c.embryo_donation_allowed ? 'allowed' : 'restricted'}">${c.embryo_donation_allowed ? '✓' : '✗'} Embryo Donation</span>
+                            <span class="feature-badge ${c.surrogacy_allowed ? 'allowed' : 'restricted'}">${c.surrogacy_allowed ? '✓' : '✗'} Surrogacy</span>
+                            <span class="feature-badge ${c.anonymous_donation_allowed ? 'allowed' : 'restricted'}">${c.anonymous_donation_allowed ? '✓' : '✗'} Anonymous Donation</span>
+                        </div>
+                    `;
+                    
+                    // Update license label
+                    document.getElementById('licenseLabel').textContent = c.license_field_name || 'Regulatory License Number';
+                }
+            } catch (error) {
+                console.error('Error loading country regulations:', error);
+            }
+        }
+
+        document.getElementById('orgCountry').addEventListener('change', function() {
+            if (this.value) {
+                loadCountryRegulations(this.value);
+            }
+        });
+
+        document.getElementById('orgKycProvider').addEventListener('change', function() {
+            document.getElementById('diditSettings').style.display = this.value === 'didit' ? 'block' : 'none';
+        });
+
+        document.getElementById('generalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            try {
+                const data = await apiCall('/clinic/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        clinic_name: document.getElementById('orgClinicName').value,
+                        clinic_code: document.getElementById('orgClinicCode').value,
+                        email: document.getElementById('orgEmail').value,
+                        phone: document.getElementById('orgPhone').value,
+                        website: document.getElementById('orgWebsite').value,
+                        address: document.getElementById('orgAddress').value,
+                        city: document.getElementById('orgCity').value,
+                        country_id: document.getElementById('orgCountry').value || null,
+                        primary_contact_name: document.getElementById('orgContactName').value,
+                        primary_contact_phone: document.getElementById('orgContactPhone').value,
+                        primary_contact_email: document.getElementById('orgContactEmail').value
+                    })
+                });
+                
+                if (data && data.success) {
+                    alert('✓ General information saved!');
+                } else {
+                    alert('Error: ' + (data?.message || 'Failed to save'));
+                }
+            } catch (error) {
+                alert('Error saving settings');
+            }
+        });
+
+        async function saveBranding() {
+            try {
+                const logoPreview = document.getElementById('logoPreview');
+                const logoBase64 = logoPreview.style.display !== 'none' ? logoPreview.src : null;
+                
+                const data = await apiCall('/clinic/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        logo_base64: logoBase64
+                    })
+                });
+                
+                if (data && data.success) {
+                    alert('✓ Branding saved!');
+                } else {
+                    alert('Error: ' + (data?.message || 'Failed to save'));
+                }
+            } catch (error) {
+                alert('Error saving branding');
+            }
+        }
+
+        async function saveRegionalSettings() {
+            try {
+                const data = await apiCall('/clinic/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        currency_code: document.getElementById('orgCurrency').value,
+                        timezone: document.getElementById('orgTimezone').value,
+                        date_format: document.getElementById('orgDateFormat').value,
+                        language: document.getElementById('orgLanguage').value
+                    })
+                });
+                
+                if (data && data.success) {
+                    alert('✓ Regional settings saved!');
+                } else {
+                    alert('Error: ' + (data?.message || 'Failed to save'));
+                }
+            } catch (error) {
+                alert('Error saving settings');
+            }
+        }
+
+        async function saveCompliance() {
+            try {
+                const data = await apiCall('/clinic/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        regulatory_license: document.getElementById('orgLicense').value,
+                        regulatory_expiry: document.getElementById('orgLicenseExpiry').value || null,
+                        tax_id: document.getElementById('orgTaxId').value
+                    })
+                });
+                
+                if (data && data.success) {
+                    alert('✓ Compliance settings saved!');
+                } else {
+                    alert('Error: ' + (data?.message || 'Failed to save'));
+                }
+            } catch (error) {
+                alert('Error saving settings');
+            }
+        }
+
+        async function saveBilling() {
+            try {
+                const data = await apiCall('/clinic/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        billing_address: document.getElementById('orgBillingAddress').value,
+                        bank_name: document.getElementById('orgBankName').value,
+                        bank_account: document.getElementById('orgBankAccount').value,
+                        bank_iban: document.getElementById('orgBankIban').value
+                    })
+                });
+                
+                if (data && data.success) {
+                    alert('✓ Billing information saved!');
+                } else {
+                    alert('Error: ' + (data?.message || 'Failed to save'));
+                }
+            } catch (error) {
+                alert('Error saving settings');
+            }
+        }
+    </script>
+</body>
+</html>

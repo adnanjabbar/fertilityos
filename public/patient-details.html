@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details - IVF Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 IVF Platform</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span>📊</span> Dashboard
+                </a>
+                <a href="patients.html" class="nav-item active">
+                    <span>👥</span> Patients
+                </a>
+                <a href="cycles.html" class="nav-item">
+                    <span>🔬</span> IVF Cycles
+                </a>
+                <a href="lab.html" class="nav-item">
+                    <span>🧪</span> Lab
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span>📈</span> Reports
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span>⚙️</span> Settings
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div>
+                    <h1 id="patientName">Loading...</h1>
+                    <p id="patientInfo" class="text-muted"></p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="window.location.href='patients.html'">
+                        ← Back to Patients
+                    </button>
+                    <button class="btn btn-primary" onclick="startNewCycle()">
+                        🔬 Start IVF Cycle
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Patient Details Tabs -->
+            <div class="settings-tabs">
+                <button class="settings-tab-btn active" onclick="showPatientTab('overview')">Overview</button>
+                <button class="settings-tab-btn" onclick="showPatientTab('history')">Medical History</button>
+                <button class="settings-tab-btn" onclick="showPatientTab('documents')">Documents</button>
+                <button class="settings-tab-btn" onclick="showPatientTab('medications')">Medications</button>
+                <button class="settings-tab-btn" onclick="showPatientTab('billing')">Billing</button>
+                <button class="settings-tab-btn" onclick="showPatientTab('cycles')">IVF Cycles</button>
+                <button class="settings-tab-btn" onclick="showPatientTab('payments')">Payments</button>
+            </div>
+            
+            <!-- Overview Tab -->
+            <div id="overviewTab" class="settings-tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Patient Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="patient-details-grid" id="patientDetailsGrid">
+                            <p>Loading patient details...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medical History Tab -->
+            <div id="historyTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Medical History</h2>
+                    </div>
+                    <div class="card-body" id="medicalHistoryContent">
+                        <p>Loading medical history...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Documents Tab -->
+            <div id="documentsTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Documents</h2>
+                    </div>
+                    <div class="card-body" id="documentsContent">
+                        <p>Loading documents...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medications Tab -->
+            <div id="medicationsTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Current Medications</h2>
+                        <button class="btn btn-primary btn-sm" onclick="showAddMedicationModal()">
+                            + Add Medication
+                        </button>
+                    </div>
+                    <div class="card-body" id="currentMedicationsContent">
+                        <p>Loading medications...</p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h2>Previous Medications</h2>
+                    </div>
+                    <div class="card-body" id="previousMedicationsContent">
+                        <p>Loading previous medications...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Billing Tab -->
+            <div id="billingTab" class="settings-tab-content">
+                <!-- Financial Summary -->
+                <div class="card">
+                    <div class="card-header" style="background: #667eea; color: white;">
+                        <h2>💰 Financial Summary</h2>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                            <div style="background: #f0f4ff; padding: 20px; border-radius: 8px; text-align: center;">
+                                <h3 style="margin: 0; color: #667eea; font-size: 32px;" id="totalBilled">PKR 0</h3>
+                                <p style="margin: 5px 0; color: #64748b;">Total Billed</p>
+                            </div>
+                            <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; text-align: center;">
+                                <h3 style="margin: 0; color: #10b981; font-size: 32px;" id="totalPaidSummary">PKR 0</h3>
+                                <p style="margin: 5px 0; color: #64748b;">Total Paid</p>
+                            </div>
+                            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; text-align: center;">
+                                <h3 style="margin: 0; color: #ef4444; font-size: 32px;" id="outstandingSummary">PKR 0</h3>
+                                <p style="margin: 5px 0; color: #64748b;">Outstanding</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Assigned Treatments -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h2>Assigned Treatments</h2>
+                        <button class="btn btn-primary btn-sm" onclick="showAssignTreatmentModal()">
+                            + Assign Treatment
+                        </button>
+                    </div>
+                    <div class="card-body" id="treatmentsContent">
+                        <p>Loading treatments...</p>
+                    </div>
+                </div>
+                
+                <!-- Invoices -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h2>Invoices</h2>
+                        <button class="btn btn-primary btn-sm" onclick="showGenerateInvoiceModal()">
+                            + Generate Invoice
+                        </button>
+                    </div>
+                    <div class="card-body" id="invoicesContent">
+                        <p>Loading invoices...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- IVF Cycles Tab -->
+            <div id="cyclesTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>IVF Cycles</h2>
+                        <button class="btn btn-primary btn-sm" onclick="startNewCycle()">
+                            + Start New Cycle
+                        </button>
+                    </div>
+                    <div class="card-body" id="cyclesContent">
+                        <p>Loading cycles...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payments Tab -->
+            <div id="paymentsTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Payment History</h2>
+                        <button class="btn btn-primary btn-sm" onclick="showAddPaymentModal()">
+                            + Record Payment
+                        </button>
+                    </div>
+                    <div class="card-body" id="paymentsContent">
+                        <p>Loading payments...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+<!-- Add Medication Modal -->
+    <div id="addMedicationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Medication</h2>
+                <span class="close" onclick="closeAddMedicationModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addMedicationForm">
+                    <div class="form-group">
+                        <label for="medicationName">Medication Name *</label>
+                        <input type="text" id="medicationName" required placeholder="e.g., Gonal-F">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dosage">Dosage *</label>
+                            <input type="text" id="dosage" required placeholder="e.g., 150 IU">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="frequency">Frequency *</label>
+                            <input type="text" id="frequency" required placeholder="e.g., Once daily">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="route">Route</label>
+                            <select id="route">
+                                <option value="oral">Oral</option>
+                                <option value="injection">Injection</option>
+                                <option value="topical">Topical</option>
+                                <option value="vaginal">Vaginal</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="medNotes">Notes</label>
+                        <textarea id="medNotes" rows="2"></textarea>
+                    </div>
+                    
+                    <div id="addMedError" class="error-message" style="display: none;"></div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddMedicationModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Medication</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Assign Treatment Modal -->
+    <div id="assignTreatmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Assign Treatment</h2>
+                <span class="close" onclick="closeAssignTreatmentModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="assignTreatmentForm">
+                    <div class="form-group">
+                        <label for="treatmentPackage">Select Treatment Package *</label>
+                        <select id="treatmentPackage" required onchange="selectTreatmentPackage()">
+                            <option value="">Loading packages...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="treatmentName">Treatment Name *</label>
+                        <input type="text" id="treatmentName" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="treatmentCost">Cost (PKR) *</label>
+                            <input type="number" id="treatmentCost" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="treatmentStartDate">Start Date</label>
+                            <input type="date" id="treatmentStartDate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="treatmentNotes">Notes</label>
+                        <textarea id="treatmentNotes" rows="2"></textarea>
+                    </div>
+                    
+                    <div id="treatmentPackageInfo" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0; display: none;">
+                        <h4 style="margin: 0 0 10px 0; color: #667eea;">Package Includes:</h4>
+                        <ul id="packageServices" style="margin: 0; padding-left: 20px;"></ul>
+                    </div>
+                    
+                    <div id="assignTreatmentError" class="error-message" style="display: none;"></div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeAssignTreatmentModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Assign Treatment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Generate Invoice Modal -->
+    <div id="generateInvoiceModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>Generate Invoice</h2>
+                <span class="close" onclick="closeGenerateInvoiceModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="generateInvoiceForm">
+                    <div id="invoiceItems">
+                        <div class="invoice-item-row">
+                            <div class="form-row">
+                                <div class="form-group" style="flex: 2;">
+                                    <label>Item/Service</label>
+                                    <input type="text" class="item-name" placeholder="e.g., IVF Cycle" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input type="number" class="item-quantity" value="1" min="1" onchange="calculateInvoiceTotal()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Unit Price (PKR)</label>
+                                    <input type="number" class="item-price" placeholder="0" onchange="calculateInvoiceTotal()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Total</label>
+                                    <input type="number" class="item-total" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addInvoiceItem()">
+                        + Add Item
+                    </button>
+                    
+                    <hr style="margin: 20px 0;">
+                    
+                    <div style="display: flex; justify-content: flex-end;">
+                        <div style="width: 400px;">
+                            <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                                <span>Subtotal:</span>
+                                <strong id="invoiceSubtotal">PKR 0</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                                <span>Discount:</span>
+                                <input type="number" id="invoiceDiscount" value="0" onchange="calculateInvoiceTotal()" style="width: 150px; text-align: right;">
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin: 10px 0; padding-top: 10px; border-top: 2px solid #e2e8f0;">
+                                <strong>Total Amount:</strong>
+                                <strong id="invoiceTotal" style="font-size: 20px; color: #667eea;">PKR 0</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label for="invoiceDueDate">Due Date</label>
+                            <input type="date" id="invoiceDueDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="invoiceNotes">Notes</label>
+                            <input type="text" id="invoiceNotes" placeholder="Optional notes">
+                        </div>
+                    </div>
+                    
+                    <div id="generateInvoiceError" class="error-message" style="display: none;"></div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeGenerateInvoiceModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Generate Invoice</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Record Payment Modal -->
+    <div id="recordPaymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Record Payment</h2>
+                <span class="close" onclick="closeRecordPaymentModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 10px 0;">Invoice: <span id="paymentInvoiceNumber"></span></h4>
+                    <p style="margin: 5px 0;"><strong>Total:</strong> <span id="paymentInvoiceTotal"></span></p>
+                    <p style="margin: 5px 0;"><strong>Already Paid:</strong> <span id="paymentInvoicePaid"></span></p>
+                    <p style="margin: 5px 0;"><strong>Outstanding:</strong> <span id="paymentInvoiceOutstanding" style="color: #ef4444; font-weight: bold;"></span></p>
+                </div>
+                
+                <form id="recordPaymentForm">
+                    <input type="hidden" id="paymentInvoiceId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="paymentAmount">Amount to Pay (PKR) *</label>
+                            <input type="number" id="paymentAmount" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentMethodSelect">Payment Method *</label>
+                            <select id="paymentMethodSelect" required>
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="cheque">Cheque</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="recordPaymentError" class="error-message" style="display: none;"></div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeRecordPaymentModal()">Cancel</button>
+                        <button type="submit" class="btn btn-success">Record Payment & Generate Receipt</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<script src="/js/auth.js"></script>
+<script src="/js/patient-details.js"></script>
+</body>
+</html>

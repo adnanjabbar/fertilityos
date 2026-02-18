@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - IVF Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 IVF Platform</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item active"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Reports & Analytics</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportReport()">
+                        📥 Export PDF
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Summary Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-details">
+                        <h3 id="successRate">0%</h3>
+                        <p>Success Rate</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🔬</div>
+                    <div class="stat-details">
+                        <h3 id="totalCycles">0</h3>
+                        <p>Total Cycles</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-details">
+                        <h3 id="positiveCycles">0</h3>
+                        <p>Positive Results</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🧬</div>
+                    <div class="stat-details">
+                        <h3 id="avgEmbryos">0</h3>
+                        <p>Avg Embryos/Cycle</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Success Rate by Age -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Success Rate by Age Group</h2>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Age Group</th>
+                                <th>Total Cycles</th>
+                                <th>Positive Results</th>
+                                <th>Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ageGroupTable">
+                            <tr>
+                                <td colspan="4" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Cycle Outcomes -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Cycle Outcomes Distribution</h2>
+                </div>
+                <div class="card-body">
+                    <div class="outcomes-chart" id="outcomesChart">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Completed Cycles -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Completed Cycles</h2>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Cycle Code</th>
+                                <th>Patient</th>
+                                <th>Age</th>
+                                <th>Start Date</th>
+                                <th>Outcome</th>
+                                <th>Embryos Transferred</th>
+                            </tr>
+                        </thead>
+                        <tbody id="completedCyclesTable">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Monthly Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Monthly Performance (Last 6 Months)</h2>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>New Patients</th>
+                                <th>Cycles Started</th>
+                                <th>Cycles Completed</th>
+                                <th>Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthlyPerformanceTable">
+                            <tr>
+                                <td colspan="5" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+    <script src="/js/reports.js"></script>
+</body>
+</html>

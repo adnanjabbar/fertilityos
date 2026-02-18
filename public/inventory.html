@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory - IVF Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .stock-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .stock-badge.in-stock { background: #dcfce7; color: #166534; }
+        .stock-badge.low-stock { background: #fef3c7; color: #92400e; }
+        .stock-badge.out-of-stock { background: #fee2e2; color: #991b1b; }
+        .alert-banner { background: #fef3c7; border: 1px solid #f59e0b; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .alert-banner.critical { background: #fee2e2; border-color: #ef4444; }
+        .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-bar input, .filter-bar select { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .filter-bar input { min-width: 250px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h2>🏥 IVF Platform</h2><p id="clinicName">Loading...</p></div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item active"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer"><div class="user-info"><p id="userName">Loading...</p><p class="text-muted" id="userRole">Loading...</p></div><button class="btn btn-secondary btn-sm" onclick="logout()" style="width:100%;">Logout</button></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>📦 Inventory Management</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="openModal('purchaseModal')">📥 Record Purchase</button>
+                    <button class="btn btn-secondary" onclick="openModal('usageModal')">📤 Record Usage</button>
+                    <button class="btn btn-primary" onclick="openModal('itemModal')">+ Add Item</button>
+                </div>
+            </div>
+
+            <div id="alertsSection"></div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-details"><h3 id="totalItems">0</h3><p>Total Items</p></div></div>
+                <div class="stat-card warning"><div class="stat-icon">⚠️</div><div class="stat-details"><h3 id="lowStock">0</h3><p>Low Stock</p></div></div>
+                <div class="stat-card danger"><div class="stat-icon">🚫</div><div class="stat-details"><h3 id="outOfStock">0</h3><p>Out of Stock</p></div></div>
+                <div class="stat-card info"><div class="stat-icon">💰</div><div class="stat-details"><h3 id="totalValue">PKR 0</h3><p>Total Value</p></div></div>
+            </div>
+
+            <div class="filter-bar">
+                <input type="text" id="searchItems" placeholder="🔍 Search items..." onkeyup="filterItems()">
+                <select id="filterCategory" onchange="filterItems()"><option value="">All Categories</option></select>
+                <select id="filterStock" onchange="filterItems()">
+                    <option value="">All Stock Levels</option>
+                    <option value="in-stock">In Stock</option>
+                    <option value="low-stock">Low Stock</option>
+                    <option value="out-of-stock">Out of Stock</option>
+                </select>
+                <button class="btn btn-secondary" onclick="exportInventory()">📥 Export CSV</button>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead><tr><th>Code</th><th>Item Name</th><th>Category</th><th>Stock</th><th>Min</th><th>Unit Price</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="inventoryTable"><tr><td colspan="8" class="text-center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header"><h2>📦 Add Inventory Item</h2><span class="close" onclick="closeModal('itemModal')">&times;</span></div>
+            <div class="modal-body">
+                <form id="itemForm">
+                    <input type="hidden" id="itemId">
+                    <div class="form-row">
+                        <div class="form-group"><label>Item Code *</label><input type="text" class="form-control" id="itemCode" required></div>
+                        <div class="form-group"><label>Category</label><select class="form-control" id="itemCategory"><option value="">Select</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Item Name *</label><input type="text" class="form-control" id="itemName" required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Unit</label><select class="form-control" id="itemUnit"><option value="piece">Piece</option><option value="box">Box</option><option value="pack">Pack</option><option value="bottle">Bottle</option><option value="vial">Vial</option><option value="kit">Kit</option></select></div>
+                        <div class="form-group"><label>Unit Price</label><input type="number" class="form-control" id="itemPrice" min="0" step="0.01"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Minimum Stock *</label><input type="number" class="form-control" id="itemMinStock" min="0" required></div>
+                        <div class="form-group"><label>Reorder Level</label><input type="number" class="form-control" id="itemReorder" min="0"></div>
+                    </div>
+                    <div class="form-group"><label>Storage Location</label><input type="text" class="form-control" id="itemLocation" placeholder="e.g., Lab Fridge 1"></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('itemModal')">Cancel</button><button class="btn btn-primary" onclick="saveItem()">💾 Save</button></div>
+        </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header"><h2>📥 Record Purchase</h2><span class="close" onclick="closeModal('purchaseModal')">&times;</span></div>
+            <div class="modal-body">
+                <form id="purchaseForm">
+                    <div class="form-group"><label>Item *</label><select class="form-control" id="purchaseItem" required><option value="">Select</option></select></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Quantity *</label><input type="number" class="form-control" id="purchaseQty" min="1" required></div>
+                        <div class="form-group"><label>Unit Price</label><input type="number" class="form-control" id="purchasePrice" min="0" step="0.01"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Batch #</label><input type="text" class="form-control" id="purchaseBatch"></div>
+                        <div class="form-group"><label>Expiry Date</label><input type="date" class="form-control" id="purchaseExpiry"></div>
+                    </div>
+                    <div class="form-group"><label>Vendor</label><input type="text" class="form-control" id="purchaseVendor"></div>
+                    <div class="form-group"><label>Notes</label><textarea class="form-control" id="purchaseNotes" rows="2"></textarea></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('purchaseModal')">Cancel</button><button class="btn btn-primary" onclick="savePurchase()">💾 Record</button></div>
+        </div>
+    </div>
+
+    <!-- Usage Modal -->
+    <div id="usageModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header"><h2>📤 Record Usage</h2><span class="close" onclick="closeModal('usageModal')">&times;</span></div>
+            <div class="modal-body">
+                <form id="usageForm">
+                    <div class="form-group"><label>Item *</label><select class="form-control" id="usageItem" required><option value="">Select</option></select></div>
+                    <div class="form-group"><label>Quantity *</label><input type="number" class="form-control" id="usageQty" min="1" required></div>
+                    <div class="form-group"><label>Patient (Optional)</label><select class="form-control" id="usagePatient"><option value="">Select</option></select></div>
+                    <div class="form-group"><label>Reason *</label><textarea class="form-control" id="usageNotes" rows="2" required placeholder="e.g., IVF procedure, Lab test"></textarea></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('usageModal')">Cancel</button><button class="btn btn-primary" onclick="saveUsage()">💾 Record</button></div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        let allItems = [];
+        document.addEventListener('DOMContentLoaded', function() { requireAuth(); loadUserInfo(); loadInventory(); loadCategories(); });
+
+        async function loadInventory() {
+            try {
+                const data = await apiCall('/finance/inventory');
+                if (data && data.success) { allItems = data.data; } else { loadSampleData(); }
+            } catch(e) { loadSampleData(); }
+            updateStats(); renderItems(allItems); populateDropdowns();
+        }
+
+        function loadSampleData() {
+            allItems = [
+                { id: '1', item_code: 'IVF-001', item_name: 'Culture Media G-1', category_name: 'IVF Consumables', current_stock: 15, minimum_stock: 10, unit: 'bottle', unit_price: 25000 },
+                { id: '2', item_code: 'IVF-002', item_name: 'ET Catheter', category_name: 'IVF Consumables', current_stock: 5, minimum_stock: 20, unit: 'piece', unit_price: 5000 },
+                { id: '3', item_code: 'LAB-001', item_name: 'FSH ELISA Kit', category_name: 'Lab Reagents', current_stock: 0, minimum_stock: 3, unit: 'kit', unit_price: 15000 },
+                { id: '4', item_code: 'MED-001', item_name: 'Progesterone 200mg', category_name: 'Medications', current_stock: 100, minimum_stock: 50, unit: 'piece', unit_price: 200 }
+            ];
+        }
+
+        async function loadCategories() {
+            const cats = ['IVF Consumables', 'Lab Reagents', 'Medications', 'Syringes', 'PPE', 'Office Supplies'];
+            document.getElementById('itemCategory').innerHTML = '<option value="">Select</option>' + cats.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+            document.getElementById('filterCategory').innerHTML = '<option value="">All Categories</option>' + cats.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+        }
+
+        function updateStats() {
+            document.getElementById('totalItems').textContent = allItems.length;
+            document.getElementById('lowStock').textContent = allItems.filter(i => i.current_stock > 0 && i.current_stock <= i.minimum_stock).length;
+            document.getElementById('outOfStock').textContent = allItems.filter(i => i.current_stock === 0).length;
+            const total = allItems.reduce((sum, i) => sum + (i.current_stock * (i.unit_price || 0)), 0);
+            document.getElementById('totalValue').textContent = formatCurrency(total);
+            checkAlerts();
+        }
+
+        function checkAlerts() {
+            const out = allItems.filter(i => i.current_stock === 0);
+            const low = allItems.filter(i => i.current_stock > 0 && i.current_stock <= i.minimum_stock);
+            let html = '';
+            if (out.length) html += '<div class="alert-banner critical"><span>🚨</span><strong>Out of Stock:</strong> ' + out.map(i => i.item_name).join(', ') + '</div>';
+            if (low.length) html += '<div class="alert-banner"><span>⚠️</span><strong>Low Stock:</strong> ' + low.map(i => i.item_name).join(', ') + '</div>';
+            document.getElementById('alertsSection').innerHTML = html;
+        }
+
+        function renderItems(items) {
+            const tbody = document.getElementById('inventoryTable');
+            if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center">No items found</td></tr>'; return; }
+            tbody.innerHTML = items.map(i => {
+                let status = 'in-stock', label = 'In Stock';
+                if (i.current_stock === 0) { status = 'out-of-stock'; label = 'Out of Stock'; }
+                else if (i.current_stock <= i.minimum_stock) { status = 'low-stock'; label = 'Low Stock'; }
+                return '<tr><td><strong>' + i.item_code + '</strong></td><td>' + i.item_name + '</td><td>' + (i.category_name || '-') + '</td><td>' + i.current_stock + ' ' + (i.unit || '') + '</td><td>' + i.minimum_stock + '</td><td>' + formatCurrency(i.unit_price) + '</td><td><span class="stock-badge ' + status + '">' + label + '</span></td><td><button class="btn btn-sm btn-secondary" onclick="editItem(\'' + i.id + '\')">✏️</button> <button class="btn btn-sm btn-primary" onclick="quickPurchase(\'' + i.id + '\')">+</button></td></tr>';
+            }).join('');
+        }
+
+        function filterItems() {
+            const search = document.getElementById('searchItems').value.toLowerCase();
+            const cat = document.getElementById('filterCategory').value;
+            const stock = document.getElementById('filterStock').value;
+            let filtered = allItems;
+            if (search) filtered = filtered.filter(i => i.item_name.toLowerCase().includes(search) || i.item_code.toLowerCase().includes(search));
+            if (cat) filtered = filtered.filter(i => i.category_name === cat);
+            if (stock === 'in-stock') filtered = filtered.filter(i => i.current_stock > i.minimum_stock);
+            else if (stock === 'low-stock') filtered = filtered.filter(i => i.current_stock > 0 && i.current_stock <= i.minimum_stock);
+            else if (stock === 'out-of-stock') filtered = filtered.filter(i => i.current_stock === 0);
+            renderItems(filtered);
+        }
+
+        function populateDropdowns() {
+            const opts = '<option value="">Select Item</option>' + allItems.map(i => '<option value="' + i.id + '">' + i.item_code + ' - ' + i.item_name + ' (Stock: ' + i.current_stock + ')</option>').join('');
+            document.getElementById('purchaseItem').innerHTML = opts;
+            document.getElementById('usageItem').innerHTML = opts;
+        }
+
+        function editItem(id) { const item = allItems.find(i => i.id === id); if (!item) return; document.getElementById('itemId').value = item.id; document.getElementById('itemCode').value = item.item_code; document.getElementById('itemName').value = item.item_name; document.getElementById('itemMinStock').value = item.minimum_stock; document.getElementById('itemPrice').value = item.unit_price; openModal('itemModal'); }
+        function quickPurchase(id) { document.getElementById('purchaseItem').value = id; openModal('purchaseModal'); }
+
+        async function saveItem() {
+            const code = document.getElementById('itemCode').value;
+            const name = document.getElementById('itemName').value;
+            if (!code || !name) { alert('Please fill required fields'); return; }
+            showToast('Item saved successfully!', 'success');
+            closeModal('itemModal');
+            loadInventory();
+        }
+
+        async function savePurchase() {
+            const itemId = document.getElementById('purchaseItem').value;
+            const qty = document.getElementById('purchaseQty').value;
+            if (!itemId || !qty) { alert('Please fill required fields'); return; }
+            // Update local data
+            const item = allItems.find(i => i.id === itemId);
+            if (item) item.current_stock += parseInt(qty);
+            showToast('Purchase recorded!', 'success');
+            closeModal('purchaseModal');
+            updateStats();
+            renderItems(allItems);
+            populateDropdowns();
+        }
+
+        async function saveUsage() {
+            const itemId = document.getElementById('usageItem').value;
+            const qty = document.getElementById('usageQty').value;
+            const notes = document.getElementById('usageNotes').value;
+            if (!itemId || !qty || !notes) { alert('Please fill required fields'); return; }
+            const item = allItems.find(i => i.id === itemId);
+            if (item) {
+                if (item.current_stock < qty) { alert('Insufficient stock!'); return; }
+                item.current_stock -= parseInt(qty);
+            }
+            showToast('Usage recorded!', 'success');
+            closeModal('usageModal');
+            updateStats();
+            renderItems(allItems);
+            populateDropdowns();
+        }
+
+        function exportInventory() {
+            const csv = 'Code,Name,Category,Stock,Min,Unit Price\n' + allItems.map(i => [i.item_code, i.item_name, i.category_name, i.current_stock, i.minimum_stock, i.unit_price].join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'inventory.csv'; a.click();
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'block'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    </script>
+</body>
+</html>

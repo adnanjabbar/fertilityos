@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Tests Management - IVF Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .test-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; }
+        .test-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .test-code { background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .test-price { font-size: 18px; font-weight: bold; color: #059669; }
+        .test-details { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 12px; color: #666; }
+        .test-details span { display: flex; align-items: center; gap: 5px; }
+        .gender-badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+        .gender-badge.male { background: #dbeafe; color: #1e40af; }
+        .gender-badge.female { background: #fce7f3; color: #be185d; }
+        .gender-badge.both { background: #e0e7ff; color: #4338ca; }
+        .category-section { margin-bottom: 30px; }
+        .category-header { background: #1a365d; color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .category-body { border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px; padding: 15px; }
+        .search-filter-bar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-filter-bar input, .search-filter-bar select { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .search-filter-bar input { flex: 1; min-width: 250px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 IVF Platform</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item active"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>🧪 Laboratory Test Catalog</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="openTestModal()">+ Add New Test</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon">🧪</div><div class="stat-details"><h3 id="totalTests">0</h3><p>Total Tests</p></div></div>
+                <div class="stat-card info"><div class="stat-icon">📁</div><div class="stat-details"><h3 id="totalCategories">0</h3><p>Categories</p></div></div>
+                <div class="stat-card success"><div class="stat-icon">👩</div><div class="stat-details"><h3 id="femaleTests">0</h3><p>Female Tests</p></div></div>
+                <div class="stat-card warning"><div class="stat-icon">👨</div><div class="stat-details"><h3 id="maleTests">0</h3><p>Male Tests</p></div></div>
+            </div>
+
+            <div class="search-filter-bar">
+                <input type="text" id="searchTests" placeholder="🔍 Search tests by name or code..." onkeyup="filterTests()">
+                <select id="filterCategory" onchange="filterTests()">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="filterGender" onchange="filterTests()">
+                    <option value="">All Genders</option>
+                    <option value="female">Female Only</option>
+                    <option value="male">Male Only</option>
+                    <option value="both">Both</option>
+                </select>
+            </div>
+
+            <div id="testCatalog">
+                <p class="text-muted">Loading tests...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Test Modal -->
+    <div id="testModal" class="modal">
+        <div class="modal-content" style="max-width:900px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h2 id="testModalTitle">🧪 Add New Test</h2>
+                <span class="close" onclick="closeModal('testModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="testForm">
+                    <input type="hidden" id="testId">
+                    
+                    <div class="detail-section">
+                        <h3>Basic Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Test Name *</label>
+                                <input type="text" class="form-control" id="testName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Test Code *</label>
+                                <input type="text" class="form-control" id="testCode" required style="text-transform:uppercase;">
+                            </div>
+                            <div class="form-group">
+                                <label>Short Name</label>
+                                <input type="text" class="form-control" id="testShortName">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Category *</label>
+                                <select class="form-control" id="testCategory" required>
+                                    <option value="">Select Category</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Applicable Gender *</label>
+                                <select class="form-control" id="testGender" required>
+                                    <option value="both">Both</option>
+                                    <option value="female">Female Only</option>
+                                    <option value="male">Male Only</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-control" id="testDescription" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Sample Requirements</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Sample Type</label>
+                                <select class="form-control" id="testSampleType">
+                                    <option value="">Select Sample Type</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Container Type</label>
+                                <select class="form-control" id="testContainerType">
+                                    <option value="">Select Container</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Sample Volume</label>
+                                <div style="display:flex;gap:5px;">
+                                    <input type="number" class="form-control" id="testSampleVolume" step="0.1" style="flex:1;">
+                                    <select class="form-control" id="testVolumeUnit" style="width:80px;">
+                                        <option value="ml">mL</option>
+                                        <option value="ul">µL</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Fasting Required?</label>
+                                <select class="form-control" id="testFasting">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Fasting Hours</label>
+                                <input type="number" class="form-control" id="testFastingHours" min="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Special Instructions</label>
+                            <textarea class="form-control" id="testInstructions" rows="2" placeholder="e.g., Collect after 2-5 days abstinence..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Reference Ranges</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Unit of Measurement</label>
+                                <input type="text" class="form-control" id="testUnit" placeholder="e.g., mIU/mL, ng/dL, %">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Female Range Min</label>
+                                <input type="number" class="form-control" id="testRefFemaleMin" step="0.001">
+                            </div>
+                            <div class="form-group">
+                                <label>Female Range Max</label>
+                                <input type="number" class="form-control" id="testRefFemaleMax" step="0.001">
+                            </div>
+                            <div class="form-group">
+                                <label>Male Range Min</label>
+                                <input type="number" class="form-control" id="testRefMaleMin" step="0.001">
+                            </div>
+                            <div class="form-group">
+                                <label>Male Range Max</label>
+                                <input type="number" class="form-control" id="testRefMaleMax" step="0.001">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Reference Text (for complex ranges)</label>
+                            <input type="text" class="form-control" id="testRefText" placeholder="e.g., Follicular: 3.5-12.5, Luteal: 1.7-7.7">
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Pricing & Timing</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Base Price *</label>
+                                <div style="display:flex;gap:5px;">
+                                    <span style="padding:10px;background:#f0f0f0;border-radius:5px 0 0 5px;" id="currencySymbol">PKR</span>
+                                    <input type="number" class="form-control" id="testPrice" required min="0" step="1" style="border-radius:0 5px 5px 0;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Cost Price (Internal)</label>
+                                <input type="number" class="form-control" id="testCostPrice" min="0" step="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Turnaround Time</label>
+                                <input type="text" class="form-control" id="testTAT" placeholder="e.g., Same Day, 24-48 Hours">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Additional Settings</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Is Outsourced?</label>
+                                <select class="form-control" id="testOutsourced">
+                                    <option value="false">No - In-house</option>
+                                    <option value="true">Yes - Send to external lab</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>External Lab Name</label>
+                                <input type="text" class="form-control" id="testExternalLab">
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control" id="testActive">
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('testModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTest()">💾 Save Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        let allTests = [];
+        let allCategories = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            requireAuth();
+            loadUserInfo();
+            loadCategories();
+            loadSampleTypes();
+            loadContainerTypes();
+            loadTests();
+        });
+
+        async function loadCategories() {
+            try {
+                const data = await apiCall('/lab/test-categories');
+                if (data && data.success) {
+                    allCategories = data.data;
+                    document.getElementById('totalCategories').textContent = allCategories.length;
+                    
+                    const options = '<option value="">Select Category</option>' +
+                        allCategories.map(c => `<option value="${c.id}">${c.category_name}</option>`).join('');
+                    document.getElementById('testCategory').innerHTML = options;
+                    
+                    document.getElementById('filterCategory').innerHTML = '<option value="">All Categories</option>' +
+                        allCategories.map(c => `<option value="${c.id}">${c.category_name}</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        async function loadSampleTypes() {
+            try {
+                const data = await apiCall('/lab/sample-types');
+                if (data && data.success) {
+                    document.getElementById('testSampleType').innerHTML = '<option value="">Select Sample Type</option>' +
+                        data.data.map(s => `<option value="${s.id}">${s.sample_name}</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error loading sample types:', error);
+            }
+        }
+
+        async function loadContainerTypes() {
+            try {
+                const data = await apiCall('/lab/container-types');
+                if (data && data.success) {
+                    document.getElementById('testContainerType').innerHTML = '<option value="">Select Container</option>' +
+                        data.data.map(c => `<option value="${c.id}">${c.container_name} (${c.color || ''})</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error loading container types:', error);
+            }
+        }
+
+        async function loadTests() {
+            try {
+                const data = await apiCall('/lab/test-definitions');
+                if (data && data.success) {
+                    allTests = data.data;
+                    document.getElementById('totalTests').textContent = allTests.length;
+                    document.getElementById('femaleTests').textContent = allTests.filter(t => t.applicable_gender === 'female').length;
+                    document.getElementById('maleTests').textContent = allTests.filter(t => t.applicable_gender === 'male').length;
+                    
+                    renderTests(allTests);
+                }
+            } catch (error) {
+                console.error('Error loading tests:', error);
+            }
+        }
+
+        function renderTests(tests) {
+            const container = document.getElementById('testCatalog');
+            
+            if (tests.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No tests found</p>';
+                return;
+            }
+
+            // Group by category
+            const grouped = {};
+            tests.forEach(t => {
+                const catName = t.category_name || 'Uncategorized';
+                if (!grouped[catName]) grouped[catName] = [];
+                grouped[catName].push(t);
+            });
+
+            let html = '';
+            for (const [category, catTests] of Object.entries(grouped)) {
+                html += `
+                    <div class="category-section">
+                        <div class="category-header">
+                            <span>${category} (${catTests.length} tests)</span>
+                        </div>
+                        <div class="category-body">
+                            ${catTests.map(t => `
+                                <div class="test-card">
+                                    <div class="test-header">
+                                        <div>
+                                            <span class="test-code">${t.test_code}</span>
+                                            <strong style="margin-left:10px;">${t.test_name}</strong>
+                                            <span class="gender-badge ${t.applicable_gender}">${t.applicable_gender}</span>
+                                        </div>
+                                        <div class="test-price">${formatCurrency(t.base_price)}</div>
+                                    </div>
+                                    <div class="test-details">
+                                        <span>🧫 ${t.sample_name || 'N/A'}</span>
+                                        <span>📦 ${t.container_name || 'N/A'}</span>
+                                        <span>📏 ${t.sample_volume_ml ? t.sample_volume_ml + ' mL' : 'N/A'}</span>
+                                        <span>⏱️ ${t.turnaround_time_text || 'N/A'}</span>
+                                    </div>
+                                    <div style="margin-top:10px;display:flex;gap:10px;">
+                                        <button class="btn btn-sm btn-secondary" onclick="editTest('${t.id}')">✏️ Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteTest('${t.id}')">🗑️</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function filterTests() {
+            const search = document.getElementById('searchTests').value.toLowerCase();
+            const category = document.getElementById('filterCategory').value;
+            const gender = document.getElementById('filterGender').value;
+
+            let filtered = allTests;
+
+            if (search) {
+                filtered = filtered.filter(t => 
+                    t.test_name.toLowerCase().includes(search) || 
+                    t.test_code.toLowerCase().includes(search)
+                );
+            }
+            if (category) {
+                filtered = filtered.filter(t => t.category_id === category);
+            }
+            if (gender) {
+                filtered = filtered.filter(t => t.applicable_gender === gender);
+            }
+
+            renderTests(filtered);
+        }
+
+        function openTestModal(testId = null) {
+            document.getElementById('testForm').reset();
+            document.getElementById('testId').value = '';
+            document.getElementById('testModalTitle').textContent = '🧪 Add New Test';
+            openModal('testModal');
+        }
+
+        async function editTest(id) {
+            const test = allTests.find(t => t.id === id);
+            if (!test) return;
+
+            document.getElementById('testId').value = test.id;
+            document.getElementById('testName').value = test.test_name || '';
+            document.getElementById('testCode').value = test.test_code || '';
+            document.getElementById('testShortName').value = test.short_name || '';
+            document.getElementById('testCategory').value = test.category_id || '';
+            document.getElementById('testGender').value = test.applicable_gender || 'both';
+            document.getElementById('testDescription').value = test.description || '';
+            document.getElementById('testSampleType').value = test.sample_type_id || '';
+            document.getElementById('testContainerType').value = test.container_type_id || '';
+            document.getElementById('testSampleVolume').value = test.sample_volume_ml || '';
+            document.getElementById('testFasting').value = test.fasting_required ? 'true' : 'false';
+            document.getElementById('testFastingHours').value = test.fasting_hours || '';
+            document.getElementById('testInstructions').value = test.special_instructions || '';
+            document.getElementById('testUnit').value = test.unit || '';
+            document.getElementById('testRefFemaleMin').value = test.reference_range_female_min || '';
+            document.getElementById('testRefFemaleMax').value = test.reference_range_female_max || '';
+            document.getElementById('testRefMaleMin').value = test.reference_range_male_min || '';
+            document.getElementById('testRefMaleMax').value = test.reference_range_male_max || '';
+            document.getElementById('testRefText').value = test.reference_range_text || '';
+            document.getElementById('testPrice').value = test.base_price || '';
+            document.getElementById('testCostPrice').value = test.cost_price || '';
+            document.getElementById('testTAT').value = test.turnaround_time_text || '';
+            document.getElementById('testOutsourced').value = test.is_outsourced ? 'true' : 'false';
+            document.getElementById('testExternalLab').value = test.outsource_lab || '';
+            document.getElementById('testActive').value = test.is_active ? 'true' : 'false';
+
+            document.getElementById('testModalTitle').textContent = '✏️ Edit Test';
+            openModal('testModal');
+        }
+
+        async function saveTest() {
+            const id = document.getElementById('testId').value;
+            const testData = {
+                test_name: document.getElementById('testName').value,
+                test_code: document.getElementById('testCode').value.toUpperCase(),
+                short_name: document.getElementById('testShortName').value || null,
+                category_id: document.getElementById('testCategory').value || null,
+                applicable_gender: document.getElementById('testGender').value,
+                description: document.getElementById('testDescription').value || null,
+                sample_type_id: document.getElementById('testSampleType').value || null,
+                container_type_id: document.getElementById('testContainerType').value || null,
+                sample_volume_ml: document.getElementById('testSampleVolume').value || null,
+                sample_volume_unit: document.getElementById('testVolumeUnit').value,
+                fasting_required: document.getElementById('testFasting').value === 'true',
+                fasting_hours: document.getElementById('testFastingHours').value || null,
+                special_instructions: document.getElementById('testInstructions').value || null,
+                unit: document.getElementById('testUnit').value || null,
+                reference_range_female_min: document.getElementById('testRefFemaleMin').value || null,
+                reference_range_female_max: document.getElementById('testRefFemaleMax').value || null,
+                reference_range_male_min: document.getElementById('testRefMaleMin').value || null,
+                reference_range_male_max: document.getElementById('testRefMaleMax').value || null,
+                reference_range_text: document.getElementById('testRefText').value || null,
+                base_price: document.getElementById('testPrice').value || 0,
+                cost_price: document.getElementById('testCostPrice').value || null,
+                turnaround_time_text: document.getElementById('testTAT').value || null,
+                is_outsourced: document.getElementById('testOutsourced').value === 'true',
+                outsource_lab: document.getElementById('testExternalLab').value || null,
+                is_active: document.getElementById('testActive').value === 'true'
+            };
+
+            if (!testData.test_name || !testData.test_code || !testData.base_price) {
+                alert('Please fill required fields');
+                return;
+            }
+
+            try {
+                const url = id ? `/lab/test-definitions/${id}` : '/lab/test-definitions';
+                const method = id ? 'PUT' : 'POST';
+                
+                const data = await apiCall(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+
+                if (data && data.success) {
+                    alert('✓ Test saved successfully!');
+                    closeModal('testModal');
+                    loadTests();
+                } else {
+                    alert('Error: ' + (data?.message || 'Failed to save'));
+                }
+            } catch (error) {
+                console.error('Error saving test:', error);
+                alert('Error saving test');
+            }
+        }
+
+        async function deleteTest(id) {
+            if (!confirm('Are you sure you want to delete this test?')) return;
+            
+            try {
+                const data = await apiCall(`/lab/test-definitions/${id}`, { method: 'DELETE' });
+                if (data && data.success) {
+                    alert('Test deleted');
+                    loadTests();
+                } else {
+                    alert('Error deleting test');
+                }
+            } catch (error) {
+                alert('Error deleting test');
+            }
+        }
+
+        function formatCurrency(amount) {
+            return 'PKR ' + (parseFloat(amount) || 0).toLocaleString();
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'block'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    </script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Clinic | IVF Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin:0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg,#4f46e5,#9333ea);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .card {
+            background:white;
+            width:500px;
+            padding:40px;
+            border-radius:16px;
+            box-shadow:0 20px 50px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            text-align:center;
+            margin-bottom:10px;
+        }
+
+        .subtitle {
+            text-align:center;
+            font-size:14px;
+            color:#6b7280;
+            margin-bottom:30px;
+        }
+
+        input, select {
+            width:100%;
+            padding:12px;
+            margin-bottom:14px;
+            border:1px solid #ddd;
+            border-radius:8px;
+            font-size:14px;
+        }
+
+        input:focus, select:focus {
+            outline:none;
+            border-color:#4f46e5;
+        }
+
+        .subdomain-wrapper {
+            display:flex;
+            align-items:center;
+            gap:6px;
+        }
+
+        .subdomain-wrapper span {
+            font-size:13px;
+            color:#6b7280;
+        }
+
+        #subdomainStatus {
+            font-size:13px;
+            margin-top:-8px;
+            margin-bottom:10px;
+        }
+
+        .pricing-box {
+            background:#f3f4f6;
+            padding:12px;
+            border-radius:8px;
+            margin-bottom:15px;
+            font-size:13px;
+            color:#374151;
+        }
+
+        button {
+            width:100%;
+            padding:14px;
+            background:linear-gradient(90deg,#4f46e5,#9333ea);
+            border:none;
+            border-radius:10px;
+            color:white;
+            font-size:15px;
+            font-weight:bold;
+            cursor:pointer;
+        }
+
+        button:disabled {
+            background:#9ca3af;
+            cursor:not-allowed;
+        }
+
+        .footer-note {
+            text-align:center;
+            font-size:12px;
+            color:#6b7280;
+            margin-top:15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <h2>Create Your Clinic</h2>
+    <div class="subtitle">
+        Launch your IVF center on the global platform
+    </div>
+
+    <form id="registerForm">
+
+        <input type="text" id="clinicName" placeholder="Clinic Name" required>
+
+<div>
+    <input type="text"
+           id="subdomain"
+           placeholder="Your Clinic URL"
+           required
+           oninput="checkSubdomainLive()">
+    <small style="color:#6b7280;font-size:12px;">
+        This will be your secure clinic address.
+    </small>
+</div>
+        <div id="subdomainStatus"></div>
+
+        <input type="text" id="adminName" placeholder="Owner / Admin Name" required>
+
+        <input type="email" id="adminEmail" placeholder="Admin Email" required>
+
+        <input type="password" id="adminPassword" placeholder="Create Password" required>
+
+        <input type="text" id="country" placeholder="Country" required>
+
+        <input type="text" id="city" placeholder="City" required>
+
+        <input type="text" id="regulatoryAuthority" placeholder="Regulatory Authority (Optional)">
+
+        <input type="text" id="licenseNumber" placeholder="License Number (Optional)">
+
+        <div class="pricing-box">
+            Subscription Plan
+        </div>
+
+        <select id="billingCycle">
+            <option value="monthly">Monthly — $20</option>
+            <option value="quarterly">Quarterly — $18/month</option>
+            <option value="yearly">Yearly — $15/month</option>
+        </select>
+
+        <button type="submit" id="registerButton" disabled>
+            Create Clinic & Start Trial
+        </button>
+
+    </form>
+
+    <div class="footer-note">
+        14-Day Free Trial · Cancel Anytime
+    </div>
+
+</div>
+
+<script>
+
+let subdomainValid = false;
+let subdomainTimeout = null;
+
+async function checkSubdomainLive() {
+
+    const input = document.getElementById('subdomain');
+    const status = document.getElementById('subdomainStatus');
+    const value = input.value.toLowerCase().trim();
+
+    subdomainValid = false;
+    status.innerHTML = '';
+
+    if (value.length < 3) {
+        status.innerHTML = 'Subdomain must be at least 3 characters';
+        status.style.color = '#dc2626';
+        toggleSubmit(false);
+        return;
+    }
+
+    if (!value.match(/^[a-z0-9-]+$/)) {
+        status.innerHTML = 'Only lowercase letters, numbers and hyphens allowed';
+        status.style.color = '#dc2626';
+        toggleSubmit(false);
+        return;
+    }
+
+    clearTimeout(subdomainTimeout);
+
+    subdomainTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/api/auth/check-subdomain/${value}`);
+            const data = await response.json();
+
+            if (data.available) {
+                status.innerHTML = '✓ Available';
+                status.style.color = '#059669';
+                subdomainValid = true;
+                toggleSubmit(true);
+            } else {
+                status.innerHTML = '✗ ' + data.message;
+                status.style.color = '#dc2626';
+                toggleSubmit(false);
+            }
+
+        } catch (error) {
+            status.innerHTML = 'Error checking availability';
+            status.style.color = '#dc2626';
+            toggleSubmit(false);
+        }
+    }, 400);
+}
+
+function toggleSubmit(enabled) {
+    document.getElementById('registerButton').disabled = !enabled;
+}
+
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    if (!subdomainValid) {
+        alert("Please choose a valid subdomain");
+        return;
+    }
+
+    const response = await fetch('/api/auth/register-clinic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            clinicName: document.getElementById('clinicName').value,
+            subdomain: document.getElementById('subdomain').value,
+            adminName: document.getElementById('adminName').value,
+            adminEmail: document.getElementById('adminEmail').value,
+            adminPassword: document.getElementById('adminPassword').value,
+            country: document.getElementById('country').value,
+            city: document.getElementById('city').value,
+            regulatoryAuthority: document.getElementById('regulatoryAuthority').value,
+            licenseNumber: document.getElementById('licenseNumber').value,
+            billingCycle: document.getElementById('billingCycle').value
+        })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+        alert('Clinic Registered Successfully!');
+        window.location.href = '/login.html';
+    } else {
+        alert(data.message || 'Registration Failed');
+    }
+});
+
+</script>
+
+</body>
+</html>

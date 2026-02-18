@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Management - IVF Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .asset-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s; }
+        .asset-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.12); }
+        .asset-card-header { padding: 15px; background: linear-gradient(135deg, #1a365d 0%, #2d4a7c 100%); color: white; }
+        .asset-card-header h3 { margin: 0 0 5px; font-size: 16px; }
+        .asset-card-header .asset-code { font-size: 12px; opacity: 0.8; }
+        .asset-card-body { padding: 15px; }
+        .asset-info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .asset-info-row:last-child { border-bottom: none; }
+        .asset-info-row label { color: #666; }
+        .asset-info-row span { font-weight: 500; }
+        .asset-card-footer { padding: 15px; background: #f8fafc; display: flex; gap: 10px; justify-content: flex-end; }
+        
+        .asset-status { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .asset-status.active { background: #dcfce7; color: #166534; }
+        .asset-status.in_maintenance { background: #fef3c7; color: #92400e; }
+        .asset-status.disposed { background: #fee2e2; color: #991b1b; }
+        
+        .asset-type-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; margin-left: 10px; }
+        .asset-type-badge.clinical { background: #dbeafe; color: #1e40af; }
+        .asset-type-badge.non_clinical { background: #f3e8ff; color: #7c3aed; }
+        
+        .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .filter-bar input, .filter-bar select { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .filter-bar input { min-width: 250px; }
+        
+        .barcode-container { text-align: center; padding: 15px; overflow: hidden; max-width: 100%; background: white; border: 2px dashed #ddd; border-radius: 8px; margin: 15px 0; display: flex; justify-content: center; align-items: center; }
+        .barcode-container svg { max-width: 100%; height: auto; }
+        .qr-container { text-align: center; padding: 15px; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        
+        .print-label { width: 280px; max-width: 100%; overflow: hidden; padding: 20px; border: 1px solid #000; background: white; margin: 20px auto; }
+        .print-label h4 { margin: 0 0 10px; font-size: 14px; }
+        .print-label .clinic-name { font-size: 12px; color: #666; margin-bottom: 15px; }
+        .print-label .asset-details { font-size: 11px; margin-top: 10px; }
+        
+        .stats-mini { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-mini { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .stat-mini .value { font-size: 24px; font-weight: bold; color: #1a365d; }
+        .stat-mini .label { font-size: 11px; color: #666; margin-top: 5px; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 IVF Platform</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item active"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>🏷️ Asset Management</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="openMaintenanceModal()">🔧 Log Maintenance</button>
+                    <button class="btn btn-primary" onclick="openAssetModal()">+ Add Asset</button>
+                </div>
+            </div>
+
+            <div class="stats-mini">
+                <div class="stat-mini">
+                    <div class="value" id="totalAssets">0</div>
+                    <div class="label">Total Assets</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="value" id="totalValue">PKR 0</div>
+                    <div class="label">Total Value</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="value" id="clinicalAssets">0</div>
+                    <div class="label">Clinical Assets</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="value" id="maintenanceDue">0</div>
+                    <div class="label">Maintenance Due</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="value" id="depreciationYTD">PKR 0</div>
+                    <div class="label">Depreciation YTD</div>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <input type="text" id="searchAssets" placeholder="🔍 Search by name, code, or serial..." onkeyup="filterAssets()">
+                <select id="filterCategory" onchange="filterAssets()">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="filterStatus" onchange="filterAssets()">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="in_maintenance">In Maintenance</option>
+                    <option value="disposed">Disposed</option>
+                </select>
+                <select id="filterType" onchange="filterAssets()">
+                    <option value="">All Types</option>
+                    <option value="clinical">Clinical</option>
+                    <option value="non_clinical">Non-Clinical</option>
+                </select>
+                <button class="btn btn-secondary" onclick="exportAssets()">📥 Export</button>
+            </div>
+
+            <div class="asset-grid" id="assetGrid">
+                <p class="text-muted">Loading assets...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Asset Modal -->
+    <div id="assetModal" class="modal">
+        <div class="modal-content" style="max-width:800px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h2 id="assetModalTitle">🏷️ Add New Asset</h2>
+                <span class="close" onclick="closeModal('assetModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="assetForm">
+                    <input type="hidden" id="assetId">
+                    
+                    <div class="detail-section">
+                        <h3>Basic Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Asset Name *</label>
+                                <input type="text" class="form-control" id="assetName" required placeholder="e.g., Ultrasound Machine">
+                            </div>
+                            <div class="form-group">
+                                <label>Asset Code *</label>
+                                <input type="text" class="form-control" id="assetCode" required placeholder="Auto-generated or custom">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Category *</label>
+                                <select class="form-control" id="assetCategory" required>
+                                    <option value="">Select Category</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Asset Type *</label>
+                                <select class="form-control" id="assetType" required>
+                                    <option value="fixed">Fixed Asset</option>
+                                    <option value="non_fixed">Non-Fixed Asset</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="assetClinical"> Clinical Equipment
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-control" id="assetDescription" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Identification</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Serial Number</label>
+                                <input type="text" class="form-control" id="assetSerial">
+                            </div>
+                            <div class="form-group">
+                                <label>Model Number</label>
+                                <input type="text" class="form-control" id="assetModel">
+                            </div>
+                            <div class="form-group">
+                                <label>Brand / Manufacturer</label>
+                                <input type="text" class="form-control" id="assetBrand">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Location & Assignment</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Location</label>
+                                <input type="text" class="form-control" id="assetLocation" placeholder="e.g., Lab Room 1, OPD">
+                            </div>
+                            <div class="form-group">
+                                <label>Department</label>
+                                <select class="form-control" id="assetDepartment">
+                                    <option value="">Select Department</option>
+                                    <option value="laboratory">Laboratory</option>
+                                    <option value="opd">OPD</option>
+                                    <option value="operation_theater">Operation Theater</option>
+                                    <option value="reception">Reception</option>
+                                    <option value="admin">Administration</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Purchase & Valuation</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Purchase Date</label>
+                                <input type="date" class="form-control" id="assetPurchaseDate">
+                            </div>
+                            <div class="form-group">
+                                <label>Purchase Price *</label>
+                                <input type="number" class="form-control" id="assetPurchasePrice" required min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Warranty Expiry</label>
+                                <input type="date" class="form-control" id="assetWarranty">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Useful Life (Years)</label>
+                                <input type="number" class="form-control" id="assetUsefulLife" min="1" max="50">
+                            </div>
+                            <div class="form-group">
+                                <label>Salvage Value</label>
+                                <input type="number" class="form-control" id="assetSalvageValue" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Current Value</label>
+                                <input type="number" class="form-control" id="assetCurrentValue" min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Maintenance Schedule</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Last Maintenance</label>
+                                <input type="date" class="form-control" id="assetLastMaint">
+                            </div>
+                            <div class="form-group">
+                                <label>Next Maintenance</label>
+                                <input type="date" class="form-control" id="assetNextMaint">
+                            </div>
+                            <div class="form-group">
+                                <label>Maintenance Frequency (Days)</label>
+                                <input type="number" class="form-control" id="assetMaintFreq" min="1" placeholder="e.g., 90">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Status & Notes</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control" id="assetStatus">
+                                    <option value="active">Active</option>
+                                    <option value="in_maintenance">In Maintenance</option>
+                                    <option value="disposed">Disposed</option>
+                                    <option value="lost">Lost</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Condition</label>
+                                <select class="form-control" id="assetCondition">
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea class="form-control" id="assetNotes" rows="2"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('assetModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAsset()">💾 Save Asset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Asset / Print Label Modal -->
+    <div id="viewAssetModal" class="modal">
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header">
+                <h2>🏷️ Asset Details</h2>
+                <span class="close" onclick="closeModal('viewAssetModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="assetDetails"></div>
+                
+                <div class="detail-section" style="margin-top:20px;">
+                    <h3>Asset Label</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Label Type</label>
+                            <select class="form-control" id="labelType" onchange="generateLabel()">
+                                <option value="barcode">Barcode</option>
+                                <option value="qrcode">QR Code</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" onclick="printLabel()" style="margin-top:25px;">🖨️ Print Label</button>
+                        </div>
+                    </div>
+                    
+                    <div id="printArea">
+                        <div class="print-label" id="labelPreview">
+                            <div class="clinic-name" id="labelClinicName">IVF Clinic</div>
+                            <h4 id="labelAssetName">Asset Name</h4>
+                            <div class="barcode-container" id="barcodeContainer">
+                                <svg id="barcodeSvg"></svg>
+                            </div>
+                            <div class="qr-container" id="qrContainer" style="display:none;">
+                                <canvas id="qrCanvas"></canvas>
+                            </div>
+                            <div class="asset-details">
+                                <div>Code: <strong id="labelAssetCode">-</strong></div>
+                                <div>S/N: <span id="labelSerial">-</span></div>
+                                <div>Location: <span id="labelLocation">-</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('viewAssetModal')">Close</button>
+                <button class="btn btn-warning" onclick="editCurrentAsset()">✏️ Edit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance Modal -->
+    <div id="maintenanceModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2>🔧 Log Maintenance</h2>
+                <span class="close" onclick="closeModal('maintenanceModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="maintenanceForm">
+                    <div class="form-group">
+                        <label>Asset *</label>
+                        <select class="form-control" id="maintAssetId" required>
+                            <option value="">Select Asset</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date *</label>
+                            <input type="date" class="form-control" id="maintDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select class="form-control" id="maintType">
+                                <option value="preventive">Preventive</option>
+                                <option value="corrective">Corrective</option>
+                                <option value="calibration">Calibration</option>
+                                <option value="inspection">Inspection</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description *</label>
+                        <textarea class="form-control" id="maintDescription" rows="2" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Performed By</label>
+                            <input type="text" class="form-control" id="maintPerformedBy">
+                        </div>
+                        <div class="form-group">
+                            <label>Cost</label>
+                            <input type="number" class="form-control" id="maintCost" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Next Due Date</label>
+                        <input type="date" class="form-control" id="maintNextDue">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('maintenanceModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveMaintenance()">💾 Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        let allAssets = [];
+        let currentAsset = null;
+        let clinicInfo = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            requireAuth();
+            loadUserInfo();
+            loadClinicInfo();
+            loadAssetCategories();
+            loadAssets();
+            
+            document.getElementById('maintDate').valueAsDate = new Date();
+        });
+
+        async function loadClinicInfo() {
+            try {
+                const data = await apiCall('/clinic/settings');
+                if (data && data.success) {
+                    clinicInfo = data.data;
+                }
+            } catch (error) {
+                clinicInfo = { clinic_name: 'IVF Clinic' };
+            }
+        }
+
+        async function loadAssetCategories() {
+            try {
+                const data = await apiCall('/finance/asset-categories');
+                if (data && data.success) {
+                    const options = '<option value="">Select Category</option>' +
+                        data.data.map(c => `<option value="${c.id}">${c.category_name}</option>`).join('');
+                    document.getElementById('assetCategory').innerHTML = options;
+                    document.getElementById('filterCategory').innerHTML = '<option value="">All Categories</option>' +
+                        data.data.map(c => `<option value="${c.id}">${c.category_name}</option>`).join('');
+                }
+            } catch (error) {
+                // Load defaults
+                const defaultCats = ['Medical Equipment', 'Laboratory Equipment', 'IVF Equipment', 'Furniture', 'IT Equipment', 'Other'];
+                document.getElementById('assetCategory').innerHTML = '<option value="">Select Category</option>' +
+                    defaultCats.map(c => `<option value="${c.toLowerCase().replace(' ', '_')}">${c}</option>`).join('');
+                document.getElementById('filterCategory').innerHTML = '<option value="">All Categories</option>' +
+                    defaultCats.map(c => `<option value="${c.toLowerCase().replace(' ', '_')}">${c}</option>`).join('');
+            }
+        }
+
+        async function loadAssets() {
+            try {
+                const data = await apiCall('/finance/assets');
+                if (data && data.success) {
+                    allAssets = data.data;
+                    updateStats();
+                    renderAssets(allAssets);
+                    loadAssetDropdown();
+                } else {
+                    loadSampleAssets();
+                }
+            } catch (error) {
+                loadSampleAssets();
+            }
+        }
+
+        function loadSampleAssets() {
+            // Demo assets
+            allAssets = [
+                { id: '1', asset_code: 'AST-2024-0001', asset_name: 'Ultrasound Machine GE Voluson', category_name: 'Medical Equipment', is_clinical: true, purchase_price: 2500000, current_value: 2000000, status: 'active', condition: 'excellent', location: 'OPD Room 1', serial_number: 'USG-12345', brand: 'GE Healthcare' },
+                { id: '2', asset_code: 'AST-2024-0002', asset_name: 'IVF Incubator', category_name: 'IVF Equipment', is_clinical: true, purchase_price: 1500000, current_value: 1350000, status: 'active', condition: 'good', location: 'IVF Lab', serial_number: 'INC-67890', brand: 'Thermo Fisher' },
+                { id: '3', asset_code: 'AST-2024-0003', asset_name: 'Microscope Olympus', category_name: 'Laboratory Equipment', is_clinical: true, purchase_price: 800000, current_value: 720000, status: 'active', condition: 'excellent', location: 'Lab Room 2', serial_number: 'MIC-11111', brand: 'Olympus' },
+                { id: '4', asset_code: 'AST-2024-0004', asset_name: 'Autoclave', category_name: 'Medical Equipment', is_clinical: true, purchase_price: 350000, current_value: 280000, status: 'in_maintenance', condition: 'fair', location: 'Sterilization Room', serial_number: 'AUT-22222', brand: 'Tuttnauer' },
+                { id: '5', asset_code: 'AST-2024-0005', asset_name: 'Reception Desk', category_name: 'Furniture', is_clinical: false, purchase_price: 150000, current_value: 120000, status: 'active', condition: 'good', location: 'Reception', serial_number: null, brand: 'Custom' },
+                { id: '6', asset_code: 'AST-2024-0006', asset_name: 'Air Conditioner - Lab', category_name: 'HVAC', is_clinical: false, purchase_price: 250000, current_value: 200000, status: 'active', condition: 'excellent', location: 'IVF Lab', serial_number: 'AC-33333', brand: 'Daikin' }
+            ];
+            updateStats();
+            renderAssets(allAssets);
+            loadAssetDropdown();
+        }
+
+        function updateStats() {
+            const total = allAssets.length;
+            const totalValue = allAssets.reduce((sum, a) => sum + (parseFloat(a.current_value) || 0), 0);
+            const clinical = allAssets.filter(a => a.is_clinical).length;
+            const maintenance = allAssets.filter(a => a.status === 'in_maintenance').length;
+            
+            document.getElementById('totalAssets').textContent = total;
+            document.getElementById('totalValue').textContent = formatCurrency(totalValue);
+            document.getElementById('clinicalAssets').textContent = clinical;
+            document.getElementById('maintenanceDue').textContent = maintenance;
+            document.getElementById('depreciationYTD').textContent = formatCurrency(totalValue * 0.1); // Simplified
+        }
+
+        function renderAssets(assets) {
+            const grid = document.getElementById('assetGrid');
+            
+            if (!assets || assets.length === 0) {
+                grid.innerHTML = '<p class="text-muted text-center" style="grid-column:1/-1;">No assets found. Click "Add Asset" to create one.</p>';
+                return;
+            }
+
+            grid.innerHTML = assets.map(a => `
+                <div class="asset-card">
+                    <div class="asset-card-header">
+                        <h3>${a.asset_name}</h3>
+                        <div class="asset-code">${a.asset_code}</div>
+                    </div>
+                    <div class="asset-card-body">
+                        <div class="asset-info-row">
+                            <label>Category</label>
+                            <span>${a.category_name || '-'} ${a.is_clinical ? '<span class="asset-type-badge clinical">Clinical</span>' : '<span class="asset-type-badge non_clinical">Non-Clinical</span>'}</span>
+                        </div>
+                        <div class="asset-info-row">
+                            <label>Location</label>
+                            <span>${a.location || '-'}</span>
+                        </div>
+                        <div class="asset-info-row">
+                            <label>Value</label>
+                            <span>${formatCurrency(a.current_value)}</span>
+                        </div>
+                        <div class="asset-info-row">
+                            <label>Status</label>
+                            <span class="asset-status ${a.status}">${formatStatus(a.status)}</span>
+                        </div>
+                    </div>
+                    <div class="asset-card-footer">
+                        <button class="btn btn-sm btn-secondary" onclick="viewAsset('${a.id}')">👁️ View</button>
+                        <button class="btn btn-sm btn-primary" onclick="editAsset('${a.id}')">✏️ Edit</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterAssets() {
+            const search = document.getElementById('searchAssets').value.toLowerCase();
+            const category = document.getElementById('filterCategory').value;
+            const status = document.getElementById('filterStatus').value;
+            const type = document.getElementById('filterType').value;
+
+            let filtered = allAssets;
+
+            if (search) {
+                filtered = filtered.filter(a => 
+                    a.asset_name?.toLowerCase().includes(search) ||
+                    a.asset_code?.toLowerCase().includes(search) ||
+                    a.serial_number?.toLowerCase().includes(search)
+                );
+            }
+            if (category) {
+                filtered = filtered.filter(a => a.category_id === category || a.category_name?.toLowerCase().includes(category.toLowerCase()));
+            }
+            if (status) {
+                filtered = filtered.filter(a => a.status === status);
+            }
+            if (type === 'clinical') {
+                filtered = filtered.filter(a => a.is_clinical);
+            } else if (type === 'non_clinical') {
+                filtered = filtered.filter(a => !a.is_clinical);
+            }
+
+            renderAssets(filtered);
+        }
+
+        function loadAssetDropdown() {
+            document.getElementById('maintAssetId').innerHTML = '<option value="">Select Asset</option>' +
+                allAssets.map(a => `<option value="${a.id}">${a.asset_code} - ${a.asset_name}</option>`).join('');
+        }
+
+        function openAssetModal() {
+            document.getElementById('assetForm').reset();
+            document.getElementById('assetId').value = '';
+            document.getElementById('assetModalTitle').textContent = '🏷️ Add New Asset';
+            
+            // Generate asset code
+            const year = new Date().getFullYear();
+            const nextNum = (allAssets.length + 1).toString().padStart(4, '0');
+            document.getElementById('assetCode').value = `AST-${year}-${nextNum}`;
+            
+            openModal('assetModal');
+        }
+
+        function editAsset(id) {
+            const asset = allAssets.find(a => a.id === id);
+            if (!asset) return;
+
+            document.getElementById('assetId').value = asset.id;
+            document.getElementById('assetName').value = asset.asset_name || '';
+            document.getElementById('assetCode').value = asset.asset_code || '';
+            document.getElementById('assetCategory').value = asset.category_id || '';
+            document.getElementById('assetType').value = asset.asset_type || 'fixed';
+            document.getElementById('assetClinical').checked = asset.is_clinical;
+            document.getElementById('assetDescription').value = asset.description || '';
+            document.getElementById('assetSerial').value = asset.serial_number || '';
+            document.getElementById('assetModel').value = asset.model_number || '';
+            document.getElementById('assetBrand').value = asset.brand || '';
+            document.getElementById('assetLocation').value = asset.location || '';
+            document.getElementById('assetDepartment').value = asset.department || '';
+            document.getElementById('assetPurchaseDate').value = asset.purchase_date || '';
+            document.getElementById('assetPurchasePrice').value = asset.purchase_price || '';
+            document.getElementById('assetWarranty').value = asset.warranty_expiry || '';
+            document.getElementById('assetUsefulLife').value = asset.useful_life_years || '';
+            document.getElementById('assetSalvageValue').value = asset.salvage_value || '';
+            document.getElementById('assetCurrentValue').value = asset.current_value || '';
+            document.getElementById('assetLastMaint').value = asset.last_maintenance_date || '';
+            document.getElementById('assetNextMaint').value = asset.next_maintenance_date || '';
+            document.getElementById('assetMaintFreq').value = asset.maintenance_frequency_days || '';
+            document.getElementById('assetStatus').value = asset.status || 'active';
+            document.getElementById('assetCondition').value = asset.condition || 'good';
+            document.getElementById('assetNotes').value = asset.notes || '';
+
+            document.getElementById('assetModalTitle').textContent = '✏️ Edit Asset';
+            openModal('assetModal');
+        }
+
+        async function saveAsset() {
+            const assetData = {
+                asset_name: document.getElementById('assetName').value,
+                asset_code: document.getElementById('assetCode').value,
+                category_id: document.getElementById('assetCategory').value,
+                asset_type: document.getElementById('assetType').value,
+                is_clinical: document.getElementById('assetClinical').checked,
+                description: document.getElementById('assetDescription').value,
+                serial_number: document.getElementById('assetSerial').value,
+                model_number: document.getElementById('assetModel').value,
+                brand: document.getElementById('assetBrand').value,
+                location: document.getElementById('assetLocation').value,
+                department: document.getElementById('assetDepartment').value,
+                purchase_date: document.getElementById('assetPurchaseDate').value || null,
+                purchase_price: document.getElementById('assetPurchasePrice').value,
+                warranty_expiry: document.getElementById('assetWarranty').value || null,
+                useful_life_years: document.getElementById('assetUsefulLife').value || null,
+                salvage_value: document.getElementById('assetSalvageValue').value || null,
+                current_value: document.getElementById('assetCurrentValue').value || document.getElementById('assetPurchasePrice').value,
+                last_maintenance_date: document.getElementById('assetLastMaint').value || null,
+                next_maintenance_date: document.getElementById('assetNextMaint').value || null,
+                maintenance_frequency_days: document.getElementById('assetMaintFreq').value || null,
+                status: document.getElementById('assetStatus').value,
+                condition: document.getElementById('assetCondition').value,
+                notes: document.getElementById('assetNotes').value
+            };
+
+            if (!assetData.asset_name || !assetData.asset_code || !assetData.purchase_price) {
+                alert('Please fill required fields');
+                return;
+            }
+
+            const id = document.getElementById('assetId').value;
+
+            try {
+                const url = id ? `/finance/assets/${id}` : '/finance/assets';
+                const method = id ? 'PUT' : 'POST';
+                
+                const data = await apiCall(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(assetData)
+                });
+
+                if (data && data.success) {
+                    alert('✓ Asset saved successfully!');
+                    closeModal('assetModal');
+                    loadAssets();
+                } else {
+                    // Demo mode
+                    if (!id) {
+                        assetData.id = Date.now().toString();
+                        assetData.category_name = document.getElementById('assetCategory').options[document.getElementById('assetCategory').selectedIndex]?.text || 'Other';
+                        allAssets.push(assetData);
+                    }
+                    alert('✓ Asset saved (demo mode)');
+                    closeModal('assetModal');
+                    updateStats();
+                    renderAssets(allAssets);
+                    loadAssetDropdown();
+                }
+            } catch (error) {
+                // Demo mode fallback
+                if (!id) {
+                    assetData.id = Date.now().toString();
+                    assetData.category_name = 'Other';
+                    allAssets.push(assetData);
+                }
+                alert('✓ Asset saved (demo mode)');
+                closeModal('assetModal');
+                updateStats();
+                renderAssets(allAssets);
+                loadAssetDropdown();
+            }
+        }
+
+        function viewAsset(id) {
+            currentAsset = allAssets.find(a => a.id === id);
+            if (!currentAsset) return;
+
+            document.getElementById('assetDetails').innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                    <div><label style="color:#666;font-size:12px;">Asset Code</label><p style="margin:5px 0;font-weight:bold;">${currentAsset.asset_code}</p></div>
+                    <div><label style="color:#666;font-size:12px;">Serial Number</label><p style="margin:5px 0;">${currentAsset.serial_number || '-'}</p></div>
+                    <div><label style="color:#666;font-size:12px;">Category</label><p style="margin:5px 0;">${currentAsset.category_name || '-'}</p></div>
+                    <div><label style="color:#666;font-size:12px;">Location</label><p style="margin:5px 0;">${currentAsset.location || '-'}</p></div>
+                    <div><label style="color:#666;font-size:12px;">Purchase Value</label><p style="margin:5px 0;">${formatCurrency(currentAsset.purchase_price)}</p></div>
+                    <div><label style="color:#666;font-size:12px;">Current Value</label><p style="margin:5px 0;">${formatCurrency(currentAsset.current_value)}</p></div>
+                    <div><label style="color:#666;font-size:12px;">Status</label><p style="margin:5px 0;"><span class="asset-status ${currentAsset.status}">${formatStatus(currentAsset.status)}</span></p></div>
+                    <div><label style="color:#666;font-size:12px;">Condition</label><p style="margin:5px 0;">${currentAsset.condition || '-'}</p></div>
+                </div>
+            `;
+
+            // Set label info
+            document.getElementById('labelClinicName').textContent = clinicInfo.clinic_name || 'IVF Clinic';
+            document.getElementById('labelAssetName').textContent = currentAsset.asset_name;
+            document.getElementById('labelAssetCode').textContent = currentAsset.asset_code;
+            document.getElementById('labelSerial').textContent = currentAsset.serial_number || 'N/A';
+            document.getElementById('labelLocation').textContent = currentAsset.location || '-';
+
+            generateLabel();
+            openModal('viewAssetModal');
+        }
+        function generateLabel() {
+            const labelType = document.getElementById('labelType').value;
+            const barcodeContainer = document.getElementById('barcodeContainer');
+            const qrContainer = document.getElementById('qrContainer');
+            
+            if (!currentAsset) return;
+
+            barcodeContainer.style.display = 'none';
+            qrContainer.style.display = 'none';
+
+            if (labelType === 'barcode' || labelType === 'both') {
+                barcodeContainer.style.display = 'flex';
+                try {
+                    JsBarcode("#barcodeSvg", currentAsset.asset_code, {
+                        format: "CODE128",
+                        width: 1.5,
+                        height: 40,
+                        margin: 5,
+                        displayValue: true,
+                        fontSize: 11
+                    });
+                } catch (e) {
+                    console.error('Barcode error:', e);
+                }
+            }
+
+            if (labelType === 'qrcode' || labelType === 'both') {
+                qrContainer.style.display = 'flex';
+                try {
+                    const qrDiv = document.getElementById('qrContainer');
+                    qrDiv.innerHTML = '';
+                    new QRCode(qrDiv, {
+                        text: currentAsset.asset_code,
+                        width: 100,
+                        height: 100,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff"
+                    });
+                } catch (e) {
+                    console.error('QR error:', e);
+                }
+            }
+        }
+        function printLabel() {
+            window.print();
+        }
+
+        function editCurrentAsset() {
+            if (currentAsset) {
+                closeModal('viewAssetModal');
+                editAsset(currentAsset.id);
+            }
+        }
+
+        function openMaintenanceModal() {
+            document.getElementById('maintenanceForm').reset();
+            document.getElementById('maintDate').valueAsDate = new Date();
+            openModal('maintenanceModal');
+        }
+
+        async function saveMaintenance() {
+            const maintData = {
+                asset_id: document.getElementById('maintAssetId').value,
+                maintenance_date: document.getElementById('maintDate').value,
+                maintenance_type: document.getElementById('maintType').value,
+                description: document.getElementById('maintDescription').value,
+                performed_by: document.getElementById('maintPerformedBy').value,
+                cost: document.getElementById('maintCost').value,
+                next_due_date: document.getElementById('maintNextDue').value
+            };
+
+            if (!maintData.asset_id || !maintData.maintenance_date || !maintData.description) {
+                alert('Please fill required fields');
+                return;
+            }
+
+            try {
+                const data = await apiCall('/finance/asset-maintenance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(maintData)
+                });
+
+                if (data && data.success) {
+                    alert('✓ Maintenance logged successfully!');
+                    closeModal('maintenanceModal');
+                    loadAssets();
+                }
+            } catch (error) {
+                alert('✓ Maintenance logged (demo mode)');
+                closeModal('maintenanceModal');
+            }
+        }
+
+        function exportAssets() {
+            // Create CSV
+            const headers = ['Asset Code', 'Asset Name', 'Category', 'Location', 'Purchase Price', 'Current Value', 'Status', 'Condition', 'Serial Number'];
+            const rows = allAssets.map(a => [
+                a.asset_code, a.asset_name, a.category_name, a.location,
+                a.purchase_price, a.current_value, a.status, a.condition, a.serial_number
+            ]);
+            
+            const csv = [headers, ...rows].map(r => r.map(c => `"${c || ''}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `assets_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        function formatCurrency(amount) {
+            return 'PKR ' + (parseFloat(amount) || 0).toLocaleString();
+        }
+
+        function formatStatus(status) {
+            const statuses = {
+                'active': 'Active',
+                'in_maintenance': 'In Maintenance',
+                'disposed': 'Disposed',
+                'lost': 'Lost'
+            };
+            return statuses[status] || status;
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'block'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    </script>
+</body>
+</html>

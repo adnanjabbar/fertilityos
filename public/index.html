@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FertilityOS — The Operating System for Fertility Clinics</title>
+
+<style>
+body {
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:#0f172a;
+    color:white;
+}
+
+nav {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 60px;
+}
+
+.logo {
+    font-size:22px;
+    font-weight:700;
+}
+
+nav a {
+    color:white;
+    text-decoration:none;
+    margin-left:25px;
+    font-weight:500;
+}
+
+.btn-primary {
+    background:#6366f1;
+    padding:10px 22px;
+    border-radius:8px;
+}
+
+.hero {
+    text-align:center;
+    padding:120px 20px;
+    max-width:900px;
+    margin:auto;
+}
+
+.hero h1 {
+    font-size:54px;
+    font-weight:800;
+    line-height:1.1;
+}
+
+.hero p {
+    font-size:20px;
+    margin-top:25px;
+    color:#cbd5e1;
+}
+
+.hero-buttons {
+    margin-top:40px;
+}
+
+.hero-buttons a {
+    padding:16px 32px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:600;
+    margin:10px;
+    display:inline-block;
+}
+
+.hero-buttons .primary {
+    background:#6366f1;
+    color:white;
+}
+
+.hero-buttons .secondary {
+    border:1px solid #475569;
+    color:white;
+}
+
+.features {
+    background:white;
+    color:black;
+    padding:100px 60px;
+    text-align:center;
+}
+
+.features h2 {
+    font-size:38px;
+    margin-bottom:60px;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:40px;
+    max-width:1100px;
+    margin:auto;
+}
+
+.card {
+    padding:30px;
+    border-radius:12px;
+    background:#f8fafc;
+}
+
+.card h3 {
+    margin-bottom:15px;
+}
+
+.pricing {
+    background:#0f172a;
+    padding:100px 20px;
+    text-align:center;
+}
+
+.pricing h2 {
+    font-size:40px;
+    margin-bottom:50px;
+}
+
+.pricing-grid {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:30px;
+}
+
+.price-card {
+    background:white;
+    color:black;
+    width:300px;
+    padding:40px;
+    border-radius:14px;
+}
+
+.price-card.popular {
+    border:3px solid #6366f1;
+}
+
+.price-card h3 {
+    font-size:22px;
+}
+
+.price-card .price {
+    font-size:38px;
+    margin:20px 0;
+}
+
+.price-card ul {
+    list-style:none;
+    padding:0;
+    text-align:left;
+    font-size:14px;
+}
+
+.price-card ul li {
+    margin:10px 0;
+}
+
+.price-card button {
+    margin-top:25px;
+    width:100%;
+    padding:12px;
+    border:none;
+    background:#6366f1;
+    color:white;
+    border-radius:8px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+footer {
+    text-align:center;
+    padding:30px;
+    background:#020617;
+    font-size:14px;
+    color:#94a3b8;
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+<div class="logo">FertilityOS</div>
+<div>
+<a href="login.html">Login</a>
+<a href="register.html" class="btn-primary">Start Free Trial</a>
+</div>
+</nav>
+
+<section class="hero">
+<h1>The Operating System for Fertility Clinics</h1>
+<p>Modern, secure, cloud-based infrastructure for IVF centers, embryology labs, and reproductive medicine institutions worldwide.</p>
+<div class="hero-buttons">
+<a href="register.html" class="primary">Start 14-Day Free Trial</a>
+<a href="#features" class="secondary">See Features</a>
+</div>
+</section>
+
+<section class="features" id="features">
+<h2>Built for Modern Fertility Medicine</h2>
+<div class="grid">
+<div class="card">
+<h3>Patient & Cycle Management</h3>
+<p>Track every patient journey from stimulation to transfer.</p>
+</div>
+
+<div class="card">
+<h3>Advanced Lab Module</h3>
+<p>Embryology tracking, grading, cryo logs & QC workflows.</p>
+</div>
+
+<div class="card">
+<h3>Verification & Audit Logs</h3>
+<p>Role-based approvals and compliance-ready audit trails.</p>
+</div>
+
+<div class="card">
+<h3>Analytics Dashboard</h3>
+<p>Monitor KPIs, success rates and operational metrics.</p>
+</div>
+</div>
+</section>
+
+<section class="pricing">
+<h2>Simple, Transparent Pricing</h2>
+
+<div class="pricing-grid">
+
+<div class="price-card">
+<h3>Starter</h3>
+<div class="price">$29<span style="font-size:14px;">/month</span></div>
+<ul>
+<li>Up to 5 users</li>
+<li>Core IVF workflow</li>
+<li>Basic lab module</li>
+<li>Email support</li>
+</ul>
+<button onclick="location.href='register.html'">Start Trial</button>
+</div>
+
+<div class="price-card popular">
+<h3>Growth ⭐</h3>
+<div class="price">$79<span style="font-size:14px;">/month</span></div>
+<ul>
+<li>Up to 20 users</li>
+<li>Full lab + verification</li>
+<li>Audit logs</li>
+<li>Analytics dashboard</li>
+<li>Priority support</li>
+</ul>
+<button onclick="location.href='register.html'">Start Trial</button>
+</div>
+
+<div class="price-card">
+<h3>Enterprise</h3>
+<div class="price">Custom</div>
+<ul>
+<li>Unlimited users</li>
+<li>White-label</li>
+<li>Custom domain</li>
+<li>Dedicated support</li>
+<li>API access</li>
+</ul>
+<button>Contact Sales</button>
+</div>
+
+</div>
+</section>
+
+<footer>
+© 2026 FertilityOS. Global infrastructure for fertility medicine.
+</footer>
+
+</body>
+</html>

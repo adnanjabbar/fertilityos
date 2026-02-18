@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory - IVF Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 IVF Platform</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item active"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>🔬 Laboratory</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showQuickActions()">+ Quick Action</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card info"><div class="stat-icon">🥚</div><div class="stat-details"><h3 id="retrievalsToday">0</h3><p>Retrievals Today</p></div></div>
+                <div class="stat-card success"><div class="stat-icon">🧬</div><div class="stat-details"><h3 id="activeEmbryos">0</h3><p>Active Embryos</p></div></div>
+                <div class="stat-card warning"><div class="stat-icon">⏰</div><div class="stat-details"><h3 id="pendingChecks">0</h3><p>Pending Checks</p></div></div>
+                <div class="stat-card"><div class="stat-icon">❄️</div><div class="stat-details"><h3 id="frozenSpecimens">0</h3><p>Frozen Specimens</p></div></div>
+            </div>
+
+            <div class="settings-tabs">
+                <button class="settings-tab-btn active" data-tab="overview">Overview</button>
+                <button class="settings-tab-btn" data-tab="semen">Semen Analysis</button>
+                <button class="settings-tab-btn" data-tab="oocytes">Oocyte/Retrieval</button>
+                <button class="settings-tab-btn" data-tab="embryos">Embryo Culture</button>
+                <button class="settings-tab-btn" data-tab="cryo">Cryopreservation</button>
+            </div>
+
+            <div id="overviewTab" class="settings-tab-content active">
+                <div class="card">
+                    <div class="card-header"><h2>📋 Today's Tasks</h2></div>
+                    <div class="card-body">
+                        <div class="stats-grid" style="margin-bottom:0;">
+                            <div class="detail-section"><h3>🔬 Fertilization Checks</h3><div id="fertChecksList"><p class="text-muted">No pending checks</p></div></div>
+                            <div class="detail-section"><h3>🧬 Embryo Assessments</h3><div id="embryoAssessmentsList"><p class="text-muted">No pending assessments</p></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h2>📝 Recent Semen Samples</h2><button class="btn btn-primary btn-sm" onclick="switchTab('semen')">View All</button></div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead><tr><th>Sample #</th><th>Patient</th><th>Date</th><th>Concentration</th><th>Motility</th><th>Quality</th></tr></thead>
+                            <tbody id="recentSamplesTable"><tr><td colspan="6" class="text-center text-muted">No recent samples</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="semenTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header"><h2>🔬 Semen Analysis Records</h2><button class="btn btn-primary" onclick="openSemenModal()">+ New Semen Analysis</button></div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead><tr><th>Sample #</th><th>Patient</th><th>Date</th><th>Volume</th><th>Conc.</th><th>Motility</th><th>Quality</th><th>Actions</th></tr></thead>
+                            <tbody id="semenSamplesTable"><tr><td colspan="8" class="text-center text-muted">No samples found</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="oocytesTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header"><h2>🥚 Oocyte Retrievals</h2><button class="btn btn-primary" onclick="openRetrievalModal()">+ New Retrieval</button></div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead><tr><th>Retrieval #</th><th>Patient</th><th>Date</th><th>Total</th><th>MII</th><th>MI</th><th>GV</th><th>Actions</th></tr></thead>
+                            <tbody id="retrievalsTable"><tr><td colspan="8" class="text-center text-muted">No retrievals found</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="embryosTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header"><h2>🧬 Embryo Culture</h2></div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead><tr><th>Embryo Code</th><th>Patient</th><th>Day</th><th>Stage</th><th>Grade</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody id="embryosTable"><tr><td colspan="7" class="text-center text-muted">No embryos found</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="cryoTab" class="settings-tab-content">
+                <div class="stats-grid" style="margin-bottom:24px;">
+                    <div class="stat-card"><div class="stat-icon">🧬</div><div class="stat-details"><h3 id="frozenEmbryos">0</h3><p>Frozen Embryos</p></div></div>
+                    <div class="stat-card"><div class="stat-icon">🥚</div><div class="stat-details"><h3 id="frozenOocytes">0</h3><p>Frozen Oocytes</p></div></div>
+                    <div class="stat-card"><div class="stat-icon">🔬</div><div class="stat-details"><h3 id="frozenSperm">0</h3><p>Frozen Sperm</p></div></div>
+                    <div class="stat-card info"><div class="stat-icon">🏪</div><div class="stat-details"><h3 id="cryoTanksCount">0</h3><p>Active Tanks</p></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h2>❄️ Cryo Tanks</h2><button class="btn btn-primary btn-sm" onclick="openTankModal()">+ Add Tank</button></div>
+                    <div class="card-body"><div id="cryoTanksGrid" class="stats-grid"><p class="text-muted">No tanks configured</p></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h2>🧊 Freeze Records</h2><button class="btn btn-primary" onclick="openFreezeModal()">+ New Freeze</button></div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead><tr><th>Code</th><th>Patient</th><th>Type</th><th>Count</th><th>Date</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody id="freezeRecordsTable"><tr><td colspan="8" class="text-center text-muted">No freeze records</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="quickActionsModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header"><h2>⚡ Quick Actions</h2><span class="close" onclick="closeModal('quickActionsModal')">&times;</span></div>
+            <div class="modal-body">
+                <div class="stats-grid">
+                    <button class="btn btn-primary" style="padding:20px;width:100%;" onclick="openSemenModal();closeModal('quickActionsModal');">🔬 New Semen Analysis</button>
+                    <button class="btn btn-success" style="padding:20px;width:100%;" onclick="openRetrievalModal();closeModal('quickActionsModal');">🥚 Record Retrieval</button>
+                    <button class="btn btn-warning" style="padding:20px;width:100%;" onclick="switchTab('embryos');closeModal('quickActionsModal');">🧬 Embryo Assessment</button>
+                    <button class="btn btn-secondary" style="padding:20px;width:100%;" onclick="openFreezeModal();closeModal('quickActionsModal');">❄️ Freeze Specimen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="semenModal" class="modal">
+        <div class="modal-content" style="max-width:950px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header"><h2>🔬 Semen Analysis</h2><span class="close" onclick="closeModal('semenModal')">&times;</span></div>
+            <div class="modal-body">
+                <form id="semenForm">
+                    <!-- Patient & Collection -->
+                    <div class="detail-section">
+                        <h3>Patient & Collection Details</h3>
+                        <div class="form-row">
+                            <div class="form-group"><label>Patient *</label><select class="form-control" id="semenPatientId" required><option value="">Select Patient</option></select></div>
+                            <div class="form-group"><label>Collection Date *</label><input type="date" class="form-control" id="semenCollectionDate" required></div>
+                            <div class="form-group"><label>Collection Time</label><input type="time" class="form-control" id="semenCollectionTime"></div>
+                            <div class="form-group"><label>Abstinence (days)</label><input type="number" class="form-control" id="semenAbstinence" min="0" max="30"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Collection Method</label>
+                                <select class="form-control" id="semenCollectionMethod">
+                                    <option value="masturbation">Masturbation</option>
+                                    <option value="coitus_interruptus">Coitus Interruptus</option>
+                                    <option value="surgical">Surgical (TESE/PESA)</option>
+                                    <option value="electroejaculation">Electroejaculation</option>
+                                    <option value="home">Home Collection</option>
+                                </select>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Macroscopic -->
+                    <div class="detail-section">
+                        <h3>Macroscopic Analysis</h3>
+                        <div class="form-row">
+                            <div class="form-group"><label>Volume (mL) *</label><input type="number" class="form-control" id="semenVolume" step="0.1" min="0" placeholder="≥1.5"></div>
+                            <div class="form-group"><label>pH</label><input type="number" class="form-control" id="semenPH" step="0.1" min="0" max="14" placeholder="≥7.2"></div>
+                            <div class="form-group"><label>Liquefaction (min)</label><input type="number" class="form-control" id="semenLiquefaction" min="0" placeholder="<60"></div>
+                            <div class="form-group"><label>Appearance</label>
+                                <select class="form-control" id="semenAppearance">
+                                    <option value="normal">Normal (Gray-opalescent)</option>
+                                    <option value="yellow">Yellow</option>
+                                    <option value="brown">Brown/Red (Hemospermia)</option>
+                                    <option value="clear">Clear</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Viscosity</label>
+                                <select class="form-control" id="semenViscosity">
+                                    <option value="normal">Normal</option>
+                                    <option value="high">High (Viscous)</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Concentration -->
+                    <div class="detail-section">
+                        <h3>Sperm Concentration</h3>
+                        <div class="form-row">
+                            <div class="form-group"><label>Concentration (M/mL) *</label><input type="number" class="form-control" id="semenConcentration" step="0.1" min="0" placeholder="≥16"></div>
+                            <div class="form-group"><label>Total Count (Million)</label><input type="number" class="form-control" id="semenTotalCount" step="0.1" min="0" placeholder="≥39"></div>
+                        </div>
+                    </div>
+
+                    <!-- Motility -->
+                    <div class="detail-section">
+                        <h3>Motility (WHO 2021)</h3>
+                        <div class="form-row">
+                            <div class="form-group"><label>Progressive PR (%)</label><input type="number" class="form-control" id="semenProgressiveMotility" step="0.1" min="0" max="100" placeholder="≥30"></div>
+                            <div class="form-group"><label>Non-Progressive NP (%)</label><input type="number" class="form-control" id="semenNonProgressiveMotility" step="0.1" min="0" max="100"></div>
+                            <div class="form-group"><label>Immotile (%)</label><input type="number" class="form-control" id="semenImmotile" step="0.1" min="0" max="100"></div>
+                            <div class="form-group"><label>Total Motility (%)</label><input type="number" class="form-control" id="semenTotalMotility" step="0.1" min="0" max="100" placeholder="≥42" readonly style="background:#f0f0f0;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Morphology -->
+                    <div class="detail-section">
+                        <h3>Morphology (Kruger Strict Criteria)</h3>
+                        <div class="form-row">
+                            <div class="form-group"><label>Normal Forms (%)</label><input type="number" class="form-control" id="semenNormalMorphology" step="0.1" min="0" max="100" placeholder="≥4"></div>
+                            <div class="form-group"><label>Head Defects (%)</label><input type="number" class="form-control" id="semenHeadDefects" step="0.1" min="0" max="100"></div>
+                            <div class="form-group"><label>Midpiece Defects (%)</label><input type="number" class="form-control" id="semenMidpieceDefects" step="0.1" min="0" max="100"></div>
+                            <div class="form-group"><label>Tail Defects (%)</label><input type="number" class="form-control" id="semenTailDefects" step="0.1" min="0" max="100"></div>
+                        </div>
+                    </div>
+
+                    <!-- Vitality & Other Cells -->
+                    <div class="detail-section">
+                        <h3>Vitality & Other Cells</h3>
+                        <div class="form-row">
+                            <div class="form-group"><label>Vitality - Live (%)</label><input type="number" class="form-control" id="semenVitality" step="0.1" min="0" max="100" placeholder="≥54"></div>
+                            <div class="form-group"><label>Round Cells (M/mL)</label><input type="number" class="form-control" id="semenRoundCells" step="0.1" min="0" placeholder="<5"></div>
+                            <div class="form-group"><label>WBC (M/mL)</label><input type="number" class="form-control" id="semenWBC" step="0.1" min="0" placeholder="<1"></div>
+                        </div>
+                    </div>
+
+                    <!-- Processing -->
+                    <div class="detail-section">
+                        <h3>Sperm Processing (Optional)</h3>
+                        <div class="form-row">
+                            <div class="form-group"><label>Processing Method</label>
+                                <select class="form-control" id="semenProcessingMethod">
+                                    <option value="">Not Processed</option>
+                                    <option value="swim_up">Swim Up</option>
+                                    <option value="density_gradient">Density Gradient</option>
+                                    <option value="simple_wash">Simple Wash</option>
+                                    <option value="magnetic_separation">Magnetic Separation (MACS)</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Post-Wash Volume (mL)</label><input type="number" class="form-control" id="semenPostWashVolume" step="0.1" min="0"></div>
+                            <div class="form-group"><label>Post-Wash Conc. (M/mL)</label><input type="number" class="form-control" id="semenPostWashConc" step="0.1" min="0"></div>
+                            <div class="form-group"><label>Post-Wash Motility (%)</label><input type="number" class="form-control" id="semenPostWashMotility" step="0.1" min="0" max="100"></div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnosis -->
+                    <div class="detail-section">
+                        <h3>Assessment & Diagnosis</h3>
+                        <div class="form-row">
+                            <div class="form-group"><label>Quality</label>
+                                <select class="form-control" id="semenQuality">
+                                    <option value="">Select Quality</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                    <option value="very_poor">Very Poor</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Diagnosis (WHO)</label>
+                                <select class="form-control" id="semenDiagnosis">
+                                    <option value="">Select Diagnosis</option>
+                                    <option value="normozoospermia">Normozoospermia</option>
+                                    <option value="oligozoospermia">Oligozoospermia</option>
+                                    <option value="asthenozoospermia">Asthenozoospermia</option>
+                                    <option value="teratozoospermia">Teratozoospermia</option>
+                                    <option value="oligoasthenozoospermia">Oligoasthenozoospermia</option>
+                                    <option value="oligoasthenoteratozoospermia">OAT Syndrome</option>
+                                    <option value="cryptozoospermia">Cryptozoospermia</option>
+                                    <option value="azoospermia">Azoospermia</option>
+                                    <option value="necrozoospermia">Necrozoospermia</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Used For</label>
+                                <select class="form-control" id="semenUsedFor">
+                                    <option value="">Pending</option>
+                                    <option value="ivf">IVF</option>
+                                    <option value="icsi">ICSI</option>
+                                    <option value="iui">IUI</option>
+                                    <option value="frozen">Cryopreservation</option>
+                                    <option value="diagnostic">Diagnostic Only</option>
+                                    <option value="discarded">Discarded</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group"><label>Notes / Remarks</label><textarea class="form-control" id="semenNotes" rows="2" placeholder="Additional observations..."></textarea></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('semenModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSemenSample()">💾 Save Analysis</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="retrievalModal" class="modal">
+        <div class="modal-content" style="max-width:800px;">
+            <div class="modal-header"><h2>🥚 Record Retrieval</h2><span class="close" onclick="closeModal('retrievalModal')">&times;</span></div>
+            <div class="modal-body">
+                <form id="retrievalForm">
+                    <div class="form-row">
+                        <div class="form-group"><label>Patient *</label><select class="form-control" id="retrievalPatientId" required><option value="">Select</option></select></div>
+                        <div class="form-group"><label>Cycle *</label><select class="form-control" id="retrievalCycleId" required><option value="">Select</option></select></div>
+                        <div class="form-group"><label>Date *</label><input type="date" class="form-control" id="retrievalDate" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Total Oocytes *</label><input type="number" class="form-control" id="retrievalTotal" required></div>
+                        <div class="form-group"><label>MII (Mature)</label><input type="number" class="form-control" id="retrievalMII" value="0"></div>
+                        <div class="form-group"><label>MI</label><input type="number" class="form-control" id="retrievalMI" value="0"></div>
+                        <div class="form-group"><label>GV</label><input type="number" class="form-control" id="retrievalGV" value="0"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Insemination Method</label><select class="form-control" id="retrievalMethod"><option value="">Pending</option><option value="ivf">IVF</option><option value="icsi">ICSI</option><option value="split">Split</option></select></div>
+                        <div class="form-group"><label>Sperm Source</label><select class="form-control" id="retrievalSpermSource"><option value="fresh">Fresh</option><option value="frozen">Frozen</option><option value="donor">Donor</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Notes</label><textarea class="form-control" id="retrievalNotes" rows="2"></textarea></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('retrievalModal')">Cancel</button><button class="btn btn-primary" onclick="saveRetrieval()">Save</button></div>
+        </div>
+    </div>
+
+    <div id="tankModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header"><h2>❄️ Add Tank</h2><span class="close" onclick="closeModal('tankModal')">&times;</span></div>
+            <div class="modal-body">
+                <form id="tankForm">
+                    <div class="form-group"><label>Tank Name *</label><input type="text" class="form-control" id="tankName" required></div>
+                    <div class="form-group"><label>Tank Code *</label><input type="text" class="form-control" id="tankCode" required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Type</label><select class="form-control" id="tankType"><option value="liquid_nitrogen">Liquid N2</option><option value="vapor">Vapor</option></select></div>
+                        <div class="form-group"><label>Location</label><input type="text" class="form-control" id="tankLocation"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('tankModal')">Cancel</button><button class="btn btn-primary" onclick="saveTank()">Save</button></div>
+        </div>
+    </div>
+
+    <div id="freezeModal" class="modal">
+        <div class="modal-content" style="max-width:700px;">
+            <div class="modal-header"><h2>🧊 Freeze Specimen</h2><span class="close" onclick="closeModal('freezeModal')">&times;</span></div>
+            <div class="modal-body">
+                <form id="freezeForm">
+                    <div class="form-row">
+                        <div class="form-group"><label>Patient *</label><select class="form-control" id="freezePatientId" required><option value="">Select</option></select></div>
+                        <div class="form-group"><label>Type *</label><select class="form-control" id="freezeType" required><option value="">Select</option><option value="embryo">Embryo</option><option value="oocyte">Oocyte</option><option value="sperm">Sperm</option></select></div>
+                        <div class="form-group"><label>Date *</label><input type="date" class="form-control" id="freezeDate" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Total Specimens *</label><input type="number" class="form-control" id="freezeTotal" required></div>
+                        <div class="form-group"><label>Tank *</label><select class="form-control" id="freezeTankId" required><option value="">Select</option></select></div>
+                        <div class="form-group"><label>Quality</label><input type="text" class="form-control" id="freezeQuality"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('freezeModal')">Cancel</button><button class="btn btn-primary" onclick="saveFreezeRecord()">Save</button></div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/lab.js"></script>
+</body>
+</html>
