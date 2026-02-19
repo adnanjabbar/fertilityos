@@ -35,6 +35,8 @@ app.get('/health', (req, res) => {
 // API Routes (Public + Auth)
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/subscription', require('./routes/subscription.routes'));
+app.use('/api/email', require('./routes/email.routes'));
+app.use('/api/subscription-payment', require('./routes/subscription-payment.routes'));
 
 // Tenant-scoped routes
 app.use('/api', resolveTenant);
