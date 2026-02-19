@@ -85,7 +85,7 @@ const sendVerificationEmail = async (userId, email, fullName) => {
         );
 
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
-        const verificationLink = `${appUrl}/api/email/verify/${token}`;
+        const verificationLink = new URL(`/api/email/verify/${token}`, appUrl).href;
 
         // Email HTML template
         const html = `

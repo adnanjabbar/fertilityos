@@ -159,6 +159,7 @@ router.post('/resend-verification', authenticateToken, async (req, res) => {
 /**
  * POST /api/email/send-verification
  * Send verification email (for newly registered users)
+ * Note: This endpoint should be rate-limited in production
  */
 router.post('/send-verification', async (req, res) => {
     try {
@@ -180,9 +181,10 @@ router.post('/send-verification', async (req, res) => {
         );
 
         if (userResult.rows.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                error: 'User not found' 
+            // Return success even if user not found to prevent email enumeration
+            return res.json({ 
+                success: true, 
+                message: 'If the email exists, a verification email has been sent' 
             });
         }
 

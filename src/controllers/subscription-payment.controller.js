@@ -6,6 +6,7 @@
 
 const db = require('../config/database');
 const emailService = require('../services/email.service');
+const crypto = require('crypto');
 
 // Subscription plans
 const SUBSCRIPTION_PLANS = {
@@ -195,8 +196,8 @@ const confirmPayment = async (req, res) => {
 
         const payment = paymentResult.rows[0];
 
-        // Generate invoice number
-        const invoiceNumber = `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
+        // Generate invoice number with UUID prefix for uniqueness
+        const invoiceNumber = `INV-${new Date().getFullYear()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
         // Create invoice
         const invoiceResult = await db.query(

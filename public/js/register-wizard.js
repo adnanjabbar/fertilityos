@@ -11,6 +11,7 @@ let stripe = null;
 let cardElement = null;
 let subdomainValid = false;
 let subdomainTimeout = null;
+const SUBDOMAIN_CHECK_DEBOUNCE_MS = 400;
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -32,25 +33,25 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 async function initializeStripe() {
     try {
-        // Get Stripe publishable key from backend or environment
-        const stripeKey = 'pk_test_51234567890'; // Replace with actual key or fetch from backend
+        // Fetch Stripe publishable key from backend
+        const response = await fetch('/api/payments/stripe/status');
+        const data = await response.json();
         
-        // For now, we'll skip Stripe initialization if key is not available
-        // In production, fetch this from the backend
-        console.log('Stripe initialization skipped - configure STRIPE_PUBLISHABLE_KEY');
-        
-        // Uncomment when Stripe is configured:
-        // stripe = Stripe(stripeKey);
-        // const elements = stripe.elements();
-        // cardElement = elements.create('card', {
-        //     style: {
-        //         base: {
-        //             fontSize: '16px',
-        //             color: '#1f2937',
-        //             '::placeholder': { color: '#9ca3af' }
-        //         }
-        //     }
-        // });
+        if (data.success && data.data.isConfigured && data.data.publishableKey) {
+            stripe = Stripe(data.data.publishableKey);
+            const elements = stripe.elements();
+            cardElement = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#1f2937',
+                        '::placeholder': { color: '#9ca3af' }
+                    }
+                }
+            });
+        } else {
+            console.log('Stripe not configured - payment features disabled');
+        }
     } catch (error) {
         console.error('Stripe initialization error:', error);
     }
@@ -377,7 +378,7 @@ async function checkSubdomain() {
             status.classList.remove('checking');
             status.classList.add('unavailable');
         }
-    }, 400);
+    }, SUBDOMAIN_CHECK_DEBOUNCE_MS);
 }
 
 /**

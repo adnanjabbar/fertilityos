@@ -84,6 +84,7 @@ const registerClinic = async (req, res) => {
     await client.query('BEGIN');
 
     // Create clinic with enhanced fields
+    // Note: Using adminEmail as fallback for clinic email when not provided
     const clinicResult = await client.query(
       `INSERT INTO clinics (
         subdomain, clinic_name, clinic_code, email, phone, address, 
