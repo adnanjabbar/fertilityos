@@ -1017,15 +1017,19 @@ const hasPermission = (role, module, requiredPermission) => {
     if (modulePermission === PERMISSIONS.FULL) return true;
     
     // Check specific permissions
+    // VIEW permission is granted if user has VIEW, EDIT, or FULL access
     if (requiredPermission === PERMISSIONS.VIEW) {
-        return [PERMISSIONS.VIEW, PERMISSIONS.EDIT, PERMISSIONS.CREATE, PERMISSIONS.DELETE, PERMISSIONS.FULL].includes(modulePermission);
+        return [PERMISSIONS.VIEW, PERMISSIONS.EDIT, PERMISSIONS.FULL].includes(modulePermission);
     }
+    // EDIT permission is granted only if user has EDIT or FULL access
     if (requiredPermission === PERMISSIONS.EDIT) {
-        return [PERMISSIONS.EDIT, PERMISSIONS.CREATE, PERMISSIONS.DELETE, PERMISSIONS.FULL].includes(modulePermission);
+        return [PERMISSIONS.EDIT, PERMISSIONS.FULL].includes(modulePermission);
     }
+    // CREATE permission is granted only if user has CREATE or FULL access
     if (requiredPermission === PERMISSIONS.CREATE) {
         return [PERMISSIONS.CREATE, PERMISSIONS.FULL].includes(modulePermission);
     }
+    // DELETE permission is granted only if user has DELETE or FULL access
     if (requiredPermission === PERMISSIONS.DELETE) {
         return [PERMISSIONS.DELETE, PERMISSIONS.FULL].includes(modulePermission);
     }

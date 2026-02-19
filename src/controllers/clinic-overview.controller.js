@@ -264,7 +264,10 @@ const getClinicOverview = async (req, res) => {
 const getUsageStatistics = async (req, res) => {
     try {
         const clinicId = req.user.clinic_id;
-        const { months = 6 } = req.query;
+        const monthsParam = req.query.months;
+        
+        // Validate and sanitize months parameter (only allow 1-24)
+        const months = Math.min(Math.max(parseInt(monthsParam) || 6, 1), 24);
 
         // Get monthly patient registrations
         const patientTrend = await db.query(
@@ -273,10 +276,10 @@ const getUsageStatistics = async (req, res) => {
                 COUNT(*) as count
              FROM patients 
              WHERE clinic_id = $1 
-                AND created_at >= CURRENT_DATE - INTERVAL '${parseInt(months)} months'
+                AND created_at >= CURRENT_DATE - ($2 || ' months')::INTERVAL
              GROUP BY DATE_TRUNC('month', created_at)
              ORDER BY month`,
-            [clinicId]
+            [clinicId, months.toString()]
         );
 
         // Get monthly cycle starts
@@ -287,10 +290,10 @@ const getUsageStatistics = async (req, res) => {
                 COUNT(CASE WHEN cycle_outcome = 'positive' THEN 1 END) as successful
              FROM ivf_cycles 
              WHERE clinic_id = $1 
-                AND start_date >= CURRENT_DATE - INTERVAL '${parseInt(months)} months'
+                AND start_date >= CURRENT_DATE - ($2 || ' months')::INTERVAL
              GROUP BY DATE_TRUNC('month', start_date)
              ORDER BY month`,
-            [clinicId]
+            [clinicId, months.toString()]
         );
 
         // Get user activity (logins per day - last 30 days)

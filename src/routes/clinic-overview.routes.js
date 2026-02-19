@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth.middleware');
-const { requireModuleAccess, requireAdmin, MODULES, PERMISSIONS } = require('../middleware/permissions.middleware');
+const { requireModuleAccess, MODULES, PERMISSIONS } = require('../middleware/permissions.middleware');
 const clinicOverviewController = require('../controllers/clinic-overview.controller');
 
 // All routes require authentication

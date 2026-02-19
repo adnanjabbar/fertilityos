@@ -423,13 +423,20 @@ const updateChequeStatus = async (req, res) => {
         }
 
         const transaction = txResult.rows[0];
+        
+        // Update metadata with clearance notes if provided
+        let updatedMetadata = transaction.metadata || {};
+        if (notes) {
+            updatedMetadata.clearance_notes = notes;
+            updatedMetadata.clearance_date = new Date().toISOString();
+        }
 
-        // Update status
+        // Update status and metadata
         await db.query(
             `UPDATE revenue_transactions 
-             SET payment_status = $1, updated_at = CURRENT_TIMESTAMP
-             WHERE id = $2`,
-            [status, transactionId]
+             SET payment_status = $1, metadata = $2, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $3`,
+            [status, JSON.stringify(updatedMetadata), transactionId]
         );
 
         // If cleared and linked to invoice, update invoice
@@ -555,7 +562,19 @@ const getPatientPayments = async (req, res) => {
         const clinicId = req.user.clinic_id;
         const { patientId } = req.params;
         const { page = 1, limit = 20 } = req.query;
-        const offset = (page - 1) * limit;
+        
+        // Validate patientId format (UUID)
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!patientId || !uuidRegex.test(patientId)) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Invalid patient ID format' 
+            });
+        }
+        
+        const pageNum = Math.max(1, parseInt(page) || 1);
+        const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
+        const offset = (pageNum - 1) * limitNum;
 
         const result = await db.query(
             `SELECT rt.*, u.full_name as received_by_name
@@ -564,7 +583,7 @@ const getPatientPayments = async (req, res) => {
              WHERE rt.clinic_id = $1 AND rt.patient_id = $2
              ORDER BY rt.transaction_date DESC, rt.created_at DESC
              LIMIT $3 OFFSET $4`,
-            [clinicId, patientId, limit, offset]
+            [clinicId, patientId, limitNum, offset]
         );
 
         const countResult = await db.query(
@@ -577,10 +596,10 @@ const getPatientPayments = async (req, res) => {
             success: true,
             data: result.rows,
             pagination: {
-                currentPage: parseInt(page),
-                totalPages: Math.ceil(parseInt(countResult.rows[0].count) / limit),
+                currentPage: pageNum,
+                totalPages: Math.ceil(parseInt(countResult.rows[0].count) / limitNum),
                 totalCount: parseInt(countResult.rows[0].count),
-                limit: parseInt(limit)
+                limit: limitNum
             }
         });
 
