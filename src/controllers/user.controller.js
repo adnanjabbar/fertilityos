@@ -44,14 +44,15 @@ const addUser = async (req, res) => {
       });
     }
     
-    // Valid roles
-    const validRoles = [
-      'admin', 'doctor', 'embryologist', 'nurse', 'lab_tech', 
-      'receptionist', 'ivf_consultant', 'lab_director', 'quality_manager'
-    ];
+    // Valid roles from centralized configuration
+    const { ROLES } = require('../config/roles.config');
+    const validRoles = Object.values(ROLES);
     
     if (!validRoles.includes(role)) {
-      return res.status(400).json({ error: 'Invalid role' });
+      return res.status(400).json({ 
+        error: 'Invalid role',
+        validRoles
+      });
     }
     
     // Check if email already exists

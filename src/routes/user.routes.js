@@ -2,53 +2,54 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
 const { authenticateToken, requireRole } = require('../middleware/auth.middleware');
+const { requireModuleAccess, requireAdmin, MODULES, PERMISSIONS } = require('../middleware/permissions.middleware');
 
 // All routes require authentication
 router.use(authenticateToken);
 
-// Get all users in clinic (admin only)
+// Get all users in clinic (requires user management view permission)
 router.get('/', 
-  requireRole('admin', 'lab_director'),
+  requireModuleAccess(MODULES.USER_MANAGEMENT, PERMISSIONS.VIEW),
   userController.getUsers
 );
 
-// Add new user (admin only)
+// Add new user (requires user management create permission)
 router.post('/', 
-  requireRole('admin'),
+  requireModuleAccess(MODULES.USER_MANAGEMENT, PERMISSIONS.CREATE),
   userController.addUser
 );
 
-// Update user (admin only)
+// Update user (requires user management edit permission)
 router.put('/:userId',
-  requireRole('admin'),
+  requireModuleAccess(MODULES.USER_MANAGEMENT, PERMISSIONS.EDIT),
   userController.updateUser
 );
 
-// Deactivate user (admin only)
+// Deactivate user (requires user management delete permission)
 router.delete('/:userId',
-  requireRole('admin'),
+  requireModuleAccess(MODULES.USER_MANAGEMENT, PERMISSIONS.DELETE),
   userController.deactivateUser
 );
 
-// Get own profile
+// Get own profile (no special permission needed)
 router.get('/profile/me',
   userController.getProfile
 );
 
-// Update own profile
+// Update own profile (no special permission needed)
 router.put('/profile/me',
   userController.updateProfile
 );
 
-// Get clinic settings (admin only)
+// Get clinic settings (requires clinic settings view permission)
 router.get('/clinic/settings',
-  requireRole('admin', 'lab_director'),
+  requireModuleAccess(MODULES.CLINIC_SETTINGS, PERMISSIONS.VIEW),
   userController.getClinicSettings
 );
 
-// Update clinic settings (admin only)
+// Update clinic settings (requires clinic settings edit permission)
 router.put('/clinic/settings',
-  requireRole('admin'),
+  requireModuleAccess(MODULES.CLINIC_SETTINGS, PERMISSIONS.EDIT),
   userController.updateClinicSettings
 );
 
