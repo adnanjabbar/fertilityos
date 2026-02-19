@@ -362,6 +362,16 @@ function toggleDropdown(wrapperId) {
     // Toggle this dropdown
     if (!isOpen) {
         wrapper.classList.add('open');
+        
+        // Show backdrop on mobile
+        if (window.innerWidth <= 768) {
+            const backdrop = document.getElementById('dropdownBackdrop');
+            if (backdrop) {
+                backdrop.classList.add('show');
+                backdrop.onclick = closeAllDropdowns;
+            }
+        }
+        
         // Focus search input
         const searchInput = wrapper.querySelector('.search-box input');
         setTimeout(() => searchInput.focus(), 100);
@@ -375,6 +385,13 @@ function closeAllDropdowns() {
     document.querySelectorAll('.custom-select').forEach(select => {
         select.classList.remove('open');
     });
+    
+    // Hide backdrop
+    const backdrop = document.getElementById('dropdownBackdrop');
+    if (backdrop) {
+        backdrop.classList.remove('show');
+        backdrop.onclick = null;
+    }
     
     // Clear search inputs
     document.querySelectorAll('.search-box input').forEach(input => {
@@ -1103,15 +1120,16 @@ function loadFormData() {
                 selectCountry(data.countryCode, data.country, data.phoneCode);
                 
                 if (data.state) {
-                    setTimeout(() => {
+                    // Use requestAnimationFrame to ensure DOM updates are complete
+                    requestAnimationFrame(() => {
                         selectState(data.state);
                         
                         if (data.city) {
-                            setTimeout(() => {
+                            requestAnimationFrame(() => {
                                 selectCity(data.city);
-                            }, 100);
+                            });
                         }
-                    }, 100);
+                    });
                 }
             }
         } catch (error) {
