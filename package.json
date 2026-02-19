@@ -16,7 +16,9 @@
     "healthcare",
     "medical",
     "saas",
-    "multi-tenant"
+    "multi-tenant",
+    "stripe",
+    "payments"
   ],
   "author": "Dr Adnan Jabbar",
   "license": "MIT",
@@ -29,6 +31,9 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1"
+  },
+  "optionalDependencies": {
+    "stripe": "^17.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

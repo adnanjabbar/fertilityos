@@ -51,8 +51,10 @@ app.use('/api/finance', require('./routes/finance.routes'));
 app.use('/api/billing', require('./routes/billing.routes'));
 app.use('/api/receipts', require('./routes/receipt.routes'));
 app.use('/api/clinic', require('./routes/clinic.routes'));
+app.use('/api/clinic', require('./routes/clinic-overview.routes'));
 app.use('/api/countries', require('./routes/country.routes'));
 app.use('/api/users', require('./routes/user.routes'));
+app.use('/api/payments', require('./routes/payment.routes'));
 
 // SPA Fallback
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));

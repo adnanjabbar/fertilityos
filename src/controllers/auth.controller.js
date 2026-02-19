@@ -61,12 +61,12 @@ const registerClinic = async (req, res) => {
     // Hash password
     const passwordHash = await bcrypt.hash(adminPassword, 10);
 
-    // Create admin user
+    // Create owner user (the first user who registers the clinic becomes the owner)
     const userResult = await client.query(
       `INSERT INTO users (clinic_id, email, password_hash, full_name, role)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, email, full_name, role`,
-      [clinic.id, adminEmail, passwordHash, adminName, 'admin']
+      [clinic.id, adminEmail, passwordHash, adminName, 'owner']
     );
 
     const user = userResult.rows[0];
