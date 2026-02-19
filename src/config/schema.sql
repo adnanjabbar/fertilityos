@@ -18,6 +18,9 @@ CREATE TABLE clinics (
     license_number VARCHAR(100),
     phc_registration VARCHAR(100), -- Punjab Healthcare Commission
     subscription_plan VARCHAR(50) DEFAULT 'basic',
+    subscription_status VARCHAR(30) DEFAULT 'active', -- active, expired, cancelled, pending
+    subscription_starts_at TIMESTAMP,
+    subscription_ends_at TIMESTAMP,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
