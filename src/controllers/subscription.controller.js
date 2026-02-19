@@ -40,9 +40,10 @@ exports.createSubscription = async (req, res) => {
 
         const plan = subscriptionPlans[planType];
         if (!plan) {
+            const availablePlans = Object.keys(subscriptionPlans).join(', ');
             return res.status(400).json({ 
                 success: false, 
-                error: 'Invalid plan type. Choose from: basic, standard, premium' 
+                error: `Invalid plan type. Available plans: ${availablePlans}` 
             });
         }
 
@@ -164,9 +165,10 @@ exports.updateSubscription = async (req, res) => {
 
         const plan = subscriptionPlans[planType];
         if (!plan) {
+            const availablePlans = Object.keys(subscriptionPlans).join(', ');
             return res.status(400).json({ 
                 success: false, 
-                error: 'Invalid plan type. Choose from: basic, standard, premium' 
+                error: `Invalid plan type. Available plans: ${availablePlans}` 
             });
         }
 

@@ -140,36 +140,43 @@ exports.getInvoices = async (req, res) => {
         const { status, patientId, page = 1, limit = 20 } = req.query;
         const offset = (page - 1) * limit;
 
-        let query = `
-            SELECT i.*, p.full_name as patient_name
-            FROM invoices i
-            JOIN patients p ON i.patient_id = p.id
-            WHERE i.clinic_id = $1
-        `;
+        // Build WHERE conditions
+        let whereConditions = ['i.clinic_id = $1'];
         const params = [clinicId];
 
         if (status) {
             params.push(status);
-            query += ` AND i.status = $${params.length}`;
+            whereConditions.push(`i.status = $${params.length}`);
         }
 
         if (patientId) {
             params.push(patientId);
-            query += ` AND i.patient_id = $${params.length}`;
+            whereConditions.push(`i.patient_id = $${params.length}`);
         }
 
-        // Get count
-        const countResult = await db.query(
-            query.replace('SELECT i.*, p.full_name as patient_name', 'SELECT COUNT(*)'),
-            params
-        );
+        const whereClause = whereConditions.join(' AND ');
+
+        // Get count using dedicated count query
+        const countQuery = `
+            SELECT COUNT(*) 
+            FROM invoices i 
+            JOIN patients p ON i.patient_id = p.id 
+            WHERE ${whereClause}
+        `;
+        const countResult = await db.query(countQuery, params);
         const totalCount = parseInt(countResult.rows[0].count);
 
-        // Add pagination
-        query += ` ORDER BY i.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+        // Get paginated results
+        const selectQuery = `
+            SELECT i.*, p.full_name as patient_name
+            FROM invoices i
+            JOIN patients p ON i.patient_id = p.id
+            WHERE ${whereClause}
+            ORDER BY i.created_at DESC 
+            LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+        `;
         params.push(limit, offset);
-
-        const result = await db.query(query, params);
+        const result = await db.query(selectQuery, params);
 
         res.json({
             success: true,
