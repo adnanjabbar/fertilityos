@@ -70,26 +70,67 @@
                         <input type="text" id="clinicCode" name="clinicCode" placeholder="Optional">
                     </div>
                     
+                    <div class="form-group">
+                        <label for="country">Country <span class="required">*</span></label>
+                        <div class="custom-select-wrapper">
+                            <div class="custom-select" id="countrySelectWrapper">
+                                <div class="selected-option" id="countrySelected">
+                                    <span class="placeholder">🌍 Select Country</span>
+                                </div>
+                                <div class="options-container" id="countryOptions">
+                                    <div class="search-box">
+                                        <input type="text" id="countrySearch" placeholder="Search countries..." autocomplete="off">
+                                    </div>
+                                    <div class="options-list" id="countryList"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="country" name="country" required>
+                        <input type="hidden" id="countryCode" name="countryCode">
+                        <input type="hidden" id="phoneCode" name="phoneCode">
+                    </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="country">Country <span class="required">*</span></label>
-                            <select id="country" name="country" required>
-                                <option value="">Select Country</option>
-                                <option value="Pakistan">Pakistan</option>
-                                <option value="India">India</option>
-                                <option value="United States">United States</option>
-                                <option value="United Kingdom">United Kingdom</option>
-                                <option value="Canada">Canada</option>
-                                <option value="Australia">Australia</option>
-                                <option value="UAE">United Arab Emirates</option>
-                                <option value="Saudi Arabia">Saudi Arabia</option>
-                            </select>
+                            <label for="state">State/Province <span class="required">*</span></label>
+                            <div class="custom-select-wrapper">
+                                <div class="custom-select" id="stateSelectWrapper" disabled>
+                                    <div class="selected-option" id="stateSelected">
+                                        <span class="placeholder">Select State/Province</span>
+                                    </div>
+                                    <div class="options-container" id="stateOptions">
+                                        <div class="search-box">
+                                            <input type="text" id="stateSearch" placeholder="Search states..." autocomplete="off">
+                                        </div>
+                                        <div class="options-list" id="stateList"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="state" name="state" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="city">City <span class="required">*</span></label>
-                            <input type="text" id="city" name="city" required placeholder="e.g., Lahore">
+                            <div class="custom-select-wrapper">
+                                <div class="custom-select" id="citySelectWrapper" disabled>
+                                    <div class="selected-option" id="citySelected">
+                                        <span class="placeholder">Select City</span>
+                                    </div>
+                                    <div class="options-container" id="cityOptions">
+                                        <div class="search-box">
+                                            <input type="text" id="citySearch" placeholder="Search cities..." autocomplete="off">
+                                        </div>
+                                        <div class="options-list" id="cityList"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="city" name="city" required>
                         </div>
+                    </div>
+                    
+                    <div class="geographic-summary" id="geographicSummary" style="display: none;">
+                        <div class="summary-label">Selected Location:</div>
+                        <div class="summary-value" id="geographicSummaryText"></div>
                     </div>
                     
                     <div class="form-group">
@@ -412,6 +453,9 @@
                 <div class="spinner"></div>
                 <p>Processing...</p>
             </div>
+            
+            <!-- Dropdown Backdrop for Mobile -->
+            <div class="dropdown-backdrop" id="dropdownBackdrop"></div>
         </div>
 
         <!-- Footer -->
@@ -423,6 +467,7 @@
 
     <!-- Include Stripe.js -->
     <script src="https://js.stripe.com/v3/"></script>
+    <script src="/js/countries-data.js"></script>
     <script src="/js/register-wizard.js"></script>
 </body>
 </html>

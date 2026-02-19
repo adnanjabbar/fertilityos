@@ -13,10 +13,18 @@ let subdomainValid = false;
 let subdomainTimeout = null;
 const SUBDOMAIN_CHECK_DEBOUNCE_MS = 400;
 
+// Geographic selector state
+let selectedCountry = null;
+let selectedState = null;
+let selectedCity = null;
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Stripe (will check for publishable key)
     initializeStripe();
+    
+    // Initialize geographic selectors
+    initializeGeographicSelectors();
     
     // Load saved form data
     loadFormData();
@@ -54,6 +62,385 @@ async function initializeStripe() {
         }
     } catch (error) {
         console.error('Stripe initialization error:', error);
+    }
+}
+
+/**
+ * Initialize Geographic Selectors
+ */
+function initializeGeographicSelectors() {
+    // Initialize country selector
+    const countryWrapper = document.getElementById('countrySelectWrapper');
+    const countryList = document.getElementById('countryList');
+    const countrySearch = document.getElementById('countrySearch');
+    
+    // Populate countries
+    populateCountries();
+    
+    // Country selector events
+    countryWrapper.addEventListener('click', function(e) {
+        if (!countryWrapper.hasAttribute('disabled')) {
+            toggleDropdown('countrySelectWrapper');
+        }
+    });
+    
+    countrySearch.addEventListener('input', function(e) {
+        e.stopPropagation();
+        filterCountries(e.target.value);
+    });
+    
+    countrySearch.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    // State selector events
+    const stateWrapper = document.getElementById('stateSelectWrapper');
+    const stateSearch = document.getElementById('stateSearch');
+    
+    stateWrapper.addEventListener('click', function(e) {
+        if (!stateWrapper.hasAttribute('disabled')) {
+            toggleDropdown('stateSelectWrapper');
+        }
+    });
+    
+    stateSearch.addEventListener('input', function(e) {
+        e.stopPropagation();
+        filterStates(e.target.value);
+    });
+    
+    stateSearch.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    // City selector events
+    const cityWrapper = document.getElementById('citySelectWrapper');
+    const citySearch = document.getElementById('citySearch');
+    
+    cityWrapper.addEventListener('click', function(e) {
+        if (!cityWrapper.hasAttribute('disabled')) {
+            toggleDropdown('citySelectWrapper');
+        }
+    });
+    
+    citySearch.addEventListener('input', function(e) {
+        e.stopPropagation();
+        filterCities(e.target.value);
+    });
+    
+    citySearch.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-select')) {
+            closeAllDropdowns();
+        }
+    });
+}
+
+/**
+ * Populate countries list
+ */
+function populateCountries(searchTerm = '') {
+    const countryList = document.getElementById('countryList');
+    const countries = searchTerm 
+        ? GeoDataHelper.searchCountries(searchTerm)
+        : GeoDataHelper.getAllCountries();
+    
+    if (countries.length === 0) {
+        countryList.innerHTML = '<div class="no-results">No countries found</div>';
+        return;
+    }
+    
+    countryList.innerHTML = countries.map(country => `
+        <div class="option-item" data-code="${country.code}" data-name="${country.name}" data-phone="${country.phoneCode}">
+            <span class="flag">${country.flag}</span>
+            <div class="option-text">
+                <span class="option-name">${country.name}</span>
+                <span class="option-code">${country.phoneCode}</span>
+            </div>
+            ${country.popular ? '<span class="popular-badge">POPULAR</span>' : ''}
+        </div>
+    `).join('');
+    
+    // Add click listeners to options
+    countryList.querySelectorAll('.option-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            selectCountry(this.dataset.code, this.dataset.name, this.dataset.phone);
+        });
+    });
+}
+
+/**
+ * Filter countries by search term
+ */
+function filterCountries(searchTerm) {
+    populateCountries(searchTerm);
+}
+
+/**
+ * Select a country
+ */
+function selectCountry(code, name, phoneCode) {
+    selectedCountry = { code, name, phoneCode };
+    selectedState = null;
+    selectedCity = null;
+    
+    // Update hidden fields
+    document.getElementById('country').value = name;
+    document.getElementById('countryCode').value = code;
+    document.getElementById('phoneCode').value = phoneCode;
+    
+    // Update display
+    const selectedOption = document.getElementById('countrySelected');
+    const country = GeoDataHelper.getCountryByCode(code);
+    selectedOption.innerHTML = `
+        <span class="flag-text">
+            <span class="flag">${country.flag}</span>
+            <div class="country-info">
+                <span class="country-name">${name}</span>
+                <span class="phone-code">${phoneCode}</span>
+            </div>
+        </span>
+    `;
+    
+    // Close dropdown
+    closeAllDropdowns();
+    
+    // Reset and enable state selector
+    resetStateSelector();
+    populateStates(code);
+    document.getElementById('stateSelectWrapper').removeAttribute('disabled');
+    
+    // Reset and disable city selector
+    resetCitySelector();
+    document.getElementById('citySelectWrapper').setAttribute('disabled', 'disabled');
+    
+    // Update summary
+    updateGeographicSummary();
+}
+
+/**
+ * Populate states list
+ */
+function populateStates(countryCode, searchTerm = '') {
+    const stateList = document.getElementById('stateList');
+    const states = searchTerm
+        ? GeoDataHelper.searchStates(countryCode, searchTerm)
+        : GeoDataHelper.getStatesForCountry(countryCode);
+    
+    if (states.length === 0) {
+        stateList.innerHTML = '<div class="no-results">No states/provinces found</div>';
+        return;
+    }
+    
+    stateList.innerHTML = states.map(state => `
+        <div class="option-item" data-name="${state.name}" data-code="${state.code}">
+            <div class="option-text">
+                <span class="option-name">${state.name}</span>
+                <span class="option-code">${state.code}</span>
+            </div>
+        </div>
+    `).join('');
+    
+    // Add click listeners
+    stateList.querySelectorAll('.option-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            selectState(this.dataset.name);
+        });
+    });
+}
+
+/**
+ * Filter states by search term
+ */
+function filterStates(searchTerm) {
+    if (selectedCountry) {
+        populateStates(selectedCountry.code, searchTerm);
+    }
+}
+
+/**
+ * Select a state
+ */
+function selectState(name) {
+    selectedState = { name };
+    selectedCity = null;
+    
+    // Update hidden field
+    document.getElementById('state').value = name;
+    
+    // Update display
+    const selectedOption = document.getElementById('stateSelected');
+    selectedOption.innerHTML = `<span class="flag-text">${name}</span>`;
+    
+    // Close dropdown
+    closeAllDropdowns();
+    
+    // Reset and enable city selector
+    resetCitySelector();
+    populateCities(selectedCountry.code, name);
+    document.getElementById('citySelectWrapper').removeAttribute('disabled');
+    
+    // Update summary
+    updateGeographicSummary();
+}
+
+/**
+ * Populate cities list
+ */
+function populateCities(countryCode, stateName, searchTerm = '') {
+    const cityList = document.getElementById('cityList');
+    const cities = searchTerm
+        ? GeoDataHelper.searchCities(countryCode, stateName, searchTerm)
+        : GeoDataHelper.getCitiesForState(countryCode, stateName);
+    
+    if (cities.length === 0) {
+        cityList.innerHTML = '<div class="no-results">No cities found</div>';
+        return;
+    }
+    
+    cityList.innerHTML = cities.map(city => `
+        <div class="option-item" data-name="${city}">
+            <div class="option-text">
+                <span class="option-name">${city}</span>
+            </div>
+        </div>
+    `).join('');
+    
+    // Add click listeners
+    cityList.querySelectorAll('.option-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            selectCity(this.dataset.name);
+        });
+    });
+}
+
+/**
+ * Filter cities by search term
+ */
+function filterCities(searchTerm) {
+    if (selectedCountry && selectedState) {
+        populateCities(selectedCountry.code, selectedState.name, searchTerm);
+    }
+}
+
+/**
+ * Select a city
+ */
+function selectCity(name) {
+    selectedCity = { name };
+    
+    // Update hidden field
+    document.getElementById('city').value = name;
+    
+    // Update display
+    const selectedOption = document.getElementById('citySelected');
+    selectedOption.innerHTML = `<span class="flag-text">${name}</span>`;
+    
+    // Close dropdown
+    closeAllDropdowns();
+    
+    // Update summary
+    updateGeographicSummary();
+}
+
+/**
+ * Toggle dropdown open/close
+ */
+function toggleDropdown(wrapperId) {
+    const wrapper = document.getElementById(wrapperId);
+    const isOpen = wrapper.classList.contains('open');
+    
+    // Close all dropdowns first
+    closeAllDropdowns();
+    
+    // Toggle this dropdown
+    if (!isOpen) {
+        wrapper.classList.add('open');
+        
+        // Show backdrop on mobile
+        if (window.innerWidth <= 768) {
+            const backdrop = document.getElementById('dropdownBackdrop');
+            if (backdrop) {
+                backdrop.classList.add('show');
+                backdrop.onclick = closeAllDropdowns;
+            }
+        }
+        
+        // Focus search input
+        const searchInput = wrapper.querySelector('.search-box input');
+        setTimeout(() => searchInput.focus(), 100);
+    }
+}
+
+/**
+ * Close all dropdowns
+ */
+function closeAllDropdowns() {
+    document.querySelectorAll('.custom-select').forEach(select => {
+        select.classList.remove('open');
+    });
+    
+    // Hide backdrop
+    const backdrop = document.getElementById('dropdownBackdrop');
+    if (backdrop) {
+        backdrop.classList.remove('show');
+        backdrop.onclick = null;
+    }
+    
+    // Clear search inputs
+    document.querySelectorAll('.search-box input').forEach(input => {
+        input.value = '';
+    });
+}
+
+/**
+ * Reset state selector
+ */
+function resetStateSelector() {
+    selectedState = null;
+    document.getElementById('state').value = '';
+    document.getElementById('stateSelected').innerHTML = '<span class="placeholder">Select State/Province</span>';
+    document.getElementById('stateList').innerHTML = '';
+    document.getElementById('stateSearch').value = '';
+}
+
+/**
+ * Reset city selector
+ */
+function resetCitySelector() {
+    selectedCity = null;
+    document.getElementById('city').value = '';
+    document.getElementById('citySelected').innerHTML = '<span class="placeholder">Select City</span>';
+    document.getElementById('cityList').innerHTML = '';
+    document.getElementById('citySearch').value = '';
+}
+
+/**
+ * Update geographic summary
+ */
+function updateGeographicSummary() {
+    const summary = document.getElementById('geographicSummary');
+    const summaryText = document.getElementById('geographicSummaryText');
+    
+    if (selectedCountry) {
+        const parts = [];
+        if (selectedCity) parts.push(selectedCity.name);
+        if (selectedState) parts.push(selectedState.name);
+        if (selectedCountry) {
+            const country = GeoDataHelper.getCountryByCode(selectedCountry.code);
+            parts.push(`${country.flag} ${selectedCountry.name}`);
+        }
+        
+        summaryText.innerHTML = parts.join(' • ');
+        summary.style.display = 'block';
+    } else {
+        summary.style.display = 'none';
     }
 }
 
@@ -229,6 +616,7 @@ function validateStep1() {
     const clinicName = document.getElementById('clinicName').value.trim();
     const subdomain = document.getElementById('subdomain').value.trim();
     const country = document.getElementById('country').value;
+    const state = document.getElementById('state').value;
     const city = document.getElementById('city').value.trim();
     
     if (!clinicName) {
@@ -249,8 +637,13 @@ function validateStep1() {
         isValid = false;
     }
     
+    if (!state) {
+        alert('Please select a state/province');
+        isValid = false;
+    }
+    
     if (!city) {
-        alert('City is required');
+        alert('Please select a city');
         isValid = false;
     }
     
@@ -584,6 +977,9 @@ async function submitForm(e) {
             subdomain: document.getElementById('subdomain').value.trim(),
             clinicCode: document.getElementById('clinicCode').value.trim() || null,
             country: document.getElementById('country').value,
+            countryCode: document.getElementById('countryCode').value,
+            phoneCode: document.getElementById('phoneCode').value,
+            state: document.getElementById('state').value,
             city: document.getElementById('city').value.trim(),
             logoUrl: document.getElementById('logoUrl').value.trim() || null,
             
@@ -682,6 +1078,9 @@ function saveFormData() {
         subdomain: document.getElementById('subdomain').value,
         clinicCode: document.getElementById('clinicCode').value,
         country: document.getElementById('country').value,
+        countryCode: document.getElementById('countryCode').value,
+        phoneCode: document.getElementById('phoneCode').value,
+        state: document.getElementById('state').value,
         city: document.getElementById('city').value,
         logoUrl: document.getElementById('logoUrl').value,
         adminName: document.getElementById('adminName').value,
@@ -715,6 +1114,24 @@ function loadFormData() {
                     element.value = data[key];
                 }
             });
+            
+            // Restore geographic selections if saved
+            if (data.countryCode && data.country && data.phoneCode) {
+                selectCountry(data.countryCode, data.country, data.phoneCode);
+                
+                if (data.state) {
+                    // Use requestAnimationFrame to ensure DOM updates are complete
+                    requestAnimationFrame(() => {
+                        selectState(data.state);
+                        
+                        if (data.city) {
+                            requestAnimationFrame(() => {
+                                selectCity(data.city);
+                            });
+                        }
+                    });
+                }
+            }
         } catch (error) {
             console.error('Error loading saved form data:', error);
         }

@@ -857,6 +857,248 @@ textarea.error {
     font-size: 12px;
 }
 
+/* Custom Select Dropdowns */
+.custom-select-wrapper {
+    position: relative;
+}
+
+.custom-select {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+
+.custom-select[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Backdrop for mobile dropdowns */
+.dropdown-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.dropdown-backdrop.show {
+    display: block;
+}
+
+.selected-option {
+    padding: 12px 40px 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+    transition: all 0.2s;
+    position: relative;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+}
+
+.custom-select:not([disabled]) .selected-option:hover {
+    border-color: #667eea;
+}
+
+.custom-select.open .selected-option {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.selected-option::after {
+    content: '▼';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: #6b7280;
+    transition: transform 0.2s;
+}
+
+.custom-select.open .selected-option::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.selected-option .placeholder {
+    color: #9ca3af;
+}
+
+.selected-option .flag-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #1f2937;
+}
+
+.selected-option .flag {
+    font-size: 20px;
+}
+
+.selected-option .country-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.selected-option .country-name {
+    font-weight: 500;
+}
+
+.selected-option .phone-code {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.options-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #667eea;
+    border-top: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    max-height: 300px;
+    overflow: hidden;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.custom-select.open .options-container {
+    display: block;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.search-box {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.options-list {
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.option-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.option-item:hover {
+    background: #f3f4f6;
+}
+
+.option-item.selected {
+    background: #eff6ff;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.option-item .flag {
+    font-size: 18px;
+    min-width: 24px;
+}
+
+.option-item .option-text {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.option-item .option-name {
+    font-size: 14px;
+}
+
+.option-item .option-code {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.option-item .popular-badge {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+/* Geographic Summary */
+.geographic-summary {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.geographic-summary .summary-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.geographic-summary .summary-value {
+    font-size: 15px;
+    color: #1f2937;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
@@ -900,6 +1142,37 @@ textarea.error {
     .btn-primary,
     .btn-secondary {
         width: 100%;
+    }
+
+    /* Mobile optimizations for custom select */
+    .options-container {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-height: 60vh;
+        border-radius: 20px 20px 0 0;
+        border: none;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .custom-select.open .options-container {
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+
+    .option-item {
+        min-height: 44px;
+        padding: 14px 16px;
     }
 }
 
