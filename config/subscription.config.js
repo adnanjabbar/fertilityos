@@ -1,27 +1,123 @@
+/**
+ * FertilityOS Subscription Plans Configuration
+ * Defines available subscription tiers, pricing, and included modules
+ */
+
 const subscriptionPlans = {
     basic: {
-        price: 10,
-        modules: ['Basic Support', 'Access to Documentation'],
+        name: 'Basic',
+        description: 'Essential features for small clinics',
+        price: 99,
+        currency: 'USD',
+        modules: [
+            'Patient Management',
+            'Basic Scheduling',
+            'Document Storage (5GB)',
+            'Email Support'
+        ],
         billingCycle: 'monthly',
+        maxUsers: 5,
+        maxPatients: 100,
         tiers: [
-            { name: 'Basic Tier', features: ['Feature A', 'Feature B'] }
+            { 
+                name: 'Core Features', 
+                features: ['Patient Registration', 'Appointment Booking', 'Basic Reports'] 
+            }
         ]
     },
     standard: {
-        price: 25,
-        modules: ['Standard Support', 'Access to Documentation', 'Community Forum'],
+        name: 'Standard',
+        description: 'Comprehensive features for growing clinics',
+        price: 249,
+        currency: 'USD',
+        modules: [
+            'Patient Management',
+            'Advanced Scheduling',
+            'IVF Cycle Tracking',
+            'Lab Management',
+            'Document Storage (25GB)',
+            'Email & Phone Support',
+            'Basic Analytics'
+        ],
         billingCycle: 'monthly',
+        maxUsers: 15,
+        maxPatients: 500,
         tiers: [
-            { name: 'Standard Tier', features: ['Feature A', 'Feature B', 'Feature C'] },
-            { name: 'Advanced Tier', features: ['Feature D'] }
+            { 
+                name: 'Core Features', 
+                features: ['Patient Registration', 'Appointment Booking', 'Basic Reports'] 
+            },
+            { 
+                name: 'Clinical Features', 
+                features: ['IVF Cycle Management', 'Embryo Tracking', 'Lab Results', 'Medication Management'] 
+            }
         ]
     },
     premium: {
-        price: 50,
-        modules: ['Premium Support', 'Access to Documentation', '1-on-1 Consultation'],
-        billingCycle: 'quarterly',
+        name: 'Premium',
+        description: 'Full-featured solution for established fertility centers',
+        price: 499,
+        currency: 'USD',
+        modules: [
+            'Patient Management',
+            'Advanced Scheduling',
+            'IVF Cycle Tracking',
+            'Lab Management',
+            'Embryo Tracking',
+            'Financial Management',
+            'Inventory Management',
+            'Document Storage (100GB)',
+            'Priority Support',
+            'Advanced Analytics',
+            'Custom Reports',
+            'API Access'
+        ],
+        billingCycle: 'monthly',
+        maxUsers: -1, // Unlimited
+        maxPatients: -1, // Unlimited
         tiers: [
-            { name: 'Premium Tier', features: ['Feature A', 'Feature B', 'Feature C', 'Feature D'] }
+            { 
+                name: 'Core Features', 
+                features: ['Patient Registration', 'Appointment Booking', 'Basic Reports'] 
+            },
+            { 
+                name: 'Clinical Features', 
+                features: ['IVF Cycle Management', 'Embryo Tracking', 'Lab Results', 'Medication Management'] 
+            },
+            { 
+                name: 'Business Features', 
+                features: ['Financial Reports', 'Revenue Analytics', 'Inventory Control', 'Custom Integrations'] 
+            }
+        ]
+    },
+    enterprise: {
+        name: 'Enterprise',
+        description: 'Custom solution for multi-location fertility networks',
+        price: null, // Contact for pricing
+        currency: 'USD',
+        modules: [
+            'All Premium Features',
+            'Multi-location Support',
+            'White-label Option',
+            'Dedicated Account Manager',
+            'Custom Development',
+            'SLA Guarantee',
+            'On-premise Option',
+            'Compliance Support',
+            'Training & Onboarding'
+        ],
+        billingCycle: 'yearly',
+        maxUsers: -1,
+        maxPatients: -1,
+        tiers: [
+            { 
+                name: 'Everything in Premium', 
+                features: ['All Premium Features'] 
+            },
+            { 
+                name: 'Enterprise Features', 
+                features: ['Multi-clinic Dashboard', 'Centralized Reporting', 'Role-based Access', 'Audit Trails'] 
+            }
         ]
     }
 };

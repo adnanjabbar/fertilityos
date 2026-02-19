@@ -2,43 +2,28 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticateToken, requireRole } = require('../middleware/auth.middleware');
+const subscriptionController = require('../controllers/subscription.controller');
 
-// Middleware example for authentication
-const authenticate = require('../middleware/auth');
+// Get available subscription plans (public endpoint)
+router.get('/plans', subscriptionController.getPlans);
 
-// Endpoint to create a new subscription
-router.post('/subscriptions', authenticate, (req, res) => {
-    // Implementation to create a subscription
-});
+// Create a new subscription for the clinic
+router.post('/subscriptions', authenticateToken, requireRole('admin'), subscriptionController.createSubscription);
 
-// Endpoint to retrieve a user's subscription details
-router.get('/subscriptions/:userId', authenticate, (req, res) => {
-    // Implementation to get subscription details
-});
+// Get subscription details for a clinic
+router.get('/subscriptions', authenticateToken, subscriptionController.getSubscriptionDetails);
+router.get('/subscriptions/:clinicId', authenticateToken, requireRole('admin'), subscriptionController.getSubscriptionDetails);
 
-// Endpoint to update subscription details
-router.put('/subscriptions/:subscriptionId', authenticate, (req, res) => {
-    // Implementation to update subscription
-});
+// Update subscription
+router.put('/subscriptions', authenticateToken, requireRole('admin'), subscriptionController.updateSubscription);
+router.put('/subscriptions/:clinicId', authenticateToken, requireRole('admin'), subscriptionController.updateSubscription);
 
-// Endpoint to cancel a subscription
-router.delete('/subscriptions/:subscriptionId', authenticate, (req, res) => {
-    // Implementation to cancel subscription
-});
+// Cancel subscription
+router.delete('/subscriptions', authenticateToken, requireRole('admin'), subscriptionController.cancelSubscription);
+router.delete('/subscriptions/:clinicId', authenticateToken, requireRole('admin'), subscriptionController.cancelSubscription);
 
-// Endpoint to handle billing information
-router.post('/billing', authenticate, (req, res) => {
-    // Implementation to manage billing info
-});
-
-// Endpoint for processing payments
-router.post('/payments', authenticate, (req, res) => {
-    // Implementation to process payment
-});
-
-// Endpoint to access modules based on subscription
-router.get('/modules', authenticate, (req, res) => {
-    // Implementation for accessing modules
-});
+// Get modules based on subscription
+router.get('/modules', authenticateToken, subscriptionController.getModules);
 
 module.exports = router;
