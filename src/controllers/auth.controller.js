@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
+const emailService = require('../services/email.service');
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -11,29 +12,47 @@ const generateToken = (userId) => {
   );
 };
 
-// Register new clinic (onboarding)
+// Register new clinic (onboarding) - Enhanced for multi-step wizard
 const registerClinic = async (req, res) => {
   const client = await db.pool.connect();
   
   try {
     const {
+      // Step 1: Clinic Basics
       subdomain,
       clinicName,
       clinicCode,
+      country,
+      city,
+      logoUrl,
+      
+      // Step 2: Admin Credentials
+      adminName,
+      adminEmail,
+      adminPassword,
+      
+      // Step 3: Clinic Details & Compliance
       email,
       phone,
       address,
-      city,
       licenseNumber,
       phcRegistration,
-      adminName,
-      adminEmail,
-      adminPassword
+      regulatoryAuthority,
+      practiceType,
+      yearsInOperation,
+      
+      // Step 4: Subscription & Payment
+      billingCycle,
+      planName,
+      paymentIntentId
     } = req.body;
 
     // Validation
-    if (!subdomain || !clinicName || !email || !adminName || !adminEmail || !adminPassword) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!subdomain || !clinicName || !adminName || !adminEmail || !adminPassword) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Missing required fields' 
+      });
     }
 
     // Check if subdomain already exists
@@ -43,17 +62,45 @@ const registerClinic = async (req, res) => {
     );
 
     if (subdomainCheck.rows.length > 0) {
-      return res.status(409).json({ error: 'Subdomain already taken' });
+      return res.status(409).json({ 
+        success: false,
+        error: 'Subdomain already taken' 
+      });
+    }
+
+    // Check if admin email already exists
+    const emailCheck = await db.query(
+      'SELECT id FROM users WHERE email = $1',
+      [adminEmail]
+    );
+
+    if (emailCheck.rows.length > 0) {
+      return res.status(409).json({ 
+        success: false,
+        error: 'Email already registered' 
+      });
     }
 
     await client.query('BEGIN');
 
-    // Create clinic
+    // Create clinic with enhanced fields
+    // Note: Using adminEmail as fallback for clinic email when not provided
     const clinicResult = await client.query(
-      `INSERT INTO clinics (subdomain, clinic_name, clinic_code, email, phone, address, city, license_number, phc_registration)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING id, subdomain, clinic_name, clinic_code`,
-      [subdomain, clinicName, clinicCode, email, phone, address, city, licenseNumber, phcRegistration]
+      `INSERT INTO clinics (
+        subdomain, clinic_name, clinic_code, email, phone, address, 
+        city, country, license_number, phc_registration, 
+        regulatory_authority, practice_type, years_in_operation, 
+        logo_url, billing_cycle, plan_name
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      RETURNING id, subdomain, clinic_name, clinic_code`,
+      [
+        subdomain, clinicName, clinicCode || null, email || adminEmail, 
+        phone, address, city, country || 'Pakistan', licenseNumber, 
+        phcRegistration, regulatoryAuthority, practiceType, 
+        yearsInOperation, logoUrl, billingCycle || 'monthly', 
+        planName || 'Starter'
+      ]
     );
 
     const clinic = clinicResult.rows[0];
@@ -61,12 +108,15 @@ const registerClinic = async (req, res) => {
     // Hash password
     const passwordHash = await bcrypt.hash(adminPassword, 10);
 
-    // Create owner user (the first user who registers the clinic becomes the owner)
+    // Create owner user with email_verified = false initially
     const userResult = await client.query(
-      `INSERT INTO users (clinic_id, email, password_hash, full_name, role)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, email, full_name, role`,
-      [clinic.id, adminEmail, passwordHash, adminName, 'owner']
+      `INSERT INTO users (
+        clinic_id, email, password_hash, full_name, role, 
+        is_active, email_verified
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id, email, full_name, role`,
+      [clinic.id, adminEmail, passwordHash, adminName, 'owner', false, false]
     );
 
     const user = userResult.rows[0];
@@ -80,10 +130,16 @@ const registerClinic = async (req, res) => {
 
     await client.query('COMMIT');
 
+    // Send verification email asynchronously (don't wait for it)
+    emailService.sendVerificationEmail(user.id, adminEmail, adminName)
+      .then(() => console.log('Verification email sent to:', adminEmail))
+      .catch(err => console.error('Error sending verification email:', err));
+
     // Generate token
     const token = generateToken(user.id);
 
     res.status(201).json({
+      success: true,
       message: 'Clinic registered successfully',
       clinic: {
         id: clinic.id,
@@ -95,10 +151,12 @@ const registerClinic = async (req, res) => {
         id: user.id,
         name: user.full_name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        emailVerified: false
       },
       token,
-      accessUrl: `http://${subdomain}.ivfsoftware.com` // Or your actual domain
+      accessUrl: `http://${subdomain}.ivfsoftware.com`,
+      requiresEmailVerification: true
     });
 
   } catch (error) {
@@ -106,10 +164,16 @@ const registerClinic = async (req, res) => {
     console.error('Registration error:', error);
     
     if (error.code === '23505') { // Unique violation
-      return res.status(409).json({ error: 'Email or clinic code already exists' });
+      return res.status(409).json({ 
+        success: false,
+        error: 'Email or clinic code already exists' 
+      });
     }
     
-    res.status(500).json({ error: 'Error registering clinic' });
+    res.status(500).json({ 
+      success: false,
+      error: 'Error registering clinic' 
+    });
   } finally {
     client.release();
   }

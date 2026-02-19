@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Clinic - FertilityOS</title>
+    <link rel="stylesheet" href="/css/register-wizard.css">
+</head>
+<body>
+    <div class="wizard-container">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Clinic Basics</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Admin Credentials</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Clinic Details</div>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Subscription</div>
+                </div>
+                <div class="progress-step" data-step="5">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">Confirmation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wizard Form -->
+        <div class="wizard-card">
+            <form id="wizardForm">
+                
+                <!-- Step 1: Clinic Basics -->
+                <div class="wizard-step active" data-step="1">
+                    <h2>Clinic Basics</h2>
+                    <p class="step-subtitle">Let's start with the essential information about your clinic</p>
+                    
+                    <div class="form-group">
+                        <label for="clinicName">Clinic Name <span class="required">*</span></label>
+                        <input type="text" id="clinicName" name="clinicName" required placeholder="e.g., ABC Fertility Center">
+                        <div class="error-message" id="clinicNameError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subdomain">
+                            Clinic Subdomain <span class="required">*</span>
+                            <span class="tooltip" data-tooltip="Your unique clinic URL (lowercase, letters, numbers, hyphens only)">ⓘ</span>
+                        </label>
+                        <div class="subdomain-input-group">
+                            <input type="text" id="subdomain" name="subdomain" required placeholder="myclinic">
+                            <span class="subdomain-suffix">.fertilityos.com</span>
+                        </div>
+                        <div class="subdomain-status" id="subdomainStatus"></div>
+                        <div class="error-message" id="subdomainError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clinicCode">Clinic Registration Number</label>
+                        <input type="text" id="clinicCode" name="clinicCode" placeholder="Optional">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="country">Country <span class="required">*</span></label>
+                            <select id="country" name="country" required>
+                                <option value="">Select Country</option>
+                                <option value="Pakistan">Pakistan</option>
+                                <option value="India">India</option>
+                                <option value="United States">United States</option>
+                                <option value="United Kingdom">United Kingdom</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Australia">Australia</option>
+                                <option value="UAE">United Arab Emirates</option>
+                                <option value="Saudi Arabia">Saudi Arabia</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="city">City <span class="required">*</span></label>
+                            <input type="text" id="city" name="city" required placeholder="e.g., Lahore">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="logoUrl">Professional Logo URL (Optional)</label>
+                        <input type="url" id="logoUrl" name="logoUrl" placeholder="https://example.com/logo.png">
+                        <small class="form-hint">Paste a URL to your clinic's logo image</small>
+                    </div>
+                </div>
+
+                <!-- Step 2: Admin Credentials -->
+                <div class="wizard-step" data-step="2">
+                    <h2>Admin Credentials</h2>
+                    <p class="step-subtitle">Create your admin account to manage your clinic</p>
+                    
+                    <div class="form-group">
+                        <label for="adminName">Admin Full Name <span class="required">*</span></label>
+                        <input type="text" id="adminName" name="adminName" required placeholder="Dr. John Doe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminEmail">Admin Email <span class="required">*</span></label>
+                        <input type="email" id="adminEmail" name="adminEmail" required placeholder="admin@example.com">
+                        <div class="error-message" id="adminEmailError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminPassword">Password <span class="required">*</span></label>
+                        <div class="password-input-group">
+                            <input type="password" id="adminPassword" name="adminPassword" required placeholder="Create a strong password">
+                            <button type="button" class="toggle-password" data-target="adminPassword">
+                                <span class="eye-icon">👁️</span>
+                            </button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <span class="strength-text" id="strengthText">Password strength</span>
+                        </div>
+                        <div class="password-requirements">
+                            <small>Password must contain:</small>
+                            <ul>
+                                <li id="req-length">At least 8 characters</li>
+                                <li id="req-uppercase">One uppercase letter</li>
+                                <li id="req-lowercase">One lowercase letter</li>
+                                <li id="req-number">One number</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+                        <div class="password-input-group">
+                            <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Re-enter your password">
+                            <button type="button" class="toggle-password" data-target="confirmPassword">
+                                <span class="eye-icon">👁️</span>
+                            </button>
+                        </div>
+                        <div class="error-message" id="confirmPasswordError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="termsAccepted" name="termsAccepted" required>
+                            <span>I agree to the <a href="#" target="_blank">Terms & Conditions</a> and <a href="#" target="_blank">Privacy Policy</a></span>
+                        </label>
+                        <div class="error-message" id="termsError"></div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Clinic Details & Compliance -->
+                <div class="wizard-step" data-step="3">
+                    <h2>Clinic Details & Compliance</h2>
+                    <p class="step-subtitle">Help us understand your clinic better</p>
+                    
+                    <div class="form-group">
+                        <label for="address">Clinic Address</label>
+                        <textarea id="address" name="address" rows="3" placeholder="Full clinic address"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Contact Phone</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Clinic Email</label>
+                            <input type="email" id="email" name="email" placeholder="info@clinic.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="licenseNumber">License Number</label>
+                        <input type="text" id="licenseNumber" name="licenseNumber" placeholder="e.g., LIC-12345">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regulatoryAuthority">Regulatory Authority</label>
+                        <select id="regulatoryAuthority" name="regulatoryAuthority">
+                            <option value="">Select Authority</option>
+                            <option value="Punjab Healthcare Commission">Punjab Healthcare Commission (PHC)</option>
+                            <option value="FDA">FDA (United States)</option>
+                            <option value="HFEA">HFEA (United Kingdom)</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phcRegistration">PHC Registration/Accreditation</label>
+                        <input type="text" id="phcRegistration" name="phcRegistration" placeholder="Optional">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="practiceType">Practice Type</label>
+                        <select id="practiceType" name="practiceType">
+                            <option value="">Select Type</option>
+                            <option value="IVF Center">IVF Center</option>
+                            <option value="Fertility Clinic">Fertility Clinic</option>
+                            <option value="Lab">Laboratory</option>
+                            <option value="Multi-specialty">Multi-specialty Clinic</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="yearsInOperation">Years in Operation</label>
+                        <input type="number" id="yearsInOperation" name="yearsInOperation" min="0" max="100" placeholder="e.g., 5">
+                    </div>
+                </div>
+
+                <!-- Step 4: Subscription & Payment -->
+                <div class="wizard-step" data-step="4">
+                    <h2>Subscription & Payment</h2>
+                    <p class="step-subtitle">Choose a plan that fits your clinic's needs</p>
+                    
+                    <!-- Billing Cycle Selector -->
+                    <div class="billing-cycle-selector">
+                        <button type="button" class="cycle-btn active" data-cycle="monthly">Monthly</button>
+                        <button type="button" class="cycle-btn" data-cycle="quarterly">
+                            Quarterly
+                            <span class="savings-badge">Save 10%</span>
+                        </button>
+                        <button type="button" class="cycle-btn" data-cycle="yearly">
+                            Yearly
+                            <span class="savings-badge">Save 25%</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Plan Selection -->
+                    <div class="pricing-plans">
+                        <div class="plan-card" data-plan="Starter">
+                            <div class="plan-header">
+                                <h3>Starter</h3>
+                                <div class="plan-price">
+                                    <span class="currency">$</span>
+                                    <span class="amount" data-monthly="20" data-quarterly="18" data-yearly="15">20</span>
+                                    <span class="period">/month</span>
+                                </div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>✓ Basic patient management</li>
+                                <li>✓ Up to 50 patients/month</li>
+                                <li>✓ Email support</li>
+                                <li>✓ Mobile app access</li>
+                            </ul>
+                            <button type="button" class="select-plan-btn">Select Plan</button>
+                        </div>
+                        
+                        <div class="plan-card popular" data-plan="Growth">
+                            <div class="popular-badge">Most Popular</div>
+                            <div class="plan-header">
+                                <h3>Growth</h3>
+                                <div class="plan-price">
+                                    <span class="currency">$</span>
+                                    <span class="amount" data-monthly="79" data-quarterly="71" data-yearly="63">79</span>
+                                    <span class="period">/month</span>
+                                </div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>✓ Full lab integration</li>
+                                <li>✓ Unlimited patients</li>
+                                <li>✓ Verification badges</li>
+                                <li>✓ Priority support</li>
+                                <li>✓ Advanced analytics</li>
+                            </ul>
+                            <button type="button" class="select-plan-btn">Select Plan</button>
+                        </div>
+                        
+                        <div class="plan-card" data-plan="Enterprise">
+                            <div class="plan-header">
+                                <h3>Enterprise</h3>
+                                <div class="plan-price">
+                                    <span class="custom-price">Custom</span>
+                                </div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>✓ Everything in Growth</li>
+                                <li>✓ Custom features</li>
+                                <li>✓ Dedicated account manager</li>
+                                <li>✓ 24/7 support</li>
+                                <li>✓ Custom integrations</li>
+                            </ul>
+                            <button type="button" class="select-plan-btn">Contact Sales</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected Plan Summary -->
+                    <div class="selected-plan-summary" id="selectedPlanSummary" style="display: none;">
+                        <h4>Selected Plan</h4>
+                        <div class="summary-content">
+                            <div class="summary-item">
+                                <span>Plan:</span>
+                                <strong id="summaryPlan"></strong>
+                            </div>
+                            <div class="summary-item">
+                                <span>Billing Cycle:</span>
+                                <strong id="summaryBilling"></strong>
+                            </div>
+                            <div class="summary-item">
+                                <span>Amount:</span>
+                                <strong id="summaryAmount"></strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coupon Code -->
+                    <div class="form-group">
+                        <label for="couponCode">Promo Code (Optional)</label>
+                        <div class="coupon-input-group">
+                            <input type="text" id="couponCode" name="couponCode" placeholder="Enter promo code">
+                            <button type="button" class="apply-coupon-btn">Apply</button>
+                        </div>
+                        <div class="coupon-message" id="couponMessage"></div>
+                    </div>
+                    
+                    <!-- Stripe Payment Form (shown when plan is selected) -->
+                    <div class="payment-form" id="paymentForm" style="display: none;">
+                        <h4>Payment Information</h4>
+                        <div id="card-element" class="stripe-card-element"></div>
+                        <div class="error-message" id="cardError"></div>
+                        <div class="secure-badge">
+                            🔒 Your payment information is secure and encrypted
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="selectedPlan" name="planName">
+                    <input type="hidden" id="selectedBillingCycle" name="billingCycle" value="monthly">
+                </div>
+
+                <!-- Step 5: Confirmation & Activation -->
+                <div class="wizard-step" data-step="5">
+                    <div class="confirmation-content">
+                        <div class="success-icon">✅</div>
+                        <h2>Registration Complete!</h2>
+                        <p class="step-subtitle">Your clinic has been successfully registered</p>
+                        
+                        <div class="confirmation-summary">
+                            <h4>Summary</h4>
+                            <div class="summary-grid">
+                                <div class="summary-row">
+                                    <span class="label">Clinic Name:</span>
+                                    <span class="value" id="confirmClinicName"></span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="label">Subdomain:</span>
+                                    <span class="value" id="confirmSubdomain"></span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="label">Admin Email:</span>
+                                    <span class="value" id="confirmEmail"></span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="label">Plan:</span>
+                                    <span class="value" id="confirmPlan"></span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="label">Billing Cycle:</span>
+                                    <span class="value" id="confirmBilling"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="verification-notice">
+                            <h4>📧 Email Verification Required</h4>
+                            <p>We've sent a verification email to <strong id="verificationEmail"></strong></p>
+                            <p>Please check your inbox and click the verification link to activate your account.</p>
+                            <button type="button" class="resend-btn" id="resendVerification">Resend Verification Email</button>
+                        </div>
+                        
+                        <div class="next-steps">
+                            <h4>Next Steps:</h4>
+                            <ol>
+                                <li>Verify your email address</li>
+                                <li>Log in to your account</li>
+                                <li>Complete your clinic profile</li>
+                                <li>Start managing your patients</li>
+                            </ol>
+                        </div>
+                        
+                        <a href="/login.html" class="btn-primary">Go to Login</a>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="wizard-navigation">
+                    <button type="button" class="btn-secondary" id="prevBtn" style="display: none;">
+                        ← Previous
+                    </button>
+                    <button type="button" class="btn-primary" id="nextBtn">
+                        Next →
+                    </button>
+                    <button type="submit" class="btn-primary" id="submitBtn" style="display: none;">
+                        Complete Registration
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <p>Processing...</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="wizard-footer">
+            <p>Already have an account? <a href="/login.html">Log in</a></p>
+            <p class="footer-note">14-Day Free Trial • Cancel Anytime • No Credit Card Required for Trial</p>
+        </div>
+    </div>
+
+    <!-- Include Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="/js/register-wizard.js"></script>
+</body>
+</html>
