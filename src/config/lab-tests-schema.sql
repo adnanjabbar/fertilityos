@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS test_definitions (
     
     -- Pricing
     base_price DECIMAL(10,2) NOT NULL DEFAULT 0,
-    currency VARCHAR(3) DEFAULT 'PKR',
+    currency VARCHAR(3),
     cost_price DECIMAL(10,2),                -- Internal cost
     
     -- Timing
