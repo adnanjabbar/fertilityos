@@ -1,5 +1,5 @@
 -- ============================================
--- IVF Platform - Internationalization Schema
+-- FertilityOS - Internationalization Schema
 -- Global Multi-tenant SaaS Configuration
 -- ============================================
 

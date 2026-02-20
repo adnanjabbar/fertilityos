@@ -1,5 +1,5 @@
 // ============================================
-// IVF Platform - Auth & Utilities
+// FertilityOS - Auth & Utilities
 // ============================================
 
 // API Base URL - Use relative path for flexibility

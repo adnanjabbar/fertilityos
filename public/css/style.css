@@ -1,5 +1,5 @@
 /* ============================================
-   IVF Platform - Enhanced Styles
+   FertilityOS - Enhanced Styles
    Polished version of working CSS
    ============================================ */
 
@@ -153,10 +153,13 @@ body {
 }
 
 .logo h1 {
-    color: var(--primary-color);
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 8px;
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 30px;
+    font-weight: 800;
     letter-spacing: -0.5px;
 }
 
@@ -1457,7 +1460,7 @@ button:focus-visible,
    FOOTER
    ============================================ */
 .footer-text {
-    margin-top: 32px;
+    margin-top: 20px;
     text-align: center;
     padding: 20px;
 }
@@ -1465,6 +1468,20 @@ button:focus-visible,
 .footer-text p {
     font-size: 13px;
     color: var(--text-muted);
+}
+
+.footer-text p + p {
+    margin-top: 8px;
+}
+
+.footer-text a {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.footer-text a:hover {
+    text-decoration: underline;
 }
 
 /* ============================================

@@ -1,4 +1,4 @@
--- IVF Platform - Lab Module Database Schema (All UUID)
+-- FertilityOS - Lab Module Database Schema (All UUID)
 
 CREATE TABLE IF NOT EXISTS semen_samples (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

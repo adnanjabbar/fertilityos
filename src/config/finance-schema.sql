@@ -1,5 +1,5 @@
 -- ============================================
--- IVF Platform - Financial ERP & Asset Management
+-- FertilityOS - Financial ERP & Asset Management
 -- Comprehensive Finance, Assets, Contracts Schema
 -- ============================================
 

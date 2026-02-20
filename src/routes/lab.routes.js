@@ -1,5 +1,5 @@
 // ============================================
-// IVF Platform - Lab Routes
+// FertilityOS - Lab Routes
 // ============================================
 
 const express = require('express');

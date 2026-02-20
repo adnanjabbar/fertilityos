@@ -29,7 +29,7 @@ app.use('/api/', apiLimiter);
 
 // Health Check
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', message: 'IVF Platform API is running', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', message: 'FertilityOS API is running', timestamp: new Date().toISOString() });
 });
 
 // API Routes (Public + Auth)

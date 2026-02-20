@@ -1,5 +1,5 @@
 // ============================================
-// IVF Platform - Lab Controller
+// FertilityOS - Lab Controller
 // Handles all laboratory operations
 // ============================================
 

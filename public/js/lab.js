@@ -1,4 +1,4 @@
-// IVF Platform - Lab Module JavaScript
+// FertilityOS - Lab Module JavaScript
 // WHO 6th Edition Semen Analysis Criteria
 
 const API_BASE = '/lab';
