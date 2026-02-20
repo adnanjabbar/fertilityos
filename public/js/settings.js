@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProfileData();
     checkAdminAccess();
     setupForms();
+    loadGeneralSettings();
 });
 
 function checkAdminAccess() {
@@ -23,20 +24,22 @@ function checkAdminAccess() {
     }
 }
 
-function showTab(tabName) {
+function showTab(tabName, btn) {
     // Hide all tabs
     document.querySelectorAll('.settings-tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
     
     // Remove active class from all buttons
-    document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-        btn.classList.remove('active');
+    document.querySelectorAll('.settings-tab-btn').forEach(b => {
+        b.classList.remove('active');
     });
     
     // Show selected tab
     document.getElementById(tabName + 'Tab').classList.add('active');
-    event.target.classList.add('active');
+    if (btn) {
+        btn.classList.add('active');
+    }
 }
 
 async function loadProfileData() {
@@ -48,55 +51,116 @@ async function loadProfileData() {
             document.getElementById('profileEmail').value = data.user.email;
             document.getElementById('profilePhone').value = data.user.phone || '';
             document.getElementById('profileRole').value = formatRole(data.user.role);
+
+            // Avatar initials
+            const name = data.user.full_name || data.user.email || '?';
+            const initials = name.split(' ').filter(w => w.length > 0).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+            document.getElementById('profileAvatar').textContent = initials;
+            document.getElementById('profileDisplayName').textContent = data.user.full_name || data.user.email;
+            document.getElementById('profileDisplayRole').textContent = formatRole(data.user.role);
+
+            // Session info
+            const sessionInfo = document.getElementById('currentSessionInfo');
+            if (sessionInfo) {
+                sessionInfo.textContent = `${navigator.platform || 'This device'} · Logged in`;
+            }
         }
     } catch (error) {
         console.error('Error loading profile:', error);
     }
 }
 
+// Role badge helper
+function getRoleBadgeClass(role) {
+    const map = {
+        owner: 'badge-role-owner',
+        admin: 'badge-role-admin',
+        doctor: 'badge-role-doctor',
+        nurse: 'badge-role-nurse',
+        embryologist: 'badge-role-lab',
+        lab_director: 'badge-role-lab',
+        lab_tech: 'badge-role-lab',
+        ivf_consultant: 'badge-role-admin',
+        quality_manager: 'badge-role-default',
+        receptionist: 'badge-role-default'
+    };
+    return map[role] || 'badge-role-default';
+}
+
+// All loaded users (for client-side filter)
+let allUsers = [];
+
 async function loadUsers() {
     try {
         const data = await apiCall('/users');
         const tableBody = document.getElementById('usersTable');
         
-        if (data && data.users.length > 0) {
-            tableBody.innerHTML = data.users.map(user => {
-                const statusBadge = user.is_active 
-                    ? '<span class="badge badge-success">Active</span>'
-                    : '<span class="badge badge-danger">Inactive</span>';
-                
-                const currentUser = getUserData();
-                const canEdit = currentUser.id !== user.id; // Can't edit yourself
-                
-                return `
-                    <tr>
-                        <td><strong>${user.full_name}</strong></td>
-                        <td>${user.email}</td>
-                        <td>${formatRole(user.role)}</td>
-                        <td>${user.phone || 'N/A'}</td>
-                        <td>${statusBadge}</td>
-                        <td>${user.last_login ? formatDate(user.last_login) : 'Never'}</td>
-                        <td>
-                            ${canEdit ? `
-                                <button class="btn btn-sm btn-secondary" onclick="editUser('${user.id}')">
-                                    Edit
-                                </button>
-                                ${user.is_active ? `
-                                    <button class="btn btn-sm btn-danger" onclick="deactivateUser('${user.id}', '${user.full_name}')">
-                                        Deactivate
-                                    </button>
-                                ` : ''}
-                            ` : '<span class="text-muted">You</span>'}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+        if (data && data.users) {
+            allUsers = data.users;
+            renderUsersTable(allUsers);
+
+            // Update count badge
+            const badge = document.getElementById('userCountBadge');
+            if (badge) badge.textContent = `${allUsers.length} user${allUsers.length !== 1 ? 's' : ''}`;
         } else {
             tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No users found</td></tr>';
         }
     } catch (error) {
         console.error('Error loading users:', error);
     }
+}
+
+function renderUsersTable(users) {
+    const tableBody = document.getElementById('usersTable');
+    if (!users || users.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No users found</td></tr>';
+        return;
+    }
+
+    const currentUser = getUserData();
+    tableBody.innerHTML = users.map(user => {
+        const statusBadge = user.is_active
+            ? '<span class="badge badge-success">Active</span>'
+            : '<span class="badge badge-danger">Inactive</span>';
+
+        const roleBadgeClass = getRoleBadgeClass(user.role);
+        const roleBadge = `<span class="badge ${roleBadgeClass}">${formatRoleLabel(user.role)}</span>`;
+
+        const canEdit = currentUser.id !== user.id;
+
+        return `
+            <tr>
+                <td><strong>${user.full_name}</strong></td>
+                <td>${user.email}</td>
+                <td>${roleBadge}</td>
+                <td>${user.phone || 'N/A'}</td>
+                <td>${statusBadge}</td>
+                <td>${user.last_login ? formatDate(user.last_login) : 'Never'}</td>
+                <td>
+                    ${canEdit ? `
+                        <button class="btn btn-sm btn-secondary" onclick="editUser('${user.id}')">
+                            Edit
+                        </button>
+                        ${user.is_active ? `
+                            <button class="btn btn-sm btn-danger" onclick="deactivateUser('${user.id}', '${user.full_name}')">
+                                Deactivate
+                            </button>
+                        ` : ''}
+                    ` : '<span class="text-muted">You</span>'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterUsers() {
+    const query = document.getElementById('usersSearch').value.toLowerCase();
+    const filtered = allUsers.filter(u =>
+        (u.full_name || '').toLowerCase().includes(query) ||
+        (u.email || '').toLowerCase().includes(query) ||
+        (u.role || '').toLowerCase().includes(query)
+    );
+    renderUsersTable(filtered);
 }
 
 async function loadClinicSettings() {
@@ -110,11 +174,57 @@ async function loadClinicSettings() {
             document.getElementById('clinicPhone').value = data.clinic.phone || '';
             document.getElementById('clinicAddress').value = data.clinic.address || '';
             document.getElementById('clinicCity').value = data.clinic.city || '';
+            document.getElementById('clinicCountry').value = data.clinic.country || '';
             document.getElementById('clinicLicense').value = data.clinic.license_number || '';
-            document.getElementById('clinicPHC').value = data.clinic.regulatory_body_name || data.clinic.phc_registration || '';
+            document.getElementById('clinicRegBody').value = data.clinic.regulatory_body_name || data.clinic.phc_registration || '';
+
+            if (data.clinic.timezone) {
+                document.getElementById('clinicTimezone').value = data.clinic.timezone;
+            }
+            if (data.clinic.currency) {
+                document.getElementById('clinicCurrency').value = data.clinic.currency;
+            }
+
+            // Subscription info
+            if (data.clinic.subscription_plan) {
+                const badge = document.getElementById('subscriptionPlanBadge');
+                if (badge) {
+                    const planLabel = data.clinic.subscription_plan.charAt(0).toUpperCase() + data.clinic.subscription_plan.slice(1);
+                    badge.textContent = `⭐ ${planLabel} Plan`;
+                }
+            }
+            if (data.clinic.subscription_expires_at) {
+                const expiry = document.getElementById('subscriptionExpiry');
+                if (expiry) expiry.textContent = `Renews: ${formatDate(data.clinic.subscription_expires_at)}`;
+            }
         }
     } catch (error) {
         console.error('Error loading clinic settings:', error);
+    }
+}
+
+function handleLogoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+        showToast('Logo file must be under 2 MB', 'error');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const preview = document.getElementById('logoPreview');
+        preview.innerHTML = `<img src="${e.target.result}" alt="Clinic logo">`;
+    };
+    reader.readAsDataURL(file);
+}
+
+function loadGeneralSettings() {
+    const settings = JSON.parse(localStorage.getItem('generalSettings') || '{}');
+    if (settings.dateFormat) document.getElementById('dateFormat').value = settings.dateFormat;
+    if (settings.defaultCurrency) document.getElementById('defaultCurrency').value = settings.defaultCurrency;
+    if (settings.language) document.getElementById('language').value = settings.language;
+    if (settings.emailNotifications !== undefined) {
+        document.getElementById('emailNotifications').checked = settings.emailNotifications;
     }
 }
 
@@ -122,8 +232,6 @@ function setupForms() {
     // Profile form
     document.getElementById('profileForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        hideError('profileError');
-        hideError('profileSuccess');
         
         const formData = {
             fullName: document.getElementById('profileFullName').value,
@@ -134,7 +242,7 @@ function setupForms() {
         
         // Validate password change
         if (formData.newPassword && !formData.currentPassword) {
-            showError('profileError', 'Current password required to change password');
+            showToast('Current password is required to set a new password', 'error');
             return;
         }
         
@@ -150,9 +258,13 @@ function setupForms() {
                 userData.name = data.user.full_name;
                 saveAuthData(getAuthToken(), userData);
                 
-                // Show success
-                document.getElementById('profileSuccess').textContent = 'Profile updated successfully!';
-                document.getElementById('profileSuccess').style.display = 'block';
+                // Update avatar
+                const name = data.user.full_name || '';
+                const initials = name.split(' ').filter(w => w.length > 0).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+                document.getElementById('profileAvatar').textContent = initials;
+                document.getElementById('profileDisplayName').textContent = data.user.full_name;
+
+                showToast('Profile updated successfully!', 'success');
                 
                 // Clear password fields
                 document.getElementById('currentPassword').value = '';
@@ -162,7 +274,7 @@ function setupForms() {
                 loadUserInfo();
             }
         } catch (error) {
-            showError('profileError', error.message);
+            showToast(error.message, 'error');
         }
     });
     
@@ -171,8 +283,6 @@ function setupForms() {
     if (clinicForm) {
         clinicForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            hideError('clinicError');
-            hideError('clinicSuccess');
             
             const formData = {
                 clinicName: document.getElementById('clinicNameInput').value,
@@ -180,8 +290,11 @@ function setupForms() {
                 phone: document.getElementById('clinicPhone').value,
                 address: document.getElementById('clinicAddress').value,
                 city: document.getElementById('clinicCity').value,
+                country: document.getElementById('clinicCountry').value,
+                timezone: document.getElementById('clinicTimezone').value,
+                currency: document.getElementById('clinicCurrency').value,
                 licenseNumber: document.getElementById('clinicLicense').value,
-                regulatoryBodyName: document.getElementById('clinicPHC').value
+                regulatoryBodyName: document.getElementById('clinicRegBody').value
             };
             
             try {
@@ -191,21 +304,35 @@ function setupForms() {
                 });
                 
                 if (data) {
-                    document.getElementById('clinicSuccess').textContent = 'Clinic settings updated successfully!';
-                    document.getElementById('clinicSuccess').style.display = 'block';
-                    
+                    showToast('Clinic settings updated successfully!', 'success');
                     // Update clinic name in sidebar
                     document.getElementById('clinicName').textContent = data.clinic.clinic_name;
                 }
             } catch (error) {
-                showError('clinicError', error.message);
+                showToast(error.message, 'error');
             }
+        });
+    }
+
+    // General settings form
+    const generalForm = document.getElementById('generalForm');
+    if (generalForm) {
+        generalForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const settings = {
+                dateFormat: document.getElementById('dateFormat').value,
+                defaultCurrency: document.getElementById('defaultCurrency').value,
+                language: document.getElementById('language').value,
+                emailNotifications: document.getElementById('emailNotifications').checked
+            };
+            localStorage.setItem('generalSettings', JSON.stringify(settings));
+            showToast('General settings saved!', 'success');
         });
     }
 }
 
 function showAddUserModal() {
-    document.getElementById('addUserModal').style.display = 'block';
+    document.getElementById('addUserModal').style.display = 'flex';
 }
 
 function closeAddUserModal() {
@@ -240,7 +367,7 @@ document.getElementById('addUserForm').addEventListener('submit', async function
         if (data) {
             closeAddUserModal();
             loadUsers();
-            alert('User added successfully!');
+            showToast('User added successfully!', 'success');
         }
     } catch (error) {
         showError('addUserError', error.message);
@@ -251,7 +378,7 @@ document.getElementById('addUserForm').addEventListener('submit', async function
 });
 
 function editUser(userId) {
-    alert('Edit user functionality coming soon! User ID: ' + userId);
+    showToast('Edit user functionality coming soon!', 'info');
     // TODO: Implement edit user modal
 }
 
@@ -266,14 +393,15 @@ async function deactivateUser(userId, userName) {
         });
         
         loadUsers();
-        alert('User deactivated successfully');
+        showToast('User deactivated successfully', 'success');
     } catch (error) {
-        alert('Error deactivating user: ' + error.message);
+        showToast('Error deactivating user: ' + error.message, 'error');
     }
 }
 
-function formatRole(role) {
+function formatRoleLabel(role) {
     const roleNames = {
+        'owner': 'Owner',
         'admin': 'Administrator',
         'doctor': 'Doctor',
         'embryologist': 'Embryologist',
@@ -284,8 +412,12 @@ function formatRole(role) {
         'quality_manager': 'Quality Manager',
         'receptionist': 'Receptionist'
     };
-    
     return roleNames[role] || role;
+}
+
+// Keep backward-compatible formatRole (used by auth.js loadUserInfo)
+function formatRole(role) {
+    return formatRoleLabel(role) || (role ? role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ') : 'User');
 }
 
 window.onclick = function(event) {
