@@ -971,6 +971,9 @@ async function applyCoupon() {
 async function submitForm(e) {
     e.preventDefault();
     
+    // Clear any previous submission error
+    clearSubmitError();
+    
     // Validate step 4
     if (!await validateStep(4)) {
         return;
@@ -1049,33 +1052,33 @@ async function submitForm(e) {
                 const errorMsg = data.error || '';
                 if (errorMsg.toLowerCase().includes('subdomain')) {
                     // Subdomain conflict — bring user back to step 1
-                    alert(`The subdomain "${formData.subdomain}" is already taken. Please choose a different one.`);
                     subdomainValid = false;
                     document.querySelector(`.wizard-step[data-step="${currentStep}"]`).classList.remove('active');
                     currentStep = 1;
                     document.querySelector(`.wizard-step[data-step="1"]`).classList.add('active');
                     updateProgress();
+                    showError('subdomainError', `The subdomain "${formData.subdomain}" is already taken. Please choose a different one.`);
                     document.getElementById('subdomain').focus();
                 } else if (errorMsg.toLowerCase().includes('email')) {
                     // Email conflict — bring user back to step 2
-                    alert('This email address is already registered. Please use a different email or log in.');
                     document.querySelector(`.wizard-step[data-step="${currentStep}"]`).classList.remove('active');
                     currentStep = 2;
                     document.querySelector(`.wizard-step[data-step="2"]`).classList.add('active');
                     updateProgress();
+                    showError('adminEmailError', 'This email address is already registered. Please use a different email or log in.');
                     document.getElementById('adminEmail').focus();
                 } else {
-                    alert(errorMsg || 'A conflict occurred. Please review your details and try again.');
+                    showSubmitError(errorMsg || 'A conflict occurred. Please review your details and try again.');
                 }
             } else {
-                alert(data.error || 'Registration failed. Please try again.');
+                showSubmitError(data.error || 'Registration failed. Please try again.');
             }
         }
         
     } catch (error) {
         hideLoading();
         console.error('Registration error:', error);
-        alert('An error occurred during registration. Please try again.');
+        showSubmitError('An error occurred during registration. Please try again.');
     }
 }
 
@@ -1182,6 +1185,23 @@ function showError(elementId, message) {
     if (errorElement) {
         errorElement.textContent = message;
         errorElement.classList.add('show');
+    }
+}
+
+function showSubmitError(message) {
+    const el = document.getElementById('submitError');
+    if (el) {
+        el.textContent = message;
+        el.classList.add('show');
+        el.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+    }
+}
+
+function clearSubmitError() {
+    const el = document.getElementById('submitError');
+    if (el) {
+        el.textContent = '';
+        el.classList.remove('show');
     }
 }
 

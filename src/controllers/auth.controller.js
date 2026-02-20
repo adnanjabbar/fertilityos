@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const db = require('../config/database');
 const emailService = require('../services/email.service');
 
@@ -55,6 +56,9 @@ const registerClinic = async (req, res) => {
       });
     }
 
+    // Auto-generate clinic code if not provided (required by DB NOT NULL constraint)
+    const resolvedClinicCode = clinicCode || `CLN-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+
     // Check if subdomain already exists
     const subdomainCheck = await db.query(
       'SELECT id FROM clinics WHERE subdomain = $1',
@@ -95,7 +99,7 @@ const registerClinic = async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING id, subdomain, clinic_name, clinic_code`,
       [
-        subdomain, clinicName, clinicCode || null, email || adminEmail, 
+        subdomain, clinicName, resolvedClinicCode, email || adminEmail, 
         phone, address, city, country || null, licenseNumber, 
         (hasRegulatoryLicense === 'yes' ? regulatoryBodyName : null), practiceType, 
         yearsInOperation, logoUrl, billingCycle || 'monthly', 
