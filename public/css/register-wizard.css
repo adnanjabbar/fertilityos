@@ -1051,6 +1051,20 @@ textarea.error {
     line-height: 1;
 }
 
+.flag-img {
+    width: 24px;
+    height: 18px;
+    vertical-align: middle;
+    border-radius: 2px;
+    object-fit: cover;
+    margin-right: 8px;
+}
+
+.selected-option .flag-img {
+    width: 32px;
+    height: 24px;
+}
+
 .option-item .option-text {
     flex: 1;
     display: flex;
