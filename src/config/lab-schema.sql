@@ -1,5 +1,5 @@
 -- ============================================
--- IVF Platform - Lab Module Database Schema
+-- FertilityOS - Lab Module Database Schema
 -- Version 1.0
 -- ============================================
 

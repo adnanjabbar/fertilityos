@@ -1,5 +1,5 @@
 -- ============================================
--- IVF Platform - Laboratory Tests & Billing Schema
+-- FertilityOS - Laboratory Tests & Billing Schema
 -- Comprehensive Test Catalog & Order Management
 -- ============================================
 

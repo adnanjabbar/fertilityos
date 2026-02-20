@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab Orders - IVF Platform</title>
+    <title>Lab Orders - FertilityOS</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
         .order-status { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
@@ -24,7 +24,7 @@
     <div class="container">
                         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>🏥 IVF Platform</h2>
+                <h2>FertilityOS</h2>
                 <p id="clinicName">Loading...</p>
             </div>
             <nav class="sidebar-nav">
@@ -582,7 +582,7 @@ if (i.result_flag === 'H') {
             <div style="padding:20px;">
 
                 <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:15px;">
-                    <h2 style="margin:0;">IVF Platform Laboratory</h2>
+                    <h2 style="margin:0;">FertilityOS Laboratory</h2>
                     <div style="font-size:13px;color:#555;">Diagnostic Report</div>
                 </div>
 
@@ -793,7 +793,7 @@ window.onclick = function(e) {
 };
 function printLabReport() {
     const orderHtml = document.getElementById('viewOrderContent').innerHTML;
-    const clinicName = document.getElementById('clinicName')?.innerText || 'IVF Platform';
+    const clinicName = document.getElementById('clinicName')?.innerText || 'FertilityOS';
 
     const printWindow = window.open('', '', 'width=1000,height=800');
 
