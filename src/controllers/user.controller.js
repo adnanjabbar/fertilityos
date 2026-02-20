@@ -259,7 +259,7 @@ const updateClinicSettings = async (req, res) => {
       address,
       city,
       licenseNumber,
-      phcRegistration
+      regulatoryBodyName
     } = req.body;
     
     const result = await db.query(
@@ -270,11 +270,11 @@ const updateClinicSettings = async (req, res) => {
         address = COALESCE($4, address),
         city = COALESCE($5, city),
         license_number = COALESCE($6, license_number),
-        phc_registration = COALESCE($7, phc_registration),
+        regulatory_body_name = COALESCE($7, regulatory_body_name),
         updated_at = CURRENT_TIMESTAMP
        WHERE id = $8
        RETURNING *`,
-      [clinicName, email, phone, address, city, licenseNumber, phcRegistration, clinicId]
+      [clinicName, email, phone, address, city, licenseNumber, regulatoryBodyName, clinicId]
     );
     
     res.json({

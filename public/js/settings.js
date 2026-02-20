@@ -111,7 +111,7 @@ async function loadClinicSettings() {
             document.getElementById('clinicAddress').value = data.clinic.address || '';
             document.getElementById('clinicCity').value = data.clinic.city || '';
             document.getElementById('clinicLicense').value = data.clinic.license_number || '';
-            document.getElementById('clinicPHC').value = data.clinic.phc_registration || '';
+            document.getElementById('clinicPHC').value = data.clinic.regulatory_body_name || data.clinic.phc_registration || '';
         }
     } catch (error) {
         console.error('Error loading clinic settings:', error);
@@ -181,7 +181,7 @@ function setupForms() {
                 address: document.getElementById('clinicAddress').value,
                 city: document.getElementById('clinicCity').value,
                 licenseNumber: document.getElementById('clinicLicense').value,
-                phcRegistration: document.getElementById('clinicPHC').value
+                regulatoryBodyName: document.getElementById('clinicPHC').value
             };
             
             try {
