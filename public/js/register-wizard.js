@@ -18,6 +18,13 @@ let selectedCountry = null;
 let selectedState = null;
 let selectedCity = null;
 
+/**
+ * Generate flag image HTML using flagcdn.com with emoji fallback
+ */
+function getFlagImgHtml(code, flag, width, height) {
+    return `<img class="flag-img" src="https://flagcdn.com/${width}x${height}/${code.toLowerCase()}.png" alt="${flag}" data-flag="${flag}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'flag',textContent:this.dataset.flag}))" width="${width}" height="${height}">`;
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Stripe (will check for publishable key)
@@ -155,7 +162,7 @@ function populateCountries(searchTerm = '') {
     
     countryList.innerHTML = countries.map(country => `
         <div class="option-item" data-code="${country.code}" data-name="${country.name}" data-phone="${country.phoneCode}">
-            <span class="flag">${country.flag}</span>
+            ${getFlagImgHtml(country.code, country.flag, 24, 18)}
             <div class="option-text">
                 <span class="option-name">${country.name}</span>
                 <span class="option-code">${country.phoneCode}</span>
@@ -198,7 +205,7 @@ function selectCountry(code, name, phoneCode) {
     const country = GeoDataHelper.getCountryByCode(code);
     selectedOption.innerHTML = `
         <span class="flag-text">
-            <span class="flag">${country.flag}</span>
+            ${getFlagImgHtml(code, country.flag, 32, 24)}
             <div class="country-info">
                 <span class="country-name">${name}</span>
                 <span class="phone-code">${phoneCode}</span>
@@ -434,7 +441,7 @@ function updateGeographicSummary() {
         if (selectedState) parts.push(selectedState.name);
         if (selectedCountry) {
             const country = GeoDataHelper.getCountryByCode(selectedCountry.code);
-            parts.push(`${country.flag} ${selectedCountry.name}`);
+            parts.push(`${getFlagImgHtml(country.code, country.flag, 24, 18)} ${selectedCountry.name}`);
         }
         
         summaryText.innerHTML = parts.join(' • ');
