@@ -16,7 +16,7 @@ CREATE TABLE clinics (
     city VARCHAR(100),
     country VARCHAR(100) DEFAULT 'Pakistan',
     license_number VARCHAR(100),
-    phc_registration VARCHAR(100), -- Punjab Healthcare Commission
+    regulatory_body_name VARCHAR(200),
     subscription_plan VARCHAR(50) DEFAULT 'basic',
     subscription_status VARCHAR(30) DEFAULT 'active', -- active, expired, cancelled, pending
     subscription_starts_at TIMESTAMP,

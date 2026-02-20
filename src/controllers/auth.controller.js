@@ -36,8 +36,8 @@ const registerClinic = async (req, res) => {
       phone,
       address,
       licenseNumber,
-      phcRegistration,
-      regulatoryAuthority,
+      hasRegulatoryLicense,
+      regulatoryBodyName,
       practiceType,
       yearsInOperation,
       
@@ -88,16 +88,16 @@ const registerClinic = async (req, res) => {
     const clinicResult = await client.query(
       `INSERT INTO clinics (
         subdomain, clinic_name, clinic_code, email, phone, address, 
-        city, country, license_number, phc_registration, 
-        regulatory_authority, practice_type, years_in_operation, 
+        city, country, license_number, regulatory_body_name, 
+        practice_type, years_in_operation, 
         logo_url, billing_cycle, plan_name
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING id, subdomain, clinic_name, clinic_code`,
       [
         subdomain, clinicName, clinicCode || null, email || adminEmail, 
-        phone, address, city, country || 'Pakistan', licenseNumber, 
-        phcRegistration, regulatoryAuthority, practiceType, 
+        phone, address, city, country || null, licenseNumber, 
+        (hasRegulatoryLicense === 'yes' ? regulatoryBodyName : null), practiceType, 
         yearsInOperation, logoUrl, billingCycle || 'monthly', 
         planName || 'Starter'
       ]

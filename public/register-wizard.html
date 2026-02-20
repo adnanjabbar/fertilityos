@@ -224,24 +224,27 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="licenseNumber">License Number</label>
+                        <label for="licenseNumber">License Number (Optional)</label>
                         <input type="text" id="licenseNumber" name="licenseNumber" placeholder="e.g., LIC-12345">
                     </div>
                     
                     <div class="form-group">
-                        <label for="regulatoryAuthority">Regulatory Authority</label>
-                        <select id="regulatoryAuthority" name="regulatoryAuthority">
-                            <option value="">Select Authority</option>
-                            <option value="Punjab Healthcare Commission">Punjab Healthcare Commission (PHC)</option>
-                            <option value="FDA">FDA (United States)</option>
-                            <option value="HFEA">HFEA (United Kingdom)</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <label>Is your clinic licensed by a regulatory body in your country?</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="hasRegulatoryLicense" id="hasRegulatoryLicenseYes" value="yes">
+                                <span>Yes, enter the name below</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="hasRegulatoryLicense" id="hasRegulatoryLicenseNo" value="no" checked>
+                                <span>No</span>
+                            </label>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="phcRegistration">PHC Registration/Accreditation</label>
-                        <input type="text" id="phcRegistration" name="phcRegistration" placeholder="Optional">
+                    <div class="form-group" id="regulatoryBodyGroup" style="display: none;">
+                        <label for="regulatoryBodyName">Regulatory Body/Authority Name</label>
+                        <input type="text" id="regulatoryBodyName" name="regulatoryBodyName" placeholder="e.g., FDA, HFEA, Dubai Health Authority, Ministry of Health">
                     </div>
                     
                     <div class="form-group">

@@ -478,6 +478,16 @@ function setupEventListeners() {
     // Coupon code
     document.querySelector('.apply-coupon-btn')?.addEventListener('click', applyCoupon);
     
+    // Toggle regulatory body name field based on radio selection
+    document.querySelectorAll('input[name="hasRegulatoryLicense"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const group = document.getElementById('regulatoryBodyGroup');
+            if (group) {
+                group.style.display = this.value === 'yes' ? 'block' : 'none';
+            }
+        });
+    });
+
     // Resend verification
     document.getElementById('resendVerification')?.addEventListener('click', resendVerification);
     
@@ -993,8 +1003,8 @@ async function submitForm(e) {
             phone: document.getElementById('phone').value.trim() || null,
             email: document.getElementById('email').value.trim() || null,
             licenseNumber: document.getElementById('licenseNumber').value.trim() || null,
-            regulatoryAuthority: document.getElementById('regulatoryAuthority').value || null,
-            phcRegistration: document.getElementById('phcRegistration').value.trim() || null,
+            hasRegulatoryLicense: document.querySelector('input[name="hasRegulatoryLicense"]:checked')?.value || 'no',
+            regulatoryBodyName: document.getElementById('regulatoryBodyName').value.trim() || null,
             practiceType: document.getElementById('practiceType').value || null,
             yearsInOperation: document.getElementById('yearsInOperation').value || null,
             
@@ -1115,8 +1125,8 @@ function saveFormData() {
         phone: document.getElementById('phone').value,
         email: document.getElementById('email').value,
         licenseNumber: document.getElementById('licenseNumber').value,
-        regulatoryAuthority: document.getElementById('regulatoryAuthority').value,
-        phcRegistration: document.getElementById('phcRegistration').value,
+        hasRegulatoryLicense: document.querySelector('input[name="hasRegulatoryLicense"]:checked')?.value || 'no',
+        regulatoryBodyName: document.getElementById('regulatoryBodyName').value,
         practiceType: document.getElementById('practiceType').value,
         yearsInOperation: document.getElementById('yearsInOperation').value
     };
