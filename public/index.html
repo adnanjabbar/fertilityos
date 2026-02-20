@@ -6,178 +6,433 @@
 <title>FertilityOS — The Operating System for Fertility Clinics</title>
 
 <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    background:#0f172a;
-    color:white;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    line-height: 1.6;
 }
 
+/* ── Navigation ── */
 nav {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 60px;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 
 .logo {
-    font-size:22px;
-    font-weight:700;
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
 }
 
-nav a {
-    color:white;
-    text-decoration:none;
-    margin-left:25px;
-    font-weight:500;
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.btn-primary {
-    background:#6366f1;
-    padding:10px 22px;
-    border-radius:8px;
+.nav-links a {
+    color: #cbd5e1;
+    text-decoration: none;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    transition: color 0.2s;
 }
 
+.nav-links a:hover { color: white; }
+
+.nav-links .btn-nav {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.nav-links .btn-nav:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* ── Hero ── */
 .hero {
-    text-align:center;
-    padding:120px 20px;
-    max-width:900px;
-    margin:auto;
+    text-align: center;
+    padding: 110px 20px 90px;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    color: #a5b4fc;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 28px;
 }
 
 .hero h1 {
-    font-size:54px;
-    font-weight:800;
-    line-height:1.1;
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -1.5px;
+    background: linear-gradient(135deg, #f1f5f9 30%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero h1 span {
+    background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .hero p {
-    font-size:20px;
-    margin-top:25px;
-    color:#cbd5e1;
+    font-size: 19px;
+    margin-top: 22px;
+    color: #94a3b8;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .hero-buttons {
-    margin-top:40px;
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
 }
 
-.hero-buttons a {
-    padding:16px 32px;
-    border-radius:8px;
-    text-decoration:none;
-    font-weight:600;
-    margin:10px;
-    display:inline-block;
+.btn-primary-hero {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    padding: 15px 34px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-block;
 }
 
-.hero-buttons .primary {
-    background:#6366f1;
-    color:white;
+.btn-primary-hero:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45);
 }
 
-.hero-buttons .secondary {
-    border:1px solid #475569;
-    color:white;
+.btn-secondary-hero {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+    padding: 15px 34px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    transition: background 0.2s, border-color 0.2s;
+    display: inline-block;
 }
 
+.btn-secondary-hero:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.hero-note {
+    margin-top: 18px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* ── Trust badges ── */
+.trust-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 28px;
+    padding: 20px 20px 60px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.trust-item .icon { font-size: 16px; }
+
+/* ── Features ── */
 .features {
-    background:white;
-    color:black;
-    padding:100px 60px;
-    text-align:center;
+    background: #f8fafc;
+    color: #0f172a;
+    padding: 90px 40px;
+    text-align: center;
+}
+
+.section-label {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+    padding: 5px 14px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
 }
 
 .features h2 {
-    font-size:38px;
-    margin-bottom:60px;
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 14px;
+    color: #0f172a;
+}
+
+.features .section-sub {
+    font-size: 17px;
+    color: #64748b;
+    max-width: 520px;
+    margin: 0 auto 56px;
 }
 
 .grid {
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:40px;
-    max-width:1100px;
-    margin:auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
 .card {
-    padding:30px;
-    border-radius:12px;
-    background:#f8fafc;
+    padding: 28px 24px;
+    border-radius: 14px;
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.07);
+}
+
+.card-icon {
+    font-size: 32px;
+    margin-bottom: 14px;
+    display: block;
 }
 
 .card h3 {
-    margin-bottom:15px;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #1e293b;
 }
 
+.card p {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* ── Pricing ── */
 .pricing {
-    background:#0f172a;
-    padding:100px 20px;
-    text-align:center;
+    background: #0f172a;
+    padding: 90px 20px;
+    text-align: center;
 }
 
 .pricing h2 {
-    font-size:40px;
-    margin-bottom:50px;
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 14px;
+}
+
+.pricing .section-sub {
+    font-size: 17px;
+    color: #64748b;
+    margin-bottom: 52px;
 }
 
 .pricing-grid {
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:30px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .price-card {
-    background:white;
-    color:black;
-    width:300px;
-    padding:40px;
-    border-radius:14px;
+    background: #1e293b;
+    color: white;
+    width: 300px;
+    padding: 36px 32px;
+    border-radius: 16px;
+    border: 1.5px solid #334155;
+    text-align: left;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.price-card:hover {
+    transform: translateY(-4px);
+    border-color: #6366f1;
 }
 
 .price-card.popular {
-    border:3px solid #6366f1;
+    border: 2px solid #6366f1;
+    background: linear-gradient(135deg, #1e293b 0%, #1a1642 100%);
+    position: relative;
+}
+
+.popular-label {
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    padding: 4px 16px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .price-card h3 {
-    font-size:22px;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
 .price-card .price {
-    font-size:38px;
-    margin:20px 0;
+    font-size: 40px;
+    font-weight: 800;
+    margin: 16px 0 6px;
+    letter-spacing: -1px;
+}
+
+.price-card .price span {
+    font-size: 15px;
+    font-weight: 400;
+    color: #94a3b8;
+}
+
+.price-card .price-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 22px;
 }
 
 .price-card ul {
-    list-style:none;
-    padding:0;
-    text-align:left;
-    font-size:14px;
+    list-style: none;
+    margin-bottom: 28px;
 }
 
 .price-card ul li {
-    margin:10px 0;
+    padding: 7px 0;
+    font-size: 14px;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.price-card button {
-    margin-top:25px;
-    width:100%;
-    padding:12px;
-    border:none;
-    background:#6366f1;
-    color:white;
-    border-radius:8px;
-    font-weight:600;
-    cursor:pointer;
+.price-card ul li::before {
+    content: '✓';
+    color: #818cf8;
+    font-weight: 700;
+    font-size: 13px;
 }
 
+.price-card .btn-plan {
+    display: block;
+    width: 100%;
+    padding: 13px;
+    border: none;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border-radius: 9px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.price-card .btn-plan:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.price-card .btn-plan-outline {
+    background: transparent;
+    border: 1.5px solid #475569;
+    color: #cbd5e1;
+}
+
+.price-card .btn-plan-outline:hover {
+    border-color: #6366f1;
+    color: white;
+}
+
+/* ── Footer ── */
 footer {
-    text-align:center;
-    padding:30px;
-    background:#020617;
-    font-size:14px;
-    color:#94a3b8;
+    text-align: center;
+    padding: 36px 20px;
+    background: #020617;
+    font-size: 14px;
+    color: #475569;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+footer a { color: #64748b; text-decoration: none; margin: 0 12px; }
+footer a:hover { color: #94a3b8; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .hero h1 { font-size: 36px; }
+    .hero p { font-size: 16px; }
+    .features h2, .pricing h2 { font-size: 28px; }
+    .features { padding: 70px 20px; }
+}
+
+@media (max-width: 480px) {
+    .hero { padding: 80px 16px 60px; }
+    .hero h1 { font-size: 30px; letter-spacing: -0.5px; }
+    .btn-primary-hero, .btn-secondary-hero { width: 100%; text-align: center; }
+    .hero-buttons { flex-direction: column; align-items: center; }
+    .price-card { width: 100%; max-width: 340px; }
 }
 </style>
 </head>
@@ -185,96 +440,133 @@ footer {
 <body>
 
 <nav>
-<div class="logo">FertilityOS</div>
-<div>
-<a href="login.html">Login</a>
-<a href="register.html" class="btn-primary">Start Free Trial</a>
-</div>
+    <div class="logo">FertilityOS</div>
+    <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="login.html">Login</a>
+        <a href="register-wizard.html" class="btn-nav">Start Free Trial</a>
+    </div>
 </nav>
 
 <section class="hero">
-<h1>The Operating System for Fertility Clinics</h1>
-<p>Modern, secure, cloud-based infrastructure for IVF centers, embryology labs, and reproductive medicine institutions worldwide.</p>
-<div class="hero-buttons">
-<a href="register.html" class="primary">Start 14-Day Free Trial</a>
-<a href="#features" class="secondary">See Features</a>
-</div>
+    <div class="hero-badge">🌟 Trusted by Fertility Clinics Worldwide</div>
+    <h1>The <span>Operating System</span> for Fertility Clinics</h1>
+    <p>Modern, secure, cloud-based infrastructure for IVF centers, embryology labs, and reproductive medicine institutions worldwide.</p>
+    <div class="hero-buttons">
+        <a href="register-wizard.html" class="btn-primary-hero">Start 14-Day Free Trial →</a>
+        <a href="#features" class="btn-secondary-hero">See Features</a>
+    </div>
+    <p class="hero-note">No credit card required &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; Setup in minutes</p>
 </section>
+
+<div class="trust-bar">
+    <div class="trust-item"><span class="icon">🔒</span> HIPAA-Ready Security</div>
+    <div class="trust-item"><span class="icon">☁️</span> 99.9% Uptime SLA</div>
+    <div class="trust-item"><span class="icon">🌍</span> Multi-Country Support</div>
+    <div class="trust-item"><span class="icon">📋</span> PHC & Regulatory Compliant</div>
+    <div class="trust-item"><span class="icon">🔑</span> Role-Based Access</div>
+</div>
 
 <section class="features" id="features">
-<h2>Built for Modern Fertility Medicine</h2>
-<div class="grid">
-<div class="card">
-<h3>Patient & Cycle Management</h3>
-<p>Track every patient journey from stimulation to transfer.</p>
-</div>
-
-<div class="card">
-<h3>Advanced Lab Module</h3>
-<p>Embryology tracking, grading, cryo logs & QC workflows.</p>
-</div>
-
-<div class="card">
-<h3>Verification & Audit Logs</h3>
-<p>Role-based approvals and compliance-ready audit trails.</p>
-</div>
-
-<div class="card">
-<h3>Analytics Dashboard</h3>
-<p>Monitor KPIs, success rates and operational metrics.</p>
-</div>
-</div>
+    <div class="section-label">FEATURES</div>
+    <h2>Built for Modern Fertility Medicine</h2>
+    <p class="section-sub">Everything your clinic needs to deliver exceptional patient care and streamline operations.</p>
+    <div class="grid">
+        <div class="card">
+            <span class="card-icon">👩‍⚕️</span>
+            <h3>Patient & Cycle Management</h3>
+            <p>Track every patient journey from stimulation to transfer with detailed cycle records and alerts.</p>
+        </div>
+        <div class="card">
+            <span class="card-icon">🔬</span>
+            <h3>Advanced Lab Module</h3>
+            <p>Embryology tracking, grading, cryo logs and full QC workflows for your laboratory team.</p>
+        </div>
+        <div class="card">
+            <span class="card-icon">✅</span>
+            <h3>Verification & Audit Logs</h3>
+            <p>Role-based approvals and compliance-ready audit trails for every action in the system.</p>
+        </div>
+        <div class="card">
+            <span class="card-icon">📊</span>
+            <h3>Analytics Dashboard</h3>
+            <p>Monitor KPIs, success rates and operational metrics to drive data-driven decisions.</p>
+        </div>
+        <div class="card">
+            <span class="card-icon">💳</span>
+            <h3>Billing & Finance</h3>
+            <p>Integrated invoicing, payment tracking and financial reports — all in one place.</p>
+        </div>
+        <div class="card">
+            <span class="card-icon">📧</span>
+            <h3>Automated Notifications</h3>
+            <p>Email reminders, appointment confirmations and verification emails sent automatically.</p>
+        </div>
+    </div>
 </section>
 
-<section class="pricing">
-<h2>Simple, Transparent Pricing</h2>
+<section class="pricing" id="pricing">
+    <div class="section-label" style="background:rgba(99,102,241,0.15);color:#818cf8;">PRICING</div>
+    <h2>Simple, Transparent Pricing</h2>
+    <p class="section-sub">Choose a plan that fits your clinic. Upgrade or cancel anytime.</p>
 
-<div class="pricing-grid">
+    <div class="pricing-grid">
+        <div class="price-card">
+            <h3>Starter</h3>
+            <div class="price">$20<span>/mo</span></div>
+            <div class="price-desc">Best for small clinics getting started</div>
+            <ul>
+                <li>Up to 50 patients/month</li>
+                <li>Core IVF workflow</li>
+                <li>Basic lab module</li>
+                <li>Mobile app access</li>
+                <li>Email support</li>
+            </ul>
+            <a href="register-wizard.html" class="btn-plan btn-plan-outline">Start Trial</a>
+        </div>
 
-<div class="price-card">
-<h3>Starter</h3>
-<div class="price">$29<span style="font-size:14px;">/month</span></div>
-<ul>
-<li>Up to 5 users</li>
-<li>Core IVF workflow</li>
-<li>Basic lab module</li>
-<li>Email support</li>
-</ul>
-<button onclick="location.href='register.html'">Start Trial</button>
-</div>
+        <div class="price-card popular">
+            <div class="popular-label">⭐ Most Popular</div>
+            <h3>Growth</h3>
+            <div class="price">$79<span>/mo</span></div>
+            <div class="price-desc">For growing clinics with advanced needs</div>
+            <ul>
+                <li>Unlimited patients</li>
+                <li>Full lab + verification</li>
+                <li>Audit logs</li>
+                <li>Analytics dashboard</li>
+                <li>Priority support</li>
+            </ul>
+            <a href="register-wizard.html" class="btn-plan">Start Trial</a>
+        </div>
 
-<div class="price-card popular">
-<h3>Growth ⭐</h3>
-<div class="price">$79<span style="font-size:14px;">/month</span></div>
-<ul>
-<li>Up to 20 users</li>
-<li>Full lab + verification</li>
-<li>Audit logs</li>
-<li>Analytics dashboard</li>
-<li>Priority support</li>
-</ul>
-<button onclick="location.href='register.html'">Start Trial</button>
-</div>
-
-<div class="price-card">
-<h3>Enterprise</h3>
-<div class="price">Custom</div>
-<ul>
-<li>Unlimited users</li>
-<li>White-label</li>
-<li>Custom domain</li>
-<li>Dedicated support</li>
-<li>API access</li>
-</ul>
-<button>Contact Sales</button>
-</div>
-
-</div>
+        <div class="price-card">
+            <h3>Enterprise</h3>
+            <div class="price" style="font-size:28px;letter-spacing:0;">Custom</div>
+            <div class="price-desc">Tailored for large or multi-site clinics</div>
+            <ul>
+                <li>Everything in Growth</li>
+                <li>Unlimited users</li>
+                <li>Custom integrations</li>
+                <li>Dedicated account manager</li>
+                <li>24/7 support</li>
+            </ul>
+            <a href="register-wizard.html" class="btn-plan btn-plan-outline">Contact Sales</a>
+        </div>
+    </div>
 </section>
 
 <footer>
-© 2026 FertilityOS. Global infrastructure for fertility medicine.
+    <p style="margin-bottom:12px;">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="login.html">Login</a>
+        <a href="register-wizard.html">Sign Up</a>
+    </p>
+    <p>© 2026 FertilityOS. Global infrastructure for fertility medicine.</p>
 </footer>
 
 </body>
 </html>
+
