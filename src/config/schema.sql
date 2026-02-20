@@ -14,7 +14,7 @@ CREATE TABLE clinics (
     phone VARCHAR(20),
     address TEXT,
     city VARCHAR(100),
-    country VARCHAR(100) DEFAULT 'Pakistan',
+    country VARCHAR(100),
     license_number VARCHAR(100),
     regulatory_body_name VARCHAR(200),
     subscription_plan VARCHAR(50) DEFAULT 'basic',
