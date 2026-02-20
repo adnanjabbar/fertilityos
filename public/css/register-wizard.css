@@ -937,10 +937,15 @@ textarea.error {
     align-items: center;
     gap: 8px;
     color: #1f2937;
+    overflow: visible;
 }
 
 .selected-option .flag {
-    font-size: 20px;
+    font-size: 22px;
+    display: inline-block;
+    min-width: 30px;
+    text-align: center;
+    line-height: 1;
 }
 
 .selected-option .country-info {
@@ -954,8 +959,9 @@ textarea.error {
 }
 
 .selected-option .phone-code {
-    font-size: 11px;
-    color: #6b7280;
+    font-size: 12px;
+    color: #4b5563;
+    font-weight: 500;
 }
 
 .options-container {
@@ -1036,8 +1042,11 @@ textarea.error {
 }
 
 .option-item .flag {
-    font-size: 18px;
-    min-width: 24px;
+    font-size: 20px;
+    min-width: 30px;
+    display: inline-block;
+    text-align: center;
+    line-height: 1;
 }
 
 .option-item .option-text {
@@ -1052,8 +1061,8 @@ textarea.error {
 }
 
 .option-item .option-code {
-    font-size: 11px;
-    color: #6b7280;
+    font-size: 12px;
+    color: #4b5563;
     font-weight: 500;
 }
 

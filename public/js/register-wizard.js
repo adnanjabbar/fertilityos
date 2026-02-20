@@ -1033,7 +1033,33 @@ async function submitForm(e) {
             hideLoading();
         } else {
             hideLoading();
-            alert(data.error || 'Registration failed. Please try again.');
+            
+            // Handle specific error codes with user-friendly messages
+            if (response.status === 409) {
+                const errorMsg = data.error || '';
+                if (errorMsg.toLowerCase().includes('subdomain')) {
+                    // Subdomain conflict — bring user back to step 1
+                    alert(`The subdomain "${formData.subdomain}" is already taken. Please choose a different one.`);
+                    subdomainValid = false;
+                    document.querySelector(`.wizard-step[data-step="${currentStep}"]`).classList.remove('active');
+                    currentStep = 1;
+                    document.querySelector(`.wizard-step[data-step="1"]`).classList.add('active');
+                    updateProgress();
+                    document.getElementById('subdomain').focus();
+                } else if (errorMsg.toLowerCase().includes('email')) {
+                    // Email conflict — bring user back to step 2
+                    alert('This email address is already registered. Please use a different email or log in.');
+                    document.querySelector(`.wizard-step[data-step="${currentStep}"]`).classList.remove('active');
+                    currentStep = 2;
+                    document.querySelector(`.wizard-step[data-step="2"]`).classList.add('active');
+                    updateProgress();
+                    document.getElementById('adminEmail').focus();
+                } else {
+                    alert(errorMsg || 'A conflict occurred. Please review your details and try again.');
+                }
+            } else {
+                alert(data.error || 'Registration failed. Please try again.');
+            }
         }
         
     } catch (error) {
