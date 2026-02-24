@@ -1,4 +1,3 @@
-const resolveTenant = require('./middleware/tenant.middleware');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,39 +5,88 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
-const app = express();
-app.set('trust proxy', 1);
+const resolveTenant = require('./middleware/tenant.middleware');
 const logger = require('./middleware/logger');
 const errorHandler = require('./middleware/errorHandler');
+const db = require('./config/database');
+const runtimeConfig = require('./config/runtime');
+
+const app = express();
+app.set('trust proxy', runtimeConfig.trustProxyHops);
+
+const createCorsOptions = () => {
+  if (runtimeConfig.cors.allowAllOrigins || runtimeConfig.cors.allowedOrigins.length === 0) {
+    return { origin: true, credentials: true };
+  }
+
+  return {
+    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin || runtimeConfig.cors.allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
+  };
+};
+
 app.use(logger);
-
-// Security Middleware
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
-app.use(cors({ origin: '*', credentials: true }));
+app.use(cors(createCorsOptions()));
 
-// Body Parsing
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// Static Files
+app.use(express.json({ limit: runtimeConfig.bodyLimit }));
+app.use(express.urlencoded({ extended: true, limit: runtimeConfig.bodyLimit }));
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Rate Limiting
-const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, message: { error: 'Too many requests' } });
-app.use('/api/', apiLimiter);
-
-// Health Check
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', message: 'FertilityOS API is running', timestamp: new Date().toISOString() });
+const apiLimiter = rateLimit({
+  windowMs: runtimeConfig.apiRateLimit.windowMs,
+  max: runtimeConfig.apiRateLimit.max,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many requests',
+  },
 });
 
-// API Routes (Public + Auth)
+app.use('/api/', apiLimiter);
+
+app.get('/health', async (req, res) => {
+  const payload = {
+    status: 'ok',
+    service: 'FertilityOS API',
+    environment: runtimeConfig.nodeEnv,
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  };
+
+  if (!runtimeConfig.enableDbHealthcheck) {
+    return res.status(200).json(payload);
+  }
+
+  try {
+    await db.query('SELECT 1 AS healthy');
+    return res.status(200).json({
+      ...payload,
+      database: 'ok',
+    });
+  } catch (error) {
+    return res.status(503).json({
+      ...payload,
+      status: 'degraded',
+      database: 'unavailable',
+      error: 'Database healthcheck failed',
+    });
+  }
+});
+
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/subscription', require('./routes/subscription.routes'));
 app.use('/api/email', require('./routes/email.routes'));
 app.use('/api/subscription-payment', require('./routes/subscription-payment.routes'));
 
-// Tenant-scoped routes
 app.use('/api', resolveTenant);
 app.use('/api/patients', require('./routes/patient.routes'));
 app.use('/api/cycles', require('./routes/cycle.routes'));
@@ -58,19 +106,40 @@ app.use('/api/countries', require('./routes/country.routes'));
 app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/payments', require('./routes/payment.routes'));
 
-// SPA Fallback
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
-// 404 Handler
 app.use('/api', (req, res) => {
   res.status(404).json({ success: false, error: 'API endpoint not found' });
 });
 
-// Error Handler (must be last middleware)
 app.use(errorHandler);
 
-// Start Server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log('Server running on port ' + PORT));
+const PORT = runtimeConfig.port;
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+const shutdown = (signal) => {
+  console.log(`Received ${signal}. Starting graceful shutdown...`);
+
+  server.close(async () => {
+    try {
+      await db.pool.end();
+      console.log('Database pool closed. Shutdown complete.');
+      process.exit(0);
+    } catch (error) {
+      console.error('Error closing database pool during shutdown:', error);
+      process.exit(1);
+    }
+  });
+
+  setTimeout(() => {
+    console.error('Forced shutdown after timeout.');
+    process.exit(1);
+  }, 10000).unref();
+};
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;
