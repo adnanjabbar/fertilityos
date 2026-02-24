@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
+const config = require('./config/app.config');
 
 const resolveTenant = require('./middleware/tenant.middleware');
 const logger = require('./middleware/logger');
