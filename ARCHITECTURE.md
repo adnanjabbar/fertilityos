@@ -1,63 +1,67 @@
 # FertilityOS Architecture Overview
 
-## Environment
-- Ubuntu VPS
-- Nginx serving static frontend
-- Node.js backend running on port 3000
-- PM2 process manager
-- Reverse proxy: `/api` → `localhost:3000`
+## Runtime Topology
+- Ubuntu VPS host with Nginx as entry point.
+- Static frontend is served by Nginx from `/public`.
+- Node.js/Express backend runs on `PORT` (default `3000`) behind Nginx reverse proxy (`/api -> localhost:3000`).
+- PM2 supervises process lifecycle in production.
 
-## Frontend
-Location: `/var/www/ivf-platform/public`
-- Static HTML, CSS, JS pages
-- Uses `fetch()` to call `/api/*` endpoints
-- Main entry points: `login.html`, `dashboard.html`
+## Backend Design (Current)
+- **API framework:** Express with modular route/controller organization under `src/routes` and `src/controllers`.
+- **Core middlewares:**
+  - Helmet security headers.
+  - Configurable CORS policy (`CORS_ALLOWED_ORIGINS`, `CORS_ALLOW_ALL_ORIGINS`).
+  - API-wide rate limiting.
+  - Structured request logging with request IDs.
+  - Centralized error handling with production-safe responses.
+- **Database:** PostgreSQL via `pg` pool (`src/config/database.js`).
+- **Health endpoint:** `/health` reports uptime and optional database health.
 
-## Backend
-Running on port 3000 and managed via PM2.
+## Multi-Tenant Strategy
+- Tenant resolution middleware maps inbound host subdomain -> clinic record.
+- Tenant-scoped endpoints mount under `/api/*` after tenant resolution.
+- Clinic status and subscription checks gate access.
 
-### Core layers
-- **HTTP layer**: Express app + middleware (`helmet`, `cors`, rate limiting, request logger)
-- **Routing layer**: Modular route files under `src/routes`
-- **Controller layer**: Domain logic under `src/controllers`
-- **Data layer**: PostgreSQL pool via `src/config/database.js`
+## API Surface (high-level)
+- Public/auth scope: `/api/auth`, `/api/subscription`, `/api/email`, `/api/subscription-payment`.
+- Tenant scope: patients, cycles, embryos, lab, medical history, medications, treatments, documents, finance, billing, receipts, clinic, countries, users, payments.
 
-### Route groups
-- Public/auth: `/api/auth`, `/api/subscription`, `/api/email`, `/api/subscription-payment`
-- Tenant-scoped: `/api/patients`, `/api/cycles`, `/api/embryos`, `/api/lab`, `/api/medical-history`, `/api/medications`, `/api/treatments`, `/api/documents`, `/api/finance`, `/api/billing`, `/api/receipts`, `/api/clinic`, `/api/countries`, `/api/users`, `/api/payments`
-- System probes: `/api/system/health/live`, `/api/system/health/ready`
+## Operational Hardening Added
+- Runtime config centralization (`src/config/runtime.js`) for environment-driven behavior.
+- Graceful shutdown for PM2/container restarts:
+  - closes HTTP server,
+  - drains DB pool,
+  - exits with timeout safeguard.
+- Consistent `X-Request-Id` response headers for tracing.
 
-## Nginx
-- Serves static files from `/public`
-- Proxies `/api` to backend
+## Recommended Next Evolution (Roadmap)
 
-## Authentication Flow
-1. Browser calls `/api/auth/login`
-2. Nginx proxies to `localhost:3000/auth/login`
-3. Backend returns JWT
-4. Frontend stores token in `localStorage`
+### 1) Domain-Driven Module Boundaries
+- Split into bounded contexts:
+  - Identity & Access (auth, roles, permissions)
+  - Clinical (patients, cycles, embryos, lab)
+  - Financial (billing, receipts, payments, subscriptions)
+  - Platform (tenant provisioning, audit, notifications)
+- Introduce service-layer abstractions for cross-module orchestration.
 
-## Health & Reliability
-- **Liveness endpoint**: `/api/system/health/live`
-  - Returns service-level heartbeat
-- **Readiness endpoint**: `/api/system/health/ready`
-  - Verifies DB connectivity with timeout guard
-  - Returns `503` when dependencies are unavailable
-- Legacy `/health` now redirects to liveness endpoint for compatibility
+### 2) Security & Compliance
+- Add strict JWT rotation + refresh token flows.
+- Add audit trail tables for PHI-sensitive operations.
+- Encrypt sensitive columns at rest.
+- Add configurable CSP and HSTS policy for production.
 
-## Production Hardening Roadmap
-1. Add OpenTelemetry traces + request correlation IDs
-2. Add centralized structured logging sink (ELK/Loki)
-3. Add Redis-backed distributed rate limiting
-4. Add background job runner (BullMQ) for email, billing, reminders
-5. Add cache layer for reference data and heavy dashboard queries
-6. Add blue/green deployment with automated smoke checks
-7. Add API contract tests and load tests in CI
+### 3) Reliability & Scalability
+- Move long-running workflows to background jobs (email dispatch, report generation).
+- Introduce Redis for rate limiting/session/cache hotspots.
+- Add read replicas when reporting load grows.
 
-## Product Roadmap
-- Multi-clinic support
-- Role-based access control
-- IVF modules
-- Billing
-- Lab management
-- Enterprise SaaS model
+### 4) Observability
+- Emit JSON logs to centralized logging backend.
+- Add metrics (`/metrics`) and distributed tracing.
+- Define SLOs for API latency/error rate and alerting policies.
+
+### 5) Product Expansion
+- Enterprise RBAC + feature flags per subscription tier.
+- Multi-clinic parent organization hierarchy.
+- Billing automation + payment reconciliation pipeline.
+- Internationalization and locale-specific workflows.
