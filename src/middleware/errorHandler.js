@@ -1,22 +1,28 @@
+const runtimeConfig = require('../config/runtime');
+
 const errorHandler = (err, req, res, next) => {
-  const statusCode = err.status || 500;
+  const status = err.status || err.statusCode || 500;
+  const requestId = req.requestId || 'unknown';
 
   console.error(
     JSON.stringify({
-      timestamp: new Date().toISOString(),
       level: 'error',
-      message: 'request_failed',
-      requestId: req.requestId,
-      statusCode,
-      error: err.message,
-      stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
+      event: 'request_failed',
+      requestId,
+      method: req.method,
+      path: req.originalUrl,
+      status,
+      message: err.message,
+      stack: runtimeConfig.nodeEnv === 'production' ? undefined : err.stack,
+      timestamp: new Date().toISOString(),
     })
   );
 
-  res.status(statusCode).json({
+  res.status(status).json({
     success: false,
+    requestId,
     message: err.message || 'Internal Server Error',
-    requestId: req.requestId,
+    ...(runtimeConfig.nodeEnv !== 'production' ? { stack: err.stack } : {}),
   });
 };
 
