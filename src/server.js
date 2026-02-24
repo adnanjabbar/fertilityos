@@ -6,10 +6,19 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
-const app = express();
-app.set('trust proxy', 1);
+const { getServerConfig, validateEnv } = require('./config/env');
+const attachRequestContext = require('./middleware/request-context.middleware');
 const logger = require('./middleware/logger');
 const errorHandler = require('./middleware/errorHandler');
+const { liveness, readiness } = require('./controllers/health.controller');
+
+validateEnv();
+const serverConfig = getServerConfig();
+
+const app = express();
+app.set('trust proxy', 1);
+
+app.use(attachRequestContext);
 app.use(logger);
 
 // Security Middleware
@@ -27,10 +36,10 @@ app.use(express.static(path.join(__dirname, '../public')));
 const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, message: { error: 'Too many requests' } });
 app.use('/api/', apiLimiter);
 
-// Health Check
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', message: 'FertilityOS API is running', timestamp: new Date().toISOString() });
-});
+// Health Checks
+app.get('/health', liveness);
+app.get('/health/liveness', liveness);
+app.get('/health/readiness', readiness);
 
 // API Routes (Public + Auth)
 app.use('/api/auth', require('./routes/auth.routes'));
@@ -63,14 +72,32 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../public/index.ht
 
 // 404 Handler
 app.use('/api', (req, res) => {
-  res.status(404).json({ success: false, error: 'API endpoint not found' });
+  res.status(404).json({ success: false, error: 'API endpoint not found', requestId: req.requestId });
 });
 
 // Error Handler (must be last middleware)
 app.use(errorHandler);
 
-// Start Server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log('Server running on port ' + PORT));
+const server = app.listen(serverConfig.port, serverConfig.host, () => {
+  console.log(`Server running on ${serverConfig.host}:${serverConfig.port} (${serverConfig.nodeEnv})`);
+});
+
+const gracefulShutdown = (signal) => {
+  console.log(`Received ${signal}. Starting graceful shutdown...`);
+
+  const forceExitTimer = setTimeout(() => {
+    console.error('Graceful shutdown timed out. Forcing exit.');
+    process.exit(1);
+  }, serverConfig.shutdownTimeoutMs);
+
+  server.close(() => {
+    clearTimeout(forceExitTimer);
+    console.log('HTTP server closed. Shutdown complete.');
+    process.exit(0);
+  });
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 module.exports = app;
