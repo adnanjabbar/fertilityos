@@ -1,66 +1,67 @@
 # FertilityOS Architecture Overview
 
-## 1) Platform Topology
-- **Edge**: Nginx handles TLS termination, static asset delivery, and reverse proxying for API traffic.
-- **Application**: Node.js + Express API process managed by PM2 (`src/server.js`).
-- **Data**: PostgreSQL accessed through a pooled client (`src/config/database.js`).
-- **Clients**: Browser SPA pages in `public/` calling `/api/*` endpoints.
+## Runtime Topology
+- Ubuntu VPS host with Nginx as entry point.
+- Static frontend is served by Nginx from `/public`.
+- Node.js/Express backend runs on `PORT` (default `3000`) behind Nginx reverse proxy (`/api -> localhost:3000`).
+- PM2 supervises process lifecycle in production.
 
-## 2) Runtime Request Flow
-1. Browser requests are served directly by Nginx from static files.
-2. API requests (`/api/*`) are reverse proxied to the Node.js app on port `3000`.
-3. Express middleware applies:
-   - request logging + request ID correlation,
-   - security headers (`helmet`),
-   - CORS policy,
-   - JSON/urlencoded payload parsing,
-   - API rate limiting.
-4. Auth/public routes run first (`/api/auth`, subscription, email, payments).
-5. Tenant middleware resolves clinic/organization context for tenant-scoped routes.
-6. Controllers execute business logic and query PostgreSQL.
-7. Centralized error middleware returns consistent API error responses.
+## Backend Design (Current)
+- **API framework:** Express with modular route/controller organization under `src/routes` and `src/controllers`.
+- **Core middlewares:**
+  - Helmet security headers.
+  - Configurable CORS policy (`CORS_ALLOWED_ORIGINS`, `CORS_ALLOW_ALL_ORIGINS`).
+  - API-wide rate limiting.
+  - Structured request logging with request IDs.
+  - Centralized error handling with production-safe responses.
+- **Database:** PostgreSQL via `pg` pool (`src/config/database.js`).
+- **Health endpoint:** `/health` reports uptime and optional database health.
 
-## 3) Availability & Operations
-- **Liveness**: `GET /health/live`
-  - confirms process uptime and API metadata.
-- **Readiness**: `GET /health/ready`
-  - verifies database dependency via `SELECT 1`.
-- **Legacy compatibility**: `GET /health` permanently redirects to `/health/live`.
-- **Graceful shutdown**:
-  - on `SIGINT` / `SIGTERM`, HTTP listener is closed first,
-  - then PostgreSQL pool is drained before process exit.
+## Multi-Tenant Strategy
+- Tenant resolution middleware maps inbound host subdomain -> clinic record.
+- Tenant-scoped endpoints mount under `/api/*` after tenant resolution.
+- Clinic status and subscription checks gate access.
 
-## 4) Security Baseline
-- Helmet headers enabled (with CSP/embedder policy explicitly disabled for current frontend compatibility).
-- Rate limiting applied to `/api/*`.
-- Tenant isolation middleware applied before protected domain routes.
-- JWT authentication/permissions enforced in route middleware where required.
+## API Surface (high-level)
+- Public/auth scope: `/api/auth`, `/api/subscription`, `/api/email`, `/api/subscription-payment`.
+- Tenant scope: patients, cycles, embryos, lab, medical history, medications, treatments, documents, finance, billing, receipts, clinic, countries, users, payments.
 
-## 5) Observability
-- Structured JSON logs include:
-  - timestamp,
-  - `x-request-id` correlation ID,
-  - method + URL,
-  - status code,
-  - duration in milliseconds,
-  - user agent.
-- Error responses include `requestId` to simplify troubleshooting across client logs and server logs.
+## Operational Hardening Added
+- Runtime config centralization (`src/config/runtime.js`) for environment-driven behavior.
+- Graceful shutdown for PM2/container restarts:
+  - closes HTTP server,
+  - drains DB pool,
+  - exits with timeout safeguard.
+- Consistent `X-Request-Id` response headers for tracing.
 
-## 6) Current Domain Modules
-- Authentication & user management
-- Patients, cycles, embryos
-- Lab workflows + test management
-- Medical history, medications, treatments
-- Documents
-- Finance, billing, payments, receipts
-- Clinic overview & organization settings
-- Subscription and subscription payment flows
+## Recommended Next Evolution (Roadmap)
 
-## 7) Recommended Next Upgrades (High-Impact)
-1. **Production CORS allowlist** (replace wildcard origin).
-2. **Central config schema validation** for all env vars (JWT, SMTP, Stripe, DB).
-3. **API versioning** (`/api/v1`) for long-term backward compatibility.
-4. **Background workers + queue** for email, billing jobs, and heavy report generation.
-5. **Audit trail tables** for clinical and billing mutations.
-6. **OpenAPI spec + contract tests** to stabilize frontend/backend integration.
-7. **Metrics endpoint** (Prometheus) + dashboards (latency, error rate, DB pool saturation).
+### 1) Domain-Driven Module Boundaries
+- Split into bounded contexts:
+  - Identity & Access (auth, roles, permissions)
+  - Clinical (patients, cycles, embryos, lab)
+  - Financial (billing, receipts, payments, subscriptions)
+  - Platform (tenant provisioning, audit, notifications)
+- Introduce service-layer abstractions for cross-module orchestration.
+
+### 2) Security & Compliance
+- Add strict JWT rotation + refresh token flows.
+- Add audit trail tables for PHI-sensitive operations.
+- Encrypt sensitive columns at rest.
+- Add configurable CSP and HSTS policy for production.
+
+### 3) Reliability & Scalability
+- Move long-running workflows to background jobs (email dispatch, report generation).
+- Introduce Redis for rate limiting/session/cache hotspots.
+- Add read replicas when reporting load grows.
+
+### 4) Observability
+- Emit JSON logs to centralized logging backend.
+- Add metrics (`/metrics`) and distributed tracing.
+- Define SLOs for API latency/error rate and alerting policies.
+
+### 5) Product Expansion
+- Enterprise RBAC + feature flags per subscription tier.
+- Multi-clinic parent organization hierarchy.
+- Billing automation + payment reconciliation pipeline.
+- Internationalization and locale-specific workflows.
