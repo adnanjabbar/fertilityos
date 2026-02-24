@@ -4,7 +4,12 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const db = require('./config/database');
+const { validateEnvironment, buildAppMetadata } = require('./config/appConfig');
 require('dotenv').config();
+
+validateEnvironment();
+const appMeta = buildAppMetadata();
 
 const app = express();
 app.set('trust proxy', 1);
@@ -27,9 +32,36 @@ app.use(express.static(path.join(__dirname, '../public')));
 const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, message: { error: 'Too many requests' } });
 app.use('/api/', apiLimiter);
 
-// Health Check
+// Health Checks
+app.get('/health/live', (req, res) => {
+    res.json({
+        status: 'ok',
+        service: appMeta.name,
+        version: appMeta.version,
+        environment: appMeta.environment,
+        uptimeSeconds: Number(process.uptime().toFixed(2)),
+        timestamp: new Date().toISOString()
+    });
+});
+
+app.get('/health/ready', async (req, res, next) => {
+    try {
+        await db.query('SELECT 1');
+        res.json({
+            status: 'ready',
+            dependencies: { database: 'up' },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        error.status = 503;
+        error.message = `Readiness check failed: ${error.message}`;
+        next(error);
+    }
+});
+
+// Backward compatibility
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', message: 'FertilityOS API is running', timestamp: new Date().toISOString() });
+    res.redirect(301, '/health/live');
 });
 
 // API Routes (Public + Auth)
@@ -71,6 +103,20 @@ app.use(errorHandler);
 
 // Start Server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log('Server running on port ' + PORT));
+const server = app.listen(PORT, '0.0.0.0', () => console.log('Server running on port ' + PORT));
+
+const shutdownSignals = ['SIGINT', 'SIGTERM'];
+shutdownSignals.forEach((signal) => {
+    process.on(signal, () => {
+        console.log(`Received ${signal}, shutting down server...`);
+        server.close(() => {
+            console.log('HTTP server closed');
+            db.pool.end(() => {
+                console.log('Database pool closed');
+                process.exit(0);
+            });
+        });
+    });
+});
 
 module.exports = app;
