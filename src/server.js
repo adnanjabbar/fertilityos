@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
+const config = require('./config/app.config');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -27,9 +28,10 @@ app.use(express.static(path.join(__dirname, '../public')));
 const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, message: { error: 'Too many requests' } });
 app.use('/api/', apiLimiter);
 
-// Health Check
+// Health and system probes
+app.use('/api/system', require('./routes/system.routes'));
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', message: 'FertilityOS API is running', timestamp: new Date().toISOString() });
+  res.redirect(302, '/api/system/health/live');
 });
 
 // API Routes (Public + Auth)
@@ -70,7 +72,6 @@ app.use('/api', (req, res) => {
 app.use(errorHandler);
 
 // Start Server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log('Server running on port ' + PORT));
+app.listen(config.port, '0.0.0.0', () => console.log('Server running on port ' + config.port));
 
 module.exports = app;
