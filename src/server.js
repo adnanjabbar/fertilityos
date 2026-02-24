@@ -110,7 +110,7 @@ app.use('/api/payments', require('./routes/payment.routes'));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
 app.use('/api', (req, res) => {
-  res.status(404).json({ success: false, error: 'API endpoint not found' });
+  res.status(404).json({ success: false, error: 'API endpoint not found', requestId: req.requestId });
 });
 
 app.use(errorHandler);
