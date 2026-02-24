@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVF Cycles - FertilityOS</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>FertilityOS</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item active"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>IVF Cycles</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showStartCycleModal()">
+                        ➕ Start New Cycle
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <button class="tab-btn active" onclick="filterCycles('all')">All Cycles</button>
+                <button class="tab-btn" onclick="filterCycles('active')">Active</button>
+                <button class="tab-btn" onclick="filterCycles('completed')">Completed</button>
+            </div>
+            
+            <!-- Cycles Table -->
+            <div class="card">
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Cycle Code</th>
+                                <th>Patient</th>
+                                <th>Cycle #</th>
+                                <th>Type</th>
+                                <th>Current Stage</th>
+                                <th>Start Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cyclesTable">
+                            <tr>
+                                <td colspan="8" class="text-center">Loading cycles...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="pagination" id="pagination"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Start Cycle Modal -->
+    <div id="startCycleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Start New IVF Cycle</h2>
+                <span class="close" onclick="closeStartCycleModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="startCycleForm">
+                    <div class="form-group">
+                        <label for="patientSelect">Select Patient *</label>
+                        <select id="patientSelect" name="patientId" required>
+                            <option value="">Loading patients...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cycleType">Cycle Type *</label>
+                           <select id="cycleType" name="cycleType" required>
+    <option value="fresh">Fresh Cycle</option>
+    <option value="frozen">Frozen Embryo Transfer (FET)</option>
+    <option value="gender_selection">Gender Selection (PGT)</option>
+    <option value="natural">Natural Cycle</option>
+</select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="protocol">Protocol</label>
+                            <select id="protocol" name="protocol">
+                                <option value="">Select Protocol</option>
+                                <option value="long">Long Protocol</option>
+                                <option value="short">Short Protocol</option>
+                                <option value="antagonist">Antagonist Protocol</option>
+                                <option value="natural">Natural Cycle</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Start Date *</label>
+                            <input type="date" id="startDate" name="startDate" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="expectedEggRetrieval">Expected Egg Retrieval</label>
+                            <input type="date" id="expectedEggRetrieval" name="expectedEggRetrieval">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                    
+                    <div id="formError" class="error-message" style="display: none;"></div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeStartCycleModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Start Cycle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+    <script src="/js/cycles.js"></script>
+</body>
+</html>

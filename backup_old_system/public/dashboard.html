@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - FertilityOS</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>FertilityOS</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.location.href='patients.html?action=add'">
+                        ➕ Add Patient
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-details">
+                        <h3 id="totalPatients">0</h3>
+                        <p>Total Patients</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🔬</div>
+                    <div class="stat-details">
+                        <h3 id="activeCycles">0</h3>
+                        <p>Active Cycles</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🧪</div>
+                    <div class="stat-details">
+                        <h3 id="pendingLab">0</h3>
+                        <p>Pending Lab Work</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-details">
+                        <h3 id="completedCycles">0</h3>
+                        <p>Completed Cycles</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Patients -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Patients</h2>
+                    <a href="patients.html" class="btn btn-secondary btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Code</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Phone</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentPatientsTable">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

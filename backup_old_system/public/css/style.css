@@ -1699,7 +1699,6 @@ button:focus-visible,
     height: 320px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 50%;
-    pointer-events: none;
 }
 
 .login-brand-panel::after {
@@ -1711,7 +1710,6 @@ button:focus-visible,
     height: 400px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 50%;
-    pointer-events: none;
 }
 
 .login-brand-content {
@@ -1804,8 +1802,6 @@ button:focus-visible,
     justify-content: center;
     padding: 48px 40px;
     overflow-y: auto;
-    position: relative;
-    z-index: 5;
     box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
 }
 

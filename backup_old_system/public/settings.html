@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - FertilityOS</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>FertilityOS</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item active"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Settings</h1>
+            </header>
+            
+            <!-- Settings Tabs -->
+            <div class="settings-tabs">
+                <button class="settings-tab-btn active" onclick="showTab('profile', this)">My Profile</button>
+                <button class="settings-tab-btn" onclick="showTab('users', this)" id="usersTabBtn">User Management</button>
+                <button class="settings-tab-btn" onclick="showTab('clinic', this)" id="clinicTabBtn">Clinic Profile</button>
+                <button class="settings-tab-btn" onclick="showTab('general', this)" id="generalTabBtn">General Settings</button>
+            </div>
+            
+            <!-- My Profile Tab -->
+            <div id="profileTab" class="settings-tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>My Profile</h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- Avatar row -->
+                        <div class="profile-header-row">
+                            <div class="profile-avatar" id="profileAvatar">?</div>
+                            <div class="profile-header-info">
+                                <h3 id="profileDisplayName">Loading…</h3>
+                                <p id="profileDisplayRole">—</p>
+                            </div>
+                        </div>
+
+                        <form id="profileForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="profileFullName">Full Name</label>
+                                    <input type="text" id="profileFullName" name="fullName">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="profileEmail">Email (cannot be changed)</label>
+                                    <input type="email" id="profileEmail" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="profilePhone">Phone</label>
+                                    <input type="tel" id="profilePhone" name="phone">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="profileRole">Role (cannot be changed)</label>
+                                    <input type="text" id="profileRole" disabled>
+                                </div>
+                            </div>
+                            
+                            <hr style="margin: 30px 0;">
+                            
+                            <h3 style="margin-bottom: 20px;">Change Password</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" name="currentPassword">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" name="newPassword">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+
+                        <hr style="margin: 30px 0;">
+
+                        <!-- Security section -->
+                        <h3 style="margin-bottom: 16px;">Security</h3>
+                        <div class="toggle-row">
+                            <div>
+                                <div class="toggle-label">Two-Factor Authentication</div>
+                                <div class="toggle-desc">Add an extra layer of security to your account (coming soon)</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="twoFactorToggle" disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <hr style="margin: 30px 0;">
+
+                        <!-- Active sessions -->
+                        <h3 style="margin-bottom: 16px;">Active Sessions</h3>
+                        <div id="sessionsContainer">
+                            <div class="toggle-row">
+                                <div>
+                                    <div class="toggle-label">Current Session</div>
+                                    <div class="toggle-desc" id="currentSessionInfo">This device · Logged in now</div>
+                                </div>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                        </div>
+
+                        <hr style="margin: 30px 0;">
+
+                        <!-- Activity log -->
+                        <h3 style="margin-bottom: 16px;">Recent Activity</h3>
+                        <div id="activityLog">
+                            <p class="text-muted" style="font-size:14px;">Activity log coming soon.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Management Tab -->
+            <div id="usersTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>User Management <span class="user-count-badge" id="userCountBadge"></span></h2>
+                        <button class="btn btn-primary" onclick="showAddUserModal()">
+                            ➕ Add User
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="users-toolbar">
+                            <input type="text" class="users-search" id="usersSearch" placeholder="Search users…" oninput="filterUsers()">
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table users-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Phone</th>
+                                        <th>Status</th>
+                                        <th>Last Login</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTable">
+                                    <tr>
+                                        <td colspan="7" class="text-center">Loading users...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Clinic Profile Tab -->
+            <div id="clinicTab" class="settings-tab-content">
+                <!-- Subscription Info -->
+                <div class="subscription-info-card" id="subscriptionInfo">
+                    <div>
+                        <div class="subscription-plan-badge" id="subscriptionPlanBadge">⭐ Starter Plan</div>
+                        <p id="subscriptionExpiry">Renews: —</p>
+                    </div>
+                    <a href="/register-wizard.html" class="btn btn-primary btn-sm">⬆ Upgrade Plan</a>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Clinic Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- Logo Upload -->
+                        <label class="logo-upload-area" id="logoUploadArea" for="clinicLogoInput">
+                            <div class="logo-preview" id="logoPreview">🏥</div>
+                            <div class="logo-upload-text">
+                                <p>Clinic Logo</p>
+                                <span>Click to upload · PNG, JPG, SVG up to 2 MB</span>
+                            </div>
+                        </label>
+                        <input type="file" id="clinicLogoInput" accept="image/*" style="display:none;" onchange="handleLogoUpload(event)">
+
+                        <form id="clinicForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicNameInput">Clinic Name</label>
+                                    <input type="text" id="clinicNameInput" name="clinicName">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clinicSubdomain">Subdomain (cannot be changed)</label>
+                                    <input type="text" id="clinicSubdomain" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicEmail">Email</label>
+                                    <input type="email" id="clinicEmail" name="email">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clinicPhone">Phone</label>
+                                    <input type="tel" id="clinicPhone" name="phone">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicAddress">Address</label>
+                                    <input type="text" id="clinicAddress" name="address">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clinicCity">City</label>
+                                    <input type="text" id="clinicCity" name="city">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicCountry">Country</label>
+                                    <input type="text" id="clinicCountry" name="country" placeholder="e.g., United States">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="clinicTimezone">Timezone</label>
+                                    <select id="clinicTimezone" name="timezone">
+                                        <option value="">Select timezone</option>
+                                        <option value="UTC">UTC</option>
+                                        <option value="America/New_York">America/New_York (EST/EDT)</option>
+                                        <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+                                        <option value="America/Denver">America/Denver (MST/MDT)</option>
+                                        <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                                        <option value="Europe/London">Europe/London (GMT/BST)</option>
+                                        <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                                        <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                                        <option value="Asia/Karachi">Asia/Karachi (PKT)</option>
+                                        <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                                        <option value="Asia/Dhaka">Asia/Dhaka (BST)</option>
+                                        <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
+                                        <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                                        <option value="Australia/Sydney">Australia/Sydney (AEST)</option>
+                                        <option value="Africa/Nairobi">Africa/Nairobi (EAT)</option>
+                                        <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicLicense">License Number</label>
+                                    <input type="text" id="clinicLicense" name="licenseNumber">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clinicRegBody">Regulatory Body Name</label>
+                                    <input type="text" id="clinicRegBody" name="regulatoryBodyName" placeholder="e.g., FDA, HFEA, Ministry of Health">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clinicCurrency">Currency</label>
+                                    <select id="clinicCurrency" name="currency">
+                                        <option value="">Select currency</option>
+                                        <option value="USD">USD — US Dollar</option>
+                                        <option value="EUR">EUR — Euro</option>
+                                        <option value="GBP">GBP — British Pound</option>
+                                        <option value="PKR">PKR — Pakistani Rupee</option>
+                                        <option value="INR">INR — Indian Rupee</option>
+                                        <option value="AED">AED — UAE Dirham</option>
+                                        <option value="SAR">SAR — Saudi Riyal</option>
+                                        <option value="BDT">BDT — Bangladeshi Taka</option>
+                                        <option value="NGN">NGN — Nigerian Naira</option>
+                                        <option value="KES">KES — Kenyan Shilling</option>
+                                        <option value="ZAR">ZAR — South African Rand</option>
+                                        <option value="CAD">CAD — Canadian Dollar</option>
+                                        <option value="AUD">AUD — Australian Dollar</option>
+                                        <option value="SGD">SGD — Singapore Dollar</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Update Clinic Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Settings Tab -->
+            <div id="generalTab" class="settings-tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>General Settings</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="generalForm">
+                            <div class="general-section">
+                                <h3>📅 Date &amp; Time</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="dateFormat">Date Format</label>
+                                        <select id="dateFormat" name="dateFormat">
+                                            <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 20/02/2026)</option>
+                                            <option value="MM/DD/YYYY">MM/DD/YYYY (e.g. 02/20/2026)</option>
+                                            <option value="YYYY-MM-DD">YYYY-MM-DD (e.g. 2026-02-20)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="general-section">
+                                <h3>💱 Currency</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="defaultCurrency">Default Currency</label>
+                                        <select id="defaultCurrency" name="defaultCurrency">
+                                            <option value="USD">USD — US Dollar</option>
+                                            <option value="EUR">EUR — Euro</option>
+                                            <option value="GBP">GBP — British Pound</option>
+                                            <option value="PKR">PKR — Pakistani Rupee</option>
+                                            <option value="INR">INR — Indian Rupee</option>
+                                            <option value="AED">AED — UAE Dirham</option>
+                                            <option value="SAR">SAR — Saudi Riyal</option>
+                                            <option value="BDT">BDT — Bangladeshi Taka</option>
+                                            <option value="NGN">NGN — Nigerian Naira</option>
+                                            <option value="KES">KES — Kenyan Shilling</option>
+                                            <option value="ZAR">ZAR — South African Rand</option>
+                                            <option value="CAD">CAD — Canadian Dollar</option>
+                                            <option value="AUD">AUD — Australian Dollar</option>
+                                            <option value="SGD">SGD — Singapore Dollar</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="general-section">
+                                <h3>🌐 Language</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="language">Language</label>
+                                        <select id="language" name="language">
+                                            <option value="en">English</option>
+                                        </select>
+                                        <small style="color:var(--text-muted);font-size:12px;margin-top:4px;display:block;">More languages coming soon.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="general-section">
+                                <h3>🔔 Notifications</h3>
+                                <div class="toggle-row">
+                                    <div>
+                                        <div class="toggle-label">Email Notifications</div>
+                                        <div class="toggle-desc">Receive email alerts for appointments, lab results, and billing</div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="emailNotifications" name="emailNotifications" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Save General Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New User</h2>
+                <span class="close" onclick="closeAddUserModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userFullName">Full Name *</label>
+                            <input type="text" id="userFullName" name="fullName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userEmail">Email *</label>
+                            <input type="email" id="userEmail" name="email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userPassword">Password *</label>
+                            <input type="password" id="userPassword" name="password" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userPhone">Phone</label>
+                            <input type="tel" id="userPhone" name="phone">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userRole">Role *</label>
+                        <select id="userRole" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="admin">Admin — Full system access</option>
+                            <option value="doctor">Doctor — Patient &amp; cycle management</option>
+                            <option value="embryologist">Embryologist — Lab &amp; embryo data</option>
+                            <option value="ivf_consultant">IVF Consultant — Patient consultations</option>
+                            <option value="lab_director">Lab Director — Lab management &amp; admin</option>
+                            <option value="lab_tech">Lab Technician — Lab orders &amp; results</option>
+                            <option value="nurse">Nurse — Patient care support</option>
+                            <option value="quality_manager">Quality Manager — Audits &amp; compliance</option>
+                            <option value="receptionist">Receptionist — Appointments &amp; reception</option>
+                        </select>
+                    </div>
+                    
+                    <div id="addUserError" class="error-message" style="display: none;"></div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddUserModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+    <script src="/js/settings.js"></script>
+</body>
+</html>

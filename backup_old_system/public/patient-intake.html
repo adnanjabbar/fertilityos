@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Intake - FertilityOS</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>FertilityOS</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span>📊</span> Dashboard
+                </a>
+                <a href="patients.html" class="nav-item active">
+                    <span>👥</span> Patients
+                </a>
+                <a href="cycles.html" class="nav-item">
+                    <span>🔬</span> IVF Cycles
+                </a>
+                <a href="lab.html" class="nav-item">
+                    <span>🧪</span> Lab
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span>📈</span> Reports
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span>⚙️</span> Settings
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>New Patient Intake</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="window.location.href='patients.html'">
+                        ← Back to Patients
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Progress Indicator -->
+            <div class="intake-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Demographics</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Medical History</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Documents</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Payment</div>
+                </div>
+            </div>
+            
+            <!-- Step 1: Demographics -->
+            <div class="intake-step active" id="step1">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Patient Demographics</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="demographicsForm">
+                            <h3 style="margin-bottom: 20px; color: #667eea;">Basic Information</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="fullName">Full Name *</label>
+                                    <input type="text" id="fullName" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="dateOfBirth">Date of Birth *</label>
+                                    <input type="date" id="dateOfBirth" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="gender">Gender *</label>
+                                    <select id="gender" required>
+                                        <option value="Female">Female</option>
+                                        <option value="Male">Male</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="cnic">CNIC</label>
+                                    <input type="text" id="cnic" placeholder="35202-1234567-8" maxlength="15" onkeyup="formatCNIC(this)">
+                                </div>
+                            </div>
+                            
+                            <h3 style="margin: 30px 0 20px; color: #667eea;">Contact Information</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="phone">Phone Number *</label>
+                                    <input type="tel" id="phone" required placeholder="0300-1234567" maxlength="12" onkeyup="formatPhone(this)">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="address">Address</label>
+                                    <input type="text" id="address">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input type="text" id="city" placeholder="Lahore">
+                                </div>
+                            </div>
+                            
+                            <h3 style="margin: 30px 0 20px; color: #667eea;">Medical Record</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="mrn">MRN (Medical Record Number)</label>
+                                    <input type="text" id="mrn" placeholder="Will be auto-generated if empty">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="bloodGroup">Blood Group</label>
+                                    <select id="bloodGroup">
+                                        <option value="">Select</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="heightCm">Height (cm)</label>
+                                    <input type="number" id="heightCm" placeholder="165">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="weightKg">Weight (kg)</label>
+                                    <input type="number" id="weightKg" placeholder="62">
+                                </div>
+                            </div>
+                            
+                            <h3 style="margin: 30px 0 20px; color: #667eea;">Partner Information</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="partnerName">Partner Name</label>
+                                    <input type="text" id="partnerName">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="partnerAge">Partner Age</label>
+                                    <input type="number" id="partnerAge">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="partnerPhone">Partner Phone</label>
+                                <input type="tel" id="partnerPhone" maxlength="12" onkeyup="formatPhone(this)">
+                            </div>
+                            
+                            <h3 style="margin: 30px 0 20px; color: #667eea;">Referring Doctor</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="referringDoctor">Referring Doctor Name</label>
+                                    <input type="text" id="referringDoctor">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="referringHospital">Hospital/Clinic</label>
+                                    <input type="text" id="referringHospital">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="referringDoctorPhone">Referring Doctor Phone</label>
+                                <input type="tel" id="referringDoctorPhone">
+                            </div>
+                            
+                            <h3 style="margin: 30px 0 20px; color: #667eea;">Consultation</h3>
+                            
+                            <div class="form-group">
+                                <label for="consultationFee">Consultation Fee (PKR)</label>
+                                <input type="number" id="consultationFee" placeholder="5000">
+                            </div>
+                            
+                            <div id="step1Error" class="error-message" style="display: none;"></div>
+                            
+                            <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
+                                <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                                    Next: Medical History →
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Medical History -->
+            <div class="intake-step" id="step2">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Medical History</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="medicalHistoryForm">
+                            <h3 style="margin-bottom: 20px; color: #667eea;">Chief Complaint</h3>
+                            
+                            <div class="form-group">
+                                <label for="chiefComplaint">Chief Complaint</label>
+                                <textarea id="chiefComplaint" rows="3" placeholder="Primary reason for visit..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="durationOfInfertility">Duration of Infertility</label>
+                                <input type="text" id="durationOfInfertility" placeholder="e.g., 3 years">
+                            </div>
+                            
+                            <h3 style="margin: 30px 0 20px; color: #667eea;">Gynecological History</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="lastMenstrualPeriod">Last Menstrual Period (LMP)</label>
+                                    <input type="date" id="lastMenstrualPeriod">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="cycleLengthDays">Cycle Length (days)</label>
+                                    <input type="number" id="cycleLengthDays" placeholder="28">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cycleRegularity">Cycle Regularity</label>
+                                <select id="cycleRegularity">
+                                    <option value="">Select</option>
+                                    <option value="Regular">Regular</option>
+                                    <option value="Irregular">Irregular</option>
+                                    <option value="Absent">Absent</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="menstrualHistory">Menstrual History Details</label>
+                                <textarea id="menstrualHistory" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="obstetricHistory">Obstetric History (G_P_A_)</label>
+                                <input type="text" id="obstetricHistory" placeholder="e.g., G2P1A1">
+                            </div>
+                            
+                            <h3 style="margin: 30px 0 20px; color: #667eea;">Medical & Surgical History</h3>
+                            
+                            <div class="form-group">
+                                <label for="medicalConditions">Medical Conditions (separate with commas)</label>
+                                <textarea id="medicalConditions" rows="2" placeholder="e.g., Diabetes, Hypertension, PCOS"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="surgeries">Previous Surgeries (separate with commas)</label>
+                                <textarea id="surgeries" rows="2" placeholder="e.g., Appendectomy, Laparoscopy"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="allergies">Known Allergies (separate with commas)</label>
+                                <textarea id="allergies" rows="2" placeholder="e.g., Penicillin, Pollen"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="familyHistory">Family History</label>
+                                <textarea id="familyHistory" rows="2"></textarea>
+                            </div>
+                            
+                            <h3 style="margin: 30px 0 20px; color: #667eea;">Previous Fertility Treatments</h3>
+                            
+                            <div id="previousTreatments">
+                                <div class="treatment-entry">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Treatment Type</label>
+                                            <input type="text" class="treatment-type" placeholder="e.g., IUI, IVF">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Date</label>
+                                            <input type="text" class="treatment-date" placeholder="e.g., Jan 2024">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Outcome</label>
+                                            <input type="text" class="treatment-outcome" placeholder="e.g., Negative">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="addTreatmentEntry()">
+                                + Add Another Treatment
+                            </button>
+                            
+                            <h3 style="margin: 30px 0 20px; color: #667eea;">Lifestyle</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Smoking</label>
+                                    <select id="smoking">
+                                        <option value="false">No</option>
+                                        <option value="true">Yes</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Alcohol</label>
+                                    <select id="alcohol">
+                                        <option value="false">No</option>
+                                        <option value="true">Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="exercise">Exercise Routine</label>
+                                <input type="text" id="exercise" placeholder="e.g., Walking 30 min daily">
+                            </div>
+                            
+                            <div id="step2Error" class="error-message" style="display: none;"></div>
+                            
+                            <div style="margin-top: 30px; display: flex; justify-content: space-between;">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep(1)">
+                                    ← Previous
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                                    Next: Documents →
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Documents -->
+            <div class="intake-step" id="step3">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Upload Documents</h2>
+                    </div>
+                    <div class="card-body">
+                        <p style="margin-bottom: 20px; color: #64748b;">
+                            Upload any previous reports, scans, prescriptions, or medical records the patient has brought.
+                        </p>
+                        
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">📁</div>
+                            <h3>Drag & Drop Files Here</h3>
+                            <p>or click to browse</p>
+                            <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                Choose Files
+                            </button>
+                        </div>
+                        
+                        <div id="uploadedFiles" style="margin-top: 30px;">
+                            <!-- Uploaded files will appear here -->
+                        </div>
+                        
+                        <div id="step3Error" class="error-message" style="display: none;"></div>
+                        
+                        <div style="margin-top: 30px; display: flex; justify-content: space-between;">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+                                ← Previous
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep(4)">
+                                Next: Payment →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 4: Payment & Receipt -->
+            <div class="intake-step" id="step4">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Payment & Receipt</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="paymentAmount">Amount to Pay (PKR) *</label>
+                                <input type="number" id="paymentAmount" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="paymentMethod">Payment Method *</label>
+                                <select id="paymentMethod" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="serviceDescription">Service Description</label>
+                            <input type="text" id="serviceDescription" value="Initial Consultation" placeholder="What is this payment for?">
+                        </div>
+                        
+                        <div id="step4Error" class="error-message" style="display: none;"></div>
+                        <div id="step4Success" class="success-message" style="display: none;"></div>
+                        
+                        <div style="margin-top: 30px; display: flex; justify-content: space-between;">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
+                                ← Previous
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="completeIntake()" id="completeBtn">
+                                Complete Registration & Generate Receipt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Receipt Preview (will show after completion) -->
+                <div id="receiptPreview" style="display: none; margin-top: 30px;">
+                    <!-- Receipt will be generated here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+    <script src="/js/patient-intake.js"></script>
+</body>
+</html>
