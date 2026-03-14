@@ -21,14 +21,14 @@ export default function Navbar({ session }: { session: Session | null }) {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2 group">
             <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-700 group-hover:bg-blue-800 transition-colors">
               <Activity className="w-5 h-5 text-white" strokeWidth={2.5} />
             </div>
             <span className="font-bold text-xl text-slate-900 tracking-tight">
               Fertility<span className="text-teal-600">OS</span>
             </span>
-          </a>
+          </Link>
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-6">

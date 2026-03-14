@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, CheckCircle } from "lucide-react";
 
 const highlights = [
@@ -60,13 +61,19 @@ export default function Hero() {
 
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="#waitlist"
+            <Link
+              href="/register"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold text-lg hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-0.5"
             >
               Get Early Access
               <ArrowRight className="w-5 h-5" />
-            </a>
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-200 bg-white text-slate-800 font-bold text-lg hover:border-blue-300 hover:text-blue-700 transition-all"
+            >
+              Sign In
+            </Link>
             <a
               href="#modules"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-200 bg-white text-slate-800 font-bold text-lg hover:border-blue-300 hover:text-blue-700 transition-all"
