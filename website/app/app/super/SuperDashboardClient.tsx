@@ -55,7 +55,7 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 function formatDate(s: string) {
-  return new Date(s).toLocaleDateString(undefined, {
+  return new Date(s).toLocaleString(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
   });
