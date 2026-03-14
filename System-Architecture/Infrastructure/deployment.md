@@ -43,7 +43,10 @@ Add `AUTH_TRUST_HOST=true` and `AUTH_URL=https://www.thefertilityos.com` (or you
 - **Create/attach:** Use App Platform **Add Resource → Database → Create and attach**. Prefer PostgreSQL 18; set **database name** (e.g. `fertilityos`).
 - **Connection:** Ensure the web service has **`DATABASE_URL`** set to the DB connection string (DO often injects it under a component name; alias or copy it to `DATABASE_URL`).
 - **Migrations:** Run the SQL files in `website/db/migrations/` **once** (in order). See **`Infrastructure/digitalocean-database-setup.md`** for step-by-step instructions.
-- **Demo account (optional):** From `website/` run `npm run db:seed-demo` (with `DATABASE_URL` set). Creates a demo clinic and user. **Login:** `demo` / `demo`.
+- **Demo account (optional):**  
+  - **CLI:** From `website/` run `npm run db:seed-demo` (with `DATABASE_URL` set).  
+  - **API (e.g. production):** Set `SEED_DEMO_SECRET` in env, then `POST /api/admin/seed-demo?secret=YOUR_SEED_DEMO_SECRET` (or header `x-seed-secret`).  
+  **Login:** `demo` / `demo`.
 
 ## For development and agents
 
