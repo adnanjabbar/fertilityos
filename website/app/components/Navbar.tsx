@@ -4,17 +4,20 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, Activity } from "lucide-react";
 import type { Session } from "next-auth";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./LanguageSwitcher";
 
-const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Modules", href: "#modules" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "About", href: "#about" },
-];
+const navLinkKeys = [
+  { key: "features", href: "#features" },
+  { key: "modules", href: "#modules" },
+  { key: "pricing", href: "#pricing" },
+  { key: "howItWorks", href: "#how-it-works" },
+  { key: "about", href: "#about" },
+] as const;
 
 export default function Navbar({ session }: { session: Session | null }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const t = useTranslations("landing.nav");
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
@@ -32,32 +35,33 @@ export default function Navbar({ session }: { session: Session | null }) {
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
+            {navLinkKeys.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 className="text-sm font-medium text-slate-600 hover:text-blue-700 transition-colors"
               >
-                {link.label}
+                {t(link.key)}
               </a>
             ))}
           </div>
 
-          {/* Desktop CTAs */}
+          {/* Desktop CTAs + Language */}
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher variant="buttons" className="shrink-0" />
             {session ? (
               <>
                 <Link
                   href="/app/dashboard"
                   className="text-sm font-medium text-slate-600 hover:text-blue-700 transition-colors"
                 >
-                  Dashboard
+                  {t("dashboard")}
                 </Link>
                 <Link
                   href="/api/auth/signout"
                   className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition-colors shadow-sm"
                 >
-                  Log out
+                  {t("logOut")}
                 </Link>
               </>
             ) : (
@@ -66,13 +70,13 @@ export default function Navbar({ session }: { session: Session | null }) {
                   href="/login"
                   className="text-sm font-medium text-slate-600 hover:text-blue-700 transition-colors"
                 >
-                  Sign In
+                  {t("signIn")}
                 </Link>
                 <Link
                   href="/register"
                   className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition-colors shadow-sm"
                 >
-                  Get Early Access
+                  {t("getEarlyAccess")}
                 </Link>
               </>
             )}
@@ -82,7 +86,7 @@ export default function Navbar({ session }: { session: Session | null }) {
           <button
             className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
+            aria-label={t("toggleMenu")}
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -91,14 +95,18 @@ export default function Navbar({ session }: { session: Session | null }) {
         {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden border-t border-slate-100 py-4 space-y-3">
-            {navLinks.map((link) => (
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm font-medium text-slate-500">Language</span>
+              <LanguageSwitcher variant="buttons" />
+            </div>
+            {navLinkKeys.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 className="block text-sm font-medium text-slate-700 hover:text-blue-700 py-1"
                 onClick={() => setMobileOpen(false)}
               >
-                {link.label}
+                {t(link.key)}
               </a>
             ))}
             <div className="pt-2 flex flex-col gap-2">
@@ -109,14 +117,14 @@ export default function Navbar({ session }: { session: Session | null }) {
                     className="w-full text-center px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50"
                     onClick={() => setMobileOpen(false)}
                   >
-                    Dashboard
+                    {t("dashboard")}
                   </Link>
                   <Link
                     href="/api/auth/signout"
                     className="w-full text-center px-4 py-2 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
-                    Log out
+                    {t("logOut")}
                   </Link>
                 </>
               ) : (
@@ -125,7 +133,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                   className="w-full text-center px-4 py-2 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
-                  Get Early Access
+                  {t("getEarlyAccess")}
                 </Link>
               )}
             </div>

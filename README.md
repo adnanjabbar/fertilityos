@@ -76,7 +76,7 @@ All plans include a **14-day free trial** — no credit card required.
 
 ## Architecture
 
-See [`System-Architecture/README.md`](./System-Architecture/README.md) for the full development roadmap and architecture documentation.
+See [`System-Architecture/README.md`](./System-Architecture/README.md) for the full development roadmap and architecture documentation. For HIPAA-style compliance controls and how FertilityOS implements them, see [`System-Architecture/Compliance/hipaa-checklist.md`](./System-Architecture/Compliance/hipaa-checklist.md).
 
 ---
 

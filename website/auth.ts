@@ -1,8 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { db } from "./db";
-import { users, tenants } from "./db/schema";
-import { eq } from "drizzle-orm";
+import { users, tenants, patients, patientPortalTokens } from "./db/schema";
+import { eq, and, gt, isNull } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 declare module "next-auth" {
@@ -13,6 +13,7 @@ declare module "next-auth" {
     tenantId: string;
     roleSlug: string;
     tenantName?: string;
+    patientId?: string;
   }
 
   interface Session {
@@ -26,6 +27,7 @@ declare module "@auth/core/jwt" {
     tenantId: string;
     roleSlug: string;
     tenantName?: string;
+    patientId?: string;
   }
 }
 
@@ -73,6 +75,54 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       },
     }),
+    Credentials({
+      id: "portal-token",
+      name: "Portal magic link",
+      credentials: {
+        token: { label: "Token", type: "text" },
+      },
+      async authorize(credentials) {
+        const token = credentials?.token ? String(credentials.token).trim() : null;
+        if (!token) return null;
+
+        const [row] = await db
+          .select({
+            tokenId: patientPortalTokens.id,
+            patientId: patients.id,
+            email: patients.email,
+            firstName: patients.firstName,
+            lastName: patients.lastName,
+            tenantId: patients.tenantId,
+          })
+          .from(patientPortalTokens)
+          .innerJoin(patients, eq(patientPortalTokens.patientId, patients.id))
+          .where(
+            and(
+              eq(patientPortalTokens.token, token),
+              gt(patientPortalTokens.expiresAt, new Date()),
+              isNull(patientPortalTokens.usedAt)
+            )
+          )
+          .limit(1);
+
+        if (!row || !row.patientId) return null;
+
+        await db
+          .update(patientPortalTokens)
+          .set({ usedAt: new Date() })
+          .where(eq(patientPortalTokens.id, row.tokenId));
+
+        const name = [row.firstName, row.lastName].filter(Boolean).join(" ") || "Patient";
+        return {
+          id: row.patientId,
+          email: row.email ?? "",
+          name,
+          tenantId: row.tenantId,
+          roleSlug: "patient",
+          patientId: row.patientId,
+        };
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -83,6 +133,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.tenantId = user.tenantId;
         token.roleSlug = user.roleSlug;
         token.tenantName = (user as { tenantName?: string }).tenantName;
+        token.patientId = (user as { patientId?: string }).patientId;
       }
       return token;
     },
@@ -94,6 +145,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.tenantId = token.tenantId ?? "";
         session.user.roleSlug = token.roleSlug ?? "staff";
         session.user.tenantName = token.tenantName ?? undefined;
+        session.user.patientId = token.patientId ?? undefined;
       }
       return session;
     },

@@ -1,0 +1,305 @@
+{
+  "landing": {
+    "hero": {
+      "badge": "Abiertas solicitudes de acceso anticipado",
+      "title": "El sistema operativo",
+      "titleHighlight": "para la atención en fertilidad",
+      "subheadline": "FertilityOS es la primera plataforma integral del mundo diseñada específicamente para clínicas de fertilidad y centros de salud reproductiva. Gestiona cada paso — desde la admisión del paciente hasta la transferencia embrionaria — en un solo lugar.",
+      "highlights": {
+        "purposeBuilt": "Diseñado para clínicas de fertilidad",
+        "ivfLab": "Flujos de trabajo de laboratorio FIV y embriología",
+        "multiTenant": "Multi-inquilino, listo para marca blanca",
+        "hipaa": "Arquitectura compatible con HIPAA"
+      },
+      "cta": {
+        "getEarlyAccess": "Obtener acceso anticipado",
+        "signIn": "Iniciar sesión",
+        "exploreModules": "Explorar módulos"
+      },
+      "trustBar": "Con la confianza de especialistas en fertilidad en todo el mundo",
+      "clinicNames": ["Advanced Fertility Center", "ReproMed Institute", "IVF Solutions", "BabyHope Clinic", "FertileLife Center"],
+      "dashboardMockup": {
+        "url": "app.thefertilityos.com/dashboard",
+        "activePatients": "Pacientes activos",
+        "ivfCyclesToday": "Ciclos FIV hoy",
+        "embryosInCulture": "Embriones en cultivo",
+        "appointmentsToday": "Citas hoy",
+        "ivfCycleOverview": "Resumen del ciclo FIV — Marzo 2026",
+        "todaysSchedule": "Agenda de hoy",
+        "retrieval": "Recuperación",
+        "consultation": "Consulta",
+        "transfer": "Transferencia"
+      }
+    },
+    "nav": {
+      "features": "Características",
+      "modules": "Módulos",
+      "pricing": "Precios",
+      "howItWorks": "Cómo funciona",
+      "about": "Nosotros",
+      "dashboard": "Panel",
+      "logOut": "Cerrar sesión",
+      "signIn": "Iniciar sesión",
+      "getEarlyAccess": "Obtener acceso anticipado",
+      "toggleMenu": "Abrir/cerrar menú",
+      "brand": "FertilityOS"
+    },
+    "footer": {
+      "Product": "Producto",
+      "Company": "Empresa",
+      "Legal": "Legal",
+      "Support": "Soporte",
+      "tagline": "El primer sistema operativo del mundo para clínicas de fertilidad y centros de salud reproductiva.",
+      "builtBy": "Creado por un especialista en fertilidad.",
+      "links": {
+        "features": "Características",
+        "modules": "Módulos",
+        "pricing": "Precios",
+        "howItWorks": "Cómo funciona",
+        "roadmap": "Hoja de ruta",
+        "about": "Nosotros",
+        "blog": "Blog",
+        "careers": "Carreras",
+        "contact": "Contacto",
+        "privacyPolicy": "Política de privacidad",
+        "termsOfService": "Términos de servicio",
+        "hipaaPolicy": "Política HIPAA",
+        "cookiePolicy": "Política de cookies",
+        "documentation": "Documentación",
+        "apiReference": "Referencia API",
+        "statusPage": "Estado del servicio",
+        "helpCenter": "Centro de ayuda"
+      },
+      "badges": ["Listo para HIPAA", "Conforme GDPR", "SSL asegurado", "SOC 2 (Planificado)"],
+      "copyright": "© {year} FertilityOS. Todos los derechos reservados.",
+      "taglineBottom": "Diseñado para clínicos. Construido para escalar. Con la nube."
+    },
+    "features": {
+      "badge": "Capacidades de la plataforma",
+      "title": "Plataforma de nivel empresarial.",
+      "titleHighlight": "Simplicidad para la clínica.",
+      "subtitle": "FertilityOS combina la seguridad y escalabilidad del software empresarial con la facilidad de uso que los equipos clínicos necesitan.",
+      "items": {
+        "whiteLabel": {
+          "title": "Listo para marca blanca",
+          "description": "Usa tu propio dominio, logo y colores de marca. Pacientes y personal ven tu marca, con FertilityOS en segundo plano."
+        },
+        "hipaa": {
+          "title": "Arquitectura compatible con HIPAA",
+          "description": "Cifrado de extremo a extremo, registros de auditoría, acceso por roles y acuerdos de asociado comercial (BAA) en planes Scale y Enterprise."
+        },
+        "ivfWorkflows": {
+          "title": "Diseñado para flujos FIV",
+          "description": "Diseñado por un especialista en fertilidad. Cada flujo, campo e informe se corresponde con la práctica clínica real."
+        },
+        "multiRole": {
+          "title": "Gestión de equipos multirol",
+          "description": "Médicos, embriólogos, enfermeras, recepcionistas y técnicos de laboratorio tienen una interfaz adaptada con los permisos que necesitan."
+        },
+        "dataSovereignty": {
+          "title": "Soberanía de datos",
+          "description": "Los datos de tu clínica se almacenan en entornos aislados y cifrados. La separación por inquilino evita fugas entre cuentas."
+        },
+        "alwaysUpdated": {
+          "title": "Siempre actualizado",
+          "description": "SaaS nativo en la nube: sin instalaciones ni actualizaciones. Nuevas funciones y requisitos se despliegan automáticamente."
+        }
+      },
+      "stats": {
+        "specialtyModules": "Módulos especializados",
+        "uptimeSla": "SLA de disponibilidad",
+        "compliant": "Conforme",
+        "support": "Soporte (Scale+)"
+      }
+    },
+    "modules": {
+      "badge": "Modular por diseño",
+      "title": "Cada módulo que necesita tu clínica.",
+      "titleHighlight": "Paga solo por lo que uses.",
+      "subtitle": "FertilityOS se basa en una arquitectura modular. La plataforma base incluye cuentas multi-inquilino, RBAC y gestión básica de pacientes. Añade módulos especializados según crezca tu clínica.",
+      "comingSoon": "Próximamente",
+      "core": "Núcleo",
+      "specialty": "Especialidad",
+      "addon": "Complemento",
+      "legend": {
+        "core": "Núcleo — incluido en todos los planes",
+        "specialty": "Especialidad — módulo enfocado en FIV",
+        "addon": "Complemento — activable por clínica"
+      },
+      "items": {
+        "patientManagement": { "name": "Gestión de pacientes", "description": "Perfiles completos, historial médico, consentimientos, vinculación pareja/donante y gestión documental. El centro de cada trayectoria del paciente." },
+        "scheduling": { "name": "Agenda y citas", "description": "Calendario multi-profesional con reservas arrastrar-y-soltar, recordatorios SMS/email automáticos y plantillas de citas recurrentes." },
+        "emr": { "name": "Historial médico electrónico", "description": "Notas clínicas en formato SOAP, códigos ICD-10, prescripciones, cartas de derivación y trazabilidad para cumplimiento." },
+        "ivfLab": { "name": "Laboratorio FIV y embriología", "description": "Seguimiento completo del ciclo FIV: protocolos de estimulación, recuperación ovocitaria, tasas de fertilización, gradación embrionaria (Gardner), criopreservación y custodia." },
+        "billing": { "name": "Gestión financiera y facturación", "description": "Precios de tratamientos, facturas, pagos, reclamaciones a seguros e informes. Integrado con Stripe." },
+        "staff": { "name": "Personal y roles", "description": "Incorporar médicos, enfermeras, embriólogos, técnicos de laboratorio, recepción y roles personalizados con permisos por módulo." },
+        "donor": { "name": "Gestión de donantes", "description": "Perfiles de donantes de óvulos y esperma, flujos de emparejamiento, consentimientos y cumplimiento legal." },
+        "telemedicine": { "name": "Telemedicina", "description": "Consultas por vídeo compatibles con HIPAA integradas en la historia del paciente." },
+        "patientPortal": { "name": "Portal del paciente", "description": "Portal con tu marca donde los pacientes ven plan de tratamiento, resultados, citas, facturas y mensajes al equipo." },
+        "inventory": { "name": "Gestión de inventario", "description": "Consumibles, medicamentos, reactivos y equipos. Alertas de stock bajo y seguimiento de caducidad." },
+        "analytics": { "name": "Análisis e informes", "description": "Dashboards KPI, tasas de éxito, resultados de ciclos, resúmenes financieros y exportación PDF/CSV." },
+        "compliance": { "name": "Cumplimiento y auditoría", "description": "Trazas de auditoría, registros de acceso, herramientas HIPAA y GDPR y políticas de retención." }
+      }
+    },
+    "howItWorks": {
+      "badge": "Primeros pasos",
+      "title": "En marcha en",
+      "titleHighlight": "minutos, no meses.",
+      "subtitle": "FertilityOS está pensado para equipos clínicos, no para TI. Configura tu clínica en cuatro pasos.",
+      "cta": "Empezar hoy",
+      "steps": {
+        "step": "Paso",
+        "register": {
+          "title": "Registra tu clínica",
+          "description": "Regístrate con el nombre, especialidad y datos de contacto de tu clínica. Elige tu subdominio FertilityOS o conecta tu propio dominio.",
+          "details": ["Perfil y licencia de la clínica", "Subdominio o dominio propio", "Logo y colores de marca", "Soporte multi-sede"]
+        },
+        "setupTeam": {
+          "title": "Configura tu equipo",
+          "description": "Crea cuentas para todo el personal y asigna permisos por rol.",
+          "details": ["Subcuentas ilimitadas", "Plantillas de roles", "Permisos por módulo", "Autenticación 2FA"]
+        },
+        "enableModules": {
+          "title": "Activa tus módulos",
+          "description": "Activa los módulos que necesites desde el panel de facturación.",
+          "details": ["Módulos núcleo en todos los planes", "Complementos al instante", "Configuración por clínica", "Cambiar o cancelar cuando quieras"]
+        },
+        "startCare": {
+          "title": "Empieza a gestionar la atención",
+          "description": "Incorporar pacientes, agendar citas, documentar notas y ciclos FIV en una sola plataforma.",
+          "details": ["Importar historiales", "Lista de onboarding", "Soporte en la puesta en marcha", "Formación y documentación"]
+        }
+      }
+    },
+    "pricing": {
+      "badge": "Precios transparentes",
+      "title": "Precios simples.",
+      "titleHighlight": "Sin cargos ocultos.",
+      "subtitle": "Empieza con la plataforma base y añade módulos según crezcas. Todos los planes incluyen 14 días de prueba gratuita.",
+      "monthly": "Mensual",
+      "quarterly": "Trimestral",
+      "yearly": "Anual",
+      "save5": "Ahorra 5%",
+      "save20": "Ahorra 20%",
+      "perMonth": "/mes",
+      "billed": "Facturado",
+      "save": "Ahorro",
+      "mostPopular": "Más popular",
+      "startFreeTrial": "Comenzar prueba gratuita",
+      "contactSales": "Contactar ventas",
+      "moduleAddons": "Módulos complementarios",
+      "addonsSubtitle": "Activa módulos adicionales cuando quieras desde tu panel de facturación.",
+      "enterpriseTitle": "¿Tienes un grupo multi-sede o una clínica enterprise?",
+      "enterpriseSubtitle": "Solicita un presupuesto personalizado con infraestructura dedicada, SLA premium e integraciones.",
+      "talkToSales": "Hablar con ventas",
+      "plans": {
+        "starter": { "name": "Starter", "tagline": "Para consultas de fertilidad pequeñas" },
+        "growth": { "name": "Growth", "tagline": "Para centros de fertilidad establecidos" },
+        "scale": { "name": "Scale", "tagline": "Para grupos de clínicas multi-sede" }
+      },
+      "features": {
+        "providers3": "Hasta 3 proveedores",
+        "patients200": "Hasta 200 pacientes",
+        "patientMgmt": "Gestión de pacientes (Núcleo)",
+        "scheduling": "Agenda y citas",
+        "basicEmr": "EMR básico (notas clínicas)",
+        "ivfLab": "Laboratorio FIV y embriología",
+        "financialMgmt": "Gestión financiera",
+        "staffMgmt": "Personal y roles",
+        "subdomain": "Subdominio fertilityo.com",
+        "emailSupport": "Soporte por email",
+        "providers15": "Hasta 15 proveedores",
+        "unlimitedPatients": "Pacientes ilimitados",
+        "everythingStarter": "Todo en Starter",
+        "customDomain": "Dominio propio (BYO)",
+        "whiteLabel": "Marca blanca",
+        "advancedReporting": "Informes avanzados",
+        "prioritySupport": "Soporte prioritario email y chat",
+        "addonsIncluded2": "2 módulos complementarios incluidos",
+        "apiAccess": "Acceso API",
+        "dataExport": "Exportación de datos (CSV/PDF)",
+        "unlimitedProviders": "Proveedores ilimitados",
+        "everythingGrowth": "Todo en Growth",
+        "multiLocation": "Soporte multi-sede",
+        "allAddons": "Todos los complementos incluidos",
+        "dedicatedManager": "Gestor de cuenta dedicado",
+        "phoneSupport": "Teléfono y soporte prioritario",
+        "customIntegrations": "Integraciones personalizadas",
+        "sla": "Garantía SLA (99,9%)",
+        "hipaaBaa": "BAA HIPAA incluido"
+      },
+      "addons": {
+        "telemedicine": "Telemedicina",
+        "patientPortal": "Portal del paciente",
+        "donorManagement": "Gestión de donantes",
+        "inventoryManagement": "Gestión de inventario",
+        "analyticsReporting": "Análisis e informes",
+        "complianceAudit": "Cumplimiento y auditoría"
+      }
+    },
+    "faq": {
+      "badge": "Preguntas frecuentes",
+      "title": "Preguntas frecuentes",
+      "subtitle": "Todo lo que necesitas saber sobre FertilityOS. ¿No encuentras lo que buscas?",
+      "talkToTeam": "Habla con nuestro equipo.",
+      "items": {
+        "install": { "q": "¿Hay que instalar algo para usar FertilityOS?", "a": "No. FertilityOS es una plataforma SaaS en la nube. Se accede desde cualquier navegador moderno. Las actualizaciones se despliegan solas." },
+        "domain": { "q": "¿Puedo usar mi propio dominio?", "a": "Sí. En los planes Growth y Scale puedes conectar tu dominio o subdominio. Los pacientes solo verán tu marca." },
+        "modules": { "q": "¿Cómo funcionan los módulos complementarios?", "a": "La plataforma base está incluida en todos los planes. Módulos como Telemedicina o Portal del paciente se activan desde el panel de facturación con una tarifa mensual por clínica." },
+        "hipaa": { "q": "¿FertilityOS cumple HIPAA?", "a": "FertilityOS está diseñado para ser compatible con HIPAA. Datos cifrados, acceso por roles y actividad registrada. Los BAA están disponibles en planes Scale y Enterprise." },
+        "multiTenant": { "q": "¿Cómo funciona el aislamiento de datos multi-inquilino?", "a": "Los datos de cada clínica están en un entorno lógicamente aislado. Tu información no es accesible para otras clínicas." },
+        "migrate": { "q": "¿Puedo migrar mis datos de pacientes?", "a": "Sí. Soportamos importación CSV y podemos ayudar con migraciones desde otras plataformas de fertilidad." },
+        "roles": { "q": "¿Qué roles de personal soporta FertilityOS?", "a": "Admin, médico/especialista, embriólogo, enfermera, técnico de laboratorio, recepción, radiólogo y roles personalizados con permisos por módulo." },
+        "trial": { "q": "¿Hay prueba gratuita?", "a": "Sí. Todos los planes incluyen 14 días de prueba. No hace falta tarjeta de crédito." }
+      }
+    },
+    "waitlist": {
+      "badge": "Acceso anticipado limitado abierto",
+      "title": "Sé de las primeras clínicas en",
+      "titleBrand": "FertilityOS",
+      "subtitle": "Únete a la lista de espera. Acceso prioritario, 30 días gratis e influencia en las funciones del producto.",
+      "successTitle": "¡Estás en la lista!",
+      "successMessage": "Nos pondremos en contacto en {email} con los siguientes pasos. Gracias por tu interés en FertilityOS.",
+      "clinicName": "Nombre de la clínica / centro",
+      "clinicPlaceholder": "ej. Clínica de Fertilidad Avanzada",
+      "workEmail": "Email profesional",
+      "emailPlaceholder": "tu@tuclinica.com",
+      "joinWaitlist": "Unirse a la lista",
+      "disclaimer": "Sin tarjeta de crédito. Prueba gratuita de 14 días al lanzamiento. Sin spam.",
+      "socialProof": "{count} clínicas ya en la lista"
+    }
+  },
+  "app": {
+    "nav": {
+      "dashboard": "Panel",
+      "patients": "Pacientes",
+      "appointments": "Citas",
+      "invoices": "Facturas",
+      "reports": "Informes",
+      "billing": "Facturación",
+      "inventory": "Inventario",
+      "referrals": "Referidos",
+      "team": "Equipo",
+      "developers": "Desarrolladores",
+      "compliance": "Cumplimiento",
+      "superDashboard": "Super panel",
+      "logOut": "Cerrar sesión",
+      "brand": "FertilityOS",
+      "clinic": "Clínica"
+    },
+    "common": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "submit": "Enviar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "close": "Cerrar"
+    }
+  },
+  "locale": {
+    "en": "English",
+    "es": "Español"
+  }
+}

@@ -2,7 +2,13 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "@/auth";
-import { Activity, LogOut, LayoutDashboard } from "lucide-react";
+import { Activity, LogOut } from "lucide-react";
+import { db } from "@/db";
+import { tenants } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { isModuleEnabled } from "@/lib/modules";
+import { getTranslations } from "next-intl/server";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default async function AppLayout({
   children,
@@ -11,6 +17,22 @@ export default async function AppLayout({
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+
+  const t = await getTranslations("app.nav");
+
+  let enabledModules: string | null = null;
+  if (session.user.tenantId) {
+    const [row] = await db
+      .select({ enabledModules: tenants.enabledModules })
+      .from(tenants)
+      .where(eq(tenants.id, session.user.tenantId))
+      .limit(1);
+    enabledModules = row?.enabledModules ?? null;
+  }
+
+  const showPatients = isModuleEnabled(enabledModules, "patientManagement");
+  const showAppointments = isModuleEnabled(enabledModules, "scheduling");
+  const showInvoices = isModuleEnabled(enabledModules, "billing");
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -31,48 +53,70 @@ export default async function AppLayout({
                   href="/app/dashboard"
                   className="text-sm font-medium text-slate-600 hover:text-blue-700"
                 >
-                  Dashboard
+                  {t("dashboard")}
                 </Link>
+                {showPatients && (
+                  <Link
+                    href="/app/patients"
+                    className="text-sm font-medium text-slate-600 hover:text-blue-700"
+                  >
+                    {t("patients")}
+                  </Link>
+                )}
+                {showAppointments && (
+                  <Link
+                    href="/app/appointments"
+                    className="text-sm font-medium text-slate-600 hover:text-blue-700"
+                  >
+                    {t("appointments")}
+                  </Link>
+                )}
+                {showInvoices && (
+                  <Link
+                    href="/app/invoices"
+                    className="text-sm font-medium text-slate-600 hover:text-blue-700"
+                  >
+                    {t("invoices")}
+                  </Link>
+                )}
                 <Link
-                  href="/app/patients"
+                  href="/app/reports"
                   className="text-sm font-medium text-slate-600 hover:text-blue-700"
                 >
-                  Patients
-                </Link>
-                <Link
-                  href="/app/appointments"
-                  className="text-sm font-medium text-slate-600 hover:text-blue-700"
-                >
-                  Appointments
-                </Link>
-                <Link
-                  href="/app/invoices"
-                  className="text-sm font-medium text-slate-600 hover:text-blue-700"
-                >
-                  Invoices
+                  {t("reports")}
                 </Link>
                 {session.user.roleSlug === "admin" && (
                   <Link
-                    href="/app/team"
+                    href="/app/billing"
                     className="text-sm font-medium text-slate-600 hover:text-blue-700"
                   >
-                    Team
+                    {t("billing")}
                   </Link>
+                )}
+                {session.user.roleSlug === "admin" && (
+                  <>
+                    <Link href="/app/inventory" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("inventory")}</Link>
+                    <Link href="/app/referrals" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("referrals")}</Link>
+                    <Link href="/app/team" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("team")}</Link>
+                    <Link href="/app/developers" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("developers")}</Link>
+                    <Link href="/app/compliance" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("compliance")}</Link>
+                  </>
                 )}
                 {session.user.roleSlug === "super_admin" && (
                   <Link
                     href="/app/super"
                     className="text-sm font-medium text-amber-700 hover:text-amber-800"
                   >
-                    Super Dashboard
+                    {t("superDashboard")}
                   </Link>
                 )}
               </nav>
             </div>
             <div className="flex items-center gap-4">
+              <LanguageSwitcher variant="buttons" className="shrink-0" />
               <span className="text-sm text-slate-600 hidden sm:block">
                 <span className="font-medium text-slate-900">
-                  {session.user.tenantName ?? "Clinic"}
+                  {session.user.tenantName ?? t("clinic")}
                 </span>
                 {" · "}
                 {session.user.name}
@@ -88,7 +132,7 @@ export default async function AppLayout({
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 hover:border-slate-300 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
-                  Log out
+                  {t("logOut")}
                 </button>
               </form>
             </div>

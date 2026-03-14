@@ -6,51 +6,16 @@ import {
   Shield,
   CloudCog,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-const features = [
-  {
-    icon: Globe,
-    title: "White-Label Ready",
-    description:
-      "Use your own domain, logo, and brand colors. Patients and staff see your brand, powered by FertilityOS behind the scenes.",
-    color: "blue",
-  },
-  {
-    icon: Lock,
-    title: "HIPAA Compliant Architecture",
-    description:
-      "End-to-end encryption, audit logs, role-based access, and Business Associate Agreements (BAA) available on Scale and Enterprise plans.",
-    color: "teal",
-  },
-  {
-    icon: Zap,
-    title: "Built for IVF Workflows",
-    description:
-      "Designed by a Fertility Specialist. Every workflow, every data field, and every report maps to real clinical practice — not generic healthcare software.",
-    color: "pink",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Multi-Role Team Management",
-    description:
-      "Doctors, embryologists, nurses, receptionists, and lab technicians each get a tailored interface with the exact permissions they need.",
-    color: "blue",
-  },
-  {
-    icon: Shield,
-    title: "Data Sovereignty",
-    description:
-      "Your clinic's data is stored in isolated, encrypted environments. Tenant separation ensures no data leakage between accounts.",
-    color: "teal",
-  },
-  {
-    icon: CloudCog,
-    title: "Always Up-to-Date",
-    description:
-      "Cloud-native SaaS means no installations, no updates to manage. New features and regulatory updates are deployed automatically.",
-    color: "pink",
-  },
-];
+const featureKeys = [
+  { key: "whiteLabel", icon: Globe, color: "blue" },
+  { key: "hipaa", icon: Lock, color: "teal" },
+  { key: "ivfWorkflows", icon: Zap, color: "pink" },
+  { key: "multiRole", icon: HeartHandshake, color: "blue" },
+  { key: "dataSovereignty", icon: Shield, color: "teal" },
+  { key: "alwaysUpdated", icon: CloudCog, color: "pink" },
+] as const;
 
 const colorMap: Record<string, { bg: string; iconBg: string; icon: string }> = {
   blue: { bg: "bg-blue-50", iconBg: "bg-blue-100", icon: "text-blue-700" },
@@ -58,36 +23,44 @@ const colorMap: Record<string, { bg: string; iconBg: string; icon: string }> = {
   pink: { bg: "bg-pink-50", iconBg: "bg-pink-100", icon: "text-pink-600" },
 };
 
-export default function Features() {
+const statKeys = [
+  { value: "12+", labelKey: "specialtyModules" as const },
+  { value: "99.9%", labelKey: "uptimeSla" as const },
+  { value: "HIPAA", labelKey: "compliant" as const },
+  { value: "24/7", labelKey: "support" as const },
+];
+
+export default async function Features() {
+  const t = await getTranslations("landing.features");
+
   return (
     <section id="features" className="py-24 bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="max-w-3xl mx-auto text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold uppercase tracking-wider mb-6">
-            Platform Capabilities
+            {t("badge")}
           </div>
           <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6">
-            Enterprise-grade platform.
+            {t("title")}
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-teal-400 to-pink-400">
-              Clinic-friendly simplicity.
+              {t("titleHighlight")}
             </span>
           </h2>
           <p className="text-xl text-slate-400">
-            FertilityOS combines the security and scalability of enterprise
-            software with the ease of use that clinical teams actually need.
+            {t("subtitle")}
           </p>
         </div>
 
         {/* Feature grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feat) => {
+          {featureKeys.map((feat) => {
             const Icon = feat.icon;
             const colors = colorMap[feat.color];
             return (
               <div
-                key={feat.title}
+                key={feat.key}
                 className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-colors"
               >
                 <div
@@ -96,10 +69,10 @@ export default function Features() {
                   <Icon className={`w-5 h-5 ${colors.icon}`} />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">
-                  {feat.title}
+                  {t(`items.${feat.key}.title`)}
                 </h3>
                 <p className="text-sm text-slate-400 leading-relaxed">
-                  {feat.description}
+                  {t(`items.${feat.key}.description`)}
                 </p>
               </div>
             );
@@ -108,18 +81,13 @@ export default function Features() {
 
         {/* Stats row */}
         <div className="mt-20 grid grid-cols-2 sm:grid-cols-4 gap-8">
-          {[
-            { value: "12+", label: "Specialty Modules" },
-            { value: "99.9%", label: "Uptime SLA" },
-            { value: "HIPAA", label: "Compliant" },
-            { value: "24/7", label: "Support (Scale+)" },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
+          {statKeys.map((stat) => (
+            <div key={stat.labelKey} className="text-center">
               <div className="text-4xl font-extrabold text-white mb-2">
                 {stat.value}
               </div>
               <div className="text-sm text-slate-400 font-medium">
-                {stat.label}
+                {t(`stats.${stat.labelKey}`)}
               </div>
             </div>
           ))}

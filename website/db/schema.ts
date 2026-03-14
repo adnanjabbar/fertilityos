@@ -6,6 +6,7 @@ import {
   varchar,
   pgEnum,
   uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 
 export const roleSlugEnum = pgEnum("role_slug", [
@@ -20,6 +21,15 @@ export const roleSlugEnum = pgEnum("role_slug", [
   "super_admin",
 ]);
 
+export const MODULE_SLUGS = [
+  "patientManagement",
+  "scheduling",
+  "emr",
+  "ivfLab",
+  "billing",
+] as const;
+export type ModuleSlug = (typeof MODULE_SLUGS)[number];
+
 export const tenants = pgTable("tenants", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -31,6 +41,7 @@ export const tenants = pgTable("tenants", {
   postalCode: varchar("postal_code", { length: 32 }),
   specialty: varchar("specialty", { length: 255 }),
   licenseInfo: text("license_info"),
+  enabledModules: text("enabled_modules"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -119,6 +130,8 @@ export const appointments = pgTable(
     type: varchar("type", { length: 64 }).notNull().default("consultation"),
     status: varchar("status", { length: 32 }).notNull().default("scheduled"),
     notes: text("notes"),
+    reminderSentAt: timestamp("reminder_sent_at", { withTimezone: true }),
+    videoRoomId: varchar("video_room_id", { length: 255 }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -236,3 +249,96 @@ export const invoiceLines = pgTable("invoice_lines", {
   amount: varchar("amount", { length: 32 }).notNull().default("0"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const tenantSubscriptions = pgTable(
+  "tenant_subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .unique(),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+    status: varchar("status", { length: 32 }).notNull().default("incomplete"),
+    currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
+    stripePriceId: varchar("stripe_price_id", { length: 255 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex("tenant_subscriptions_tenant_idx").on(table.tenantId)]
+);
+
+export const inventoryItems = pgTable(
+  "inventory_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 255 }).notNull(),
+    quantity: varchar("quantity", { length: 32 }).notNull().default("0"),
+    unit: varchar("unit", { length: 32 }).notNull().default("units"),
+    reorderLevel: varchar("reorder_level", { length: 32 }).notNull().default("0"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex("inventory_items_tenant_idx").on(table.tenantId)]
+);
+
+export const patientPortalTokens = pgTable("patient_portal_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  patientId: uuid("patient_id")
+    .notNull()
+    .references(() => patients.id, { onDelete: "cascade" }),
+  email: varchar("email", { length: 255 }).notNull(),
+  token: varchar("token", { length: 64 }).notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const referralCodes = pgTable(
+  "referral_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    code: varchar("code", { length: 64 }).notNull(),
+    createdById: uuid("created_by_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    note: text("note"),
+    usedCount: varchar("used_count", { length: 32 }).notNull().default("0"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex("referral_codes_tenant_code_idx").on(table.tenantId, table.code)]
+);
+
+export const referralSignups = pgTable("referral_signups", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  referralCodeId: uuid("referral_code_id")
+    .notNull()
+    .references(() => referralCodes.id, { onDelete: "cascade" }),
+  email: varchar("email", { length: 255 }).notNull(),
+  signedUpAt: timestamp("signed_up_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const apiKeys = pgTable(
+  "api_keys",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 255 }).notNull(),
+    keyHash: text("key_hash").notNull(),
+    keyPrefix: varchar("key_prefix", { length: 16 }).notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("api_keys_tenant_idx").on(table.tenantId)]
+);

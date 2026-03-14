@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { ArrowRight, Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function Waitlist() {
   const [email, setEmail] = useState("");
   const [clinicName, setClinicName] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const t = useTranslations("landing.waitlist");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    // In production this would call an API endpoint
     setSubmitted(true);
   };
 
@@ -20,17 +21,16 @@ export default function Waitlist() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-50 border border-pink-200 text-pink-600 text-xs font-semibold uppercase tracking-wider mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
-          Limited Early Access Open
+          {t("badge")}
         </div>
         <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6 leading-tight">
-          Be among the first clinics on{" "}
+          {t("title")}{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-teal-600 to-pink-500">
-            FertilityOS
+            {t("titleBrand")}
           </span>
         </h2>
         <p className="text-xl text-slate-600 mb-10">
-          Join our early access waitlist. Get priority onboarding, 30 days
-          free, and direct input on product features.
+          {t("subtitle")}
         </p>
 
         {submitted ? (
@@ -39,11 +39,10 @@ export default function Waitlist() {
               <Mail className="w-7 h-7 text-teal-600" />
             </div>
             <h3 className="text-xl font-bold text-teal-800 mb-2">
-              You&apos;re on the list!
+              {t("successTitle")}
             </h3>
             <p className="text-teal-700">
-              We&apos;ll be in touch at <strong>{email}</strong> with next steps.
-              Thank you for your interest in FertilityOS.
+              {t("successMessage", { email })}
             </p>
           </div>
         ) : (
@@ -57,12 +56,12 @@ export default function Waitlist() {
                   htmlFor="clinic-name"
                   className="block text-sm font-semibold text-slate-700 mb-2"
                 >
-                  Clinic / Center Name
+                  {t("clinicName")}
                 </label>
                 <input
                   id="clinic-name"
                   type="text"
-                  placeholder="e.g. Advanced Fertility Center"
+                  placeholder={t("clinicPlaceholder")}
                   value={clinicName}
                   onChange={(e) => setClinicName(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
@@ -73,13 +72,13 @@ export default function Waitlist() {
                   htmlFor="email"
                   className="block text-sm font-semibold text-slate-700 mb-2"
                 >
-                  Work Email <span className="text-red-400">*</span>
+                  {t("workEmail")} <span className="text-red-400">*</span>
                 </label>
                 <input
                   id="email"
                   type="email"
                   required
-                  placeholder="you@yourclinic.com"
+                  placeholder={t("emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
@@ -90,11 +89,11 @@ export default function Waitlist() {
               type="submit"
               className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold text-base hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-0.5"
             >
-              Join the Waitlist
+              {t("joinWaitlist")}
               <ArrowRight className="w-5 h-5" />
             </button>
             <p className="text-xs text-slate-400 text-center mt-4">
-              No credit card required. 14-day free trial when we launch. No spam.
+              {t("disclaimer")}
             </p>
           </form>
         )}
@@ -113,8 +112,7 @@ export default function Waitlist() {
             )}
           </div>
           <p className="text-sm text-slate-600">
-            <span className="font-bold text-slate-900">47 clinics</span> already
-            on the waitlist
+            {t("socialProof", { count: "47" })}
           </p>
         </div>
       </div>

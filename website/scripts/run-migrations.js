@@ -35,6 +35,13 @@ const migrations = [
   "0005_clinical_notes.sql",
   "0006_ivf_cycles.sql",
   "0007_invoices.sql",
+  "0008_appointment_reminder_sent.sql",
+  "0009_tenant_subscriptions.sql",
+  "0010_tenant_enabled_modules.sql",
+  "0011_inventory_items.sql",
+  "0012_patient_portal_and_video.sql",
+  "0013_api_keys.sql",
+  "0014_referral_codes.sql",
 ];
 
 async function main() {

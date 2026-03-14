@@ -85,6 +85,9 @@ We provide a script that runs both migration files. From the repo:
    psql "YOUR_DATABASE_URL" -f db/migrations/0005_clinical_notes.sql
    psql "YOUR_DATABASE_URL" -f db/migrations/0006_ivf_cycles.sql
    psql "YOUR_DATABASE_URL" -f db/migrations/0007_invoices.sql
+   psql "YOUR_DATABASE_URL" -f db/migrations/0008_appointment_reminder_sent.sql
+   psql "YOUR_DATABASE_URL" -f db/migrations/0009_tenant_subscriptions.sql
+   psql "YOUR_DATABASE_URL" -f db/migrations/0010_tenant_enabled_modules.sql
    ```
 
    On Windows (PowerShell), use the same URLs in quotes; if the password has special characters, use the URI as given by DigitalOcean (often URL-encoded).

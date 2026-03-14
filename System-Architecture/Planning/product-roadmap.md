@@ -40,32 +40,34 @@ FertilityOS is a cloud-native, multi-tenant SaaS platform that enables fertility
 
 **Goal:** Deliver the essential clinical modules for day-to-day fertility clinic operations.
 
-#### 3.1 Patient Management
-- Patient registration, demographic data
-- Medical history and consents
-- Partner / donor linkage
+**Status:** Core modules implemented. See `next-steps-development.md` for polish (reminders, Stripe) and Phase 4.
 
-#### 3.2 Appointments & Scheduling
-- Calendar-based booking
-- Multi-provider scheduling
-- Automated reminders (SMS/Email)
+#### 3.1 Patient Management ✅
+- [x] Patient registration, demographic data
+- [ ] Medical history and consents (basic notes in place)
+- [ ] Partner / donor linkage
 
-#### 3.3 Electronic Medical Records (EMR)
-- Clinical notes, SOAP format
-- Diagnosis codes (ICD-10)
-- Prescription and medication tracking
+#### 3.2 Appointments & Scheduling ✅
+- [x] Calendar-based booking
+- [x] Multi-provider scheduling (providerId on appointment)
+- [ ] Automated reminders (SMS/Email) — next step
 
-#### 3.4 IVF Laboratory & Embryology Module
-- Stimulation protocol tracking
-- Egg retrieval and fertilization records
-- Embryo grading and cryopreservation
-- PGT/PGS results logging
+#### 3.3 Electronic Medical Records (EMR) ✅
+- [x] Clinical notes, SOAP format
+- [ ] Diagnosis codes (ICD-10) — optional field in place
+- [ ] Prescription and medication tracking
 
-#### 3.5 Financial Management & Billing
-- Treatment package pricing
-- Invoice generation
-- Insurance claims (where applicable)
-- Payment tracking
+#### 3.4 IVF Laboratory & Embryology Module ✅
+- [x] IVF cycle tracking
+- [x] Egg retrieval / fertilization (cycle status)
+- [x] Embryo grading and cryopreservation (embryo records)
+- [ ] PGT/PGS results logging
+
+#### 3.5 Financial Management & Billing ✅
+- [x] Invoice generation and line items
+- [ ] Stripe subscription management — next step
+- [ ] Insurance claims (where applicable)
+- [x] Payment tracking (paid status, paidAt)
 
 ---
 

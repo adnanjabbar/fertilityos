@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-const highlights = [
-  "Purpose-built for fertility clinics",
-  "IVF lab & embryology workflows",
-  "Multi-tenant, white-label ready",
-  "HIPAA-compliant architecture",
-];
+const highlightKeys = [
+  "purposeBuilt",
+  "ivfLab",
+  "multiTenant",
+  "hipaa",
+] as const;
 
-export default function Hero() {
+export default async function Hero() {
+  const t = await getTranslations("landing.hero");
+
   return (
     <section className="relative overflow-hidden bg-white pt-32 pb-24 sm:pt-40 sm:pb-32">
       {/* Background gradient decoration */}
@@ -26,35 +29,32 @@ export default function Hero() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold uppercase tracking-wider mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            Now accepting early access applications
+            {t("badge")}
           </div>
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight tracking-tight mb-6">
-            The Operating System
+            {t("title")}
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-teal-600 to-pink-500">
-              for Fertility Care
+              {t("titleHighlight")}
             </span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-xl sm:text-2xl text-slate-600 leading-relaxed mb-10 max-w-3xl mx-auto">
-            FertilityOS is the world&apos;s first comprehensive platform built
-            specifically for fertility clinics and reproductive health centers.
-            Manage every step — from patient intake to embryo transfer — in one
-            place.
+            {t("subheadline")}
           </p>
 
           {/* Highlight bullets */}
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-12">
-            {highlights.map((item) => (
+            {highlightKeys.map((key) => (
               <div
-                key={item}
+                key={key}
                 className="flex items-center gap-1.5 text-sm text-slate-700"
               >
                 <CheckCircle className="w-4 h-4 text-teal-500 shrink-0" />
-                {item}
+                {t(`highlights.${key}`)}
               </div>
             ))}
           </div>
@@ -65,20 +65,20 @@ export default function Hero() {
               href="/register"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold text-lg hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-0.5"
             >
-              Get Early Access
+              {t("cta.getEarlyAccess")}
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/login"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-200 bg-white text-slate-800 font-bold text-lg hover:border-blue-300 hover:text-blue-700 transition-all"
             >
-              Sign In
+              {t("cta.signIn")}
             </Link>
             <a
               href="#modules"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-200 bg-white text-slate-800 font-bold text-lg hover:border-blue-300 hover:text-blue-700 transition-all"
             >
-              Explore Modules
+              {t("cta.exploreModules")}
             </a>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function Hero() {
               </div>
               <div className="flex-1 mx-4">
                 <div className="bg-white rounded-md px-3 py-1.5 text-xs text-slate-400 font-mono">
-                  app.thefertilityos.com/dashboard
+                  {t("dashboardMockup.url")}
                 </div>
               </div>
             </div>
@@ -103,16 +103,16 @@ export default function Hero() {
             <div className="bg-slate-50 p-6 min-h-[360px]">
               <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
-                  { label: "Active Patients", value: "247", color: "blue" },
-                  { label: "IVF Cycles Today", value: "12", color: "teal" },
-                  { label: "Embryos in Culture", value: "38", color: "pink" },
-                  { label: "Appointments Today", value: "31", color: "purple" },
+                  { labelKey: "activePatients", value: "247", color: "blue" },
+                  { labelKey: "ivfCyclesToday", value: "12", color: "teal" },
+                  { labelKey: "embryosInCulture", value: "38", color: "pink" },
+                  { labelKey: "appointmentsToday", value: "31", color: "purple" },
                 ].map((stat) => (
                   <div
-                    key={stat.label}
+                    key={stat.labelKey}
                     className="bg-white rounded-xl p-4 shadow-sm border border-slate-100"
                   >
-                    <p className="text-xs text-slate-500 mb-1">{stat.label}</p>
+                    <p className="text-xs text-slate-500 mb-1">{t(`dashboardMockup.${stat.labelKey}`)}</p>
                     <p
                       className={`text-2xl font-bold ${
                         stat.color === "blue"
@@ -132,7 +132,7 @@ export default function Hero() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2 bg-white rounded-xl p-4 shadow-sm border border-slate-100">
                   <p className="text-sm font-semibold text-slate-700 mb-3">
-                    IVF Cycle Overview — March 2026
+                    {t("dashboardMockup.ivfCycleOverview")}
                   </p>
                   <div className="flex items-end gap-2 h-24">
                     {[65, 80, 45, 90, 70, 55, 85, 60, 75, 95, 50, 70].map(
@@ -148,13 +148,13 @@ export default function Hero() {
                 </div>
                 <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
                   <p className="text-sm font-semibold text-slate-700 mb-3">
-                    Today&apos;s Schedule
+                    {t("dashboardMockup.todaysSchedule")}
                   </p>
                   <div className="space-y-2">
                     {[
-                      { time: "09:00", name: "Sarah M.", type: "Retrieval" },
-                      { time: "10:30", name: "Emma K.", type: "Consultation" },
-                      { time: "14:00", name: "Aisha R.", type: "Transfer" },
+                      { time: "09:00", name: "Sarah M.", typeKey: "retrieval" as const },
+                      { time: "10:30", name: "Emma K.", typeKey: "consultation" as const },
+                      { time: "14:00", name: "Aisha R.", typeKey: "transfer" as const },
                     ].map((appt) => (
                       <div
                         key={appt.time}
@@ -167,7 +167,7 @@ export default function Hero() {
                           {appt.name}
                         </span>
                         <span className="px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
-                          {appt.type}
+                          {t(`dashboardMockup.${appt.typeKey}`)}
                         </span>
                       </div>
                     ))}
@@ -181,16 +181,10 @@ export default function Hero() {
         {/* Trust bar */}
         <div className="mt-16 text-center">
           <p className="text-sm text-slate-400 mb-6 uppercase tracking-wider font-medium">
-            Trusted by fertility specialists worldwide
+            {t("trustBar")}
           </p>
           <div className="flex items-center justify-center gap-10 flex-wrap">
-            {[
-              "Advanced Fertility Center",
-              "ReproMed Institute",
-              "IVF Solutions",
-              "BabyHope Clinic",
-              "FertileLife Center",
-            ].map((name) => (
+            {(t.raw("clinicNames") as string[]).map((name: string) => (
               <span
                 key={name}
                 className="text-slate-300 font-semibold text-sm tracking-tight"

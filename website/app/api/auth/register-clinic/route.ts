@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { db } from "@/db";
-import { tenants, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { tenants, users, referralCodes, referralSignups } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 
 const registerSchema = z.object({
+  ref: z.string().max(64).optional(),
+  tenantSlug: z.string().max(64).optional(),
   clinic: z.object({
     name: z.string().min(1, "Clinic name is required").max(255),
     slug: z
@@ -40,8 +42,49 @@ export async function POST(request: Request) {
       );
     }
 
-    const { clinic, admin } = parsed.data;
+    const { clinic, admin, ref: refCode, tenantSlug } = parsed.data;
     const slug = clinic.slug.toLowerCase().replace(/\s+/g, "-");
+
+    let referralCodeId: string | null = null;
+    if (refCode?.trim()) {
+      const code = refCode.trim().toUpperCase();
+      if (tenantSlug?.trim()) {
+        const [tenantRow] = await db
+          .select({ id: tenants.id })
+          .from(tenants)
+          .where(eq(tenants.slug, tenantSlug.trim().toLowerCase()))
+          .limit(1);
+        if (tenantRow) {
+          const [refRow] = await db
+            .select({ id: referralCodes.id, usedCount: referralCodes.usedCount })
+            .from(referralCodes)
+            .where(and(eq(referralCodes.tenantId, tenantRow.id), eq(referralCodes.code, code)))
+            .limit(1);
+          if (refRow) {
+            referralCodeId = refRow.id;
+            const nextCount = String(parseInt(refRow.usedCount || "0", 10) + 1);
+            await db
+              .update(referralCodes)
+              .set({ usedCount: nextCount })
+              .where(eq(referralCodes.id, refRow.id));
+          }
+        }
+      } else {
+        const [refRow] = await db
+          .select({ id: referralCodes.id, usedCount: referralCodes.usedCount })
+          .from(referralCodes)
+          .where(eq(referralCodes.code, code))
+          .limit(1);
+        if (refRow) {
+          referralCodeId = refRow.id;
+          const nextCount = String(parseInt(refRow.usedCount || "0", 10) + 1);
+          await db
+            .update(referralCodes)
+            .set({ usedCount: nextCount })
+            .where(eq(referralCodes.id, refRow.id));
+        }
+      }
+    }
 
     const [existingTenant] = await db
       .select({ id: tenants.id })
@@ -97,6 +140,13 @@ export async function POST(request: Request) {
         { error: "Failed to create admin account" },
         { status: 500 }
       );
+    }
+
+    if (referralCodeId) {
+      await db.insert(referralSignups).values({
+        referralCodeId,
+        email: admin.email.trim().toLowerCase(),
+      });
     }
 
     return NextResponse.json(

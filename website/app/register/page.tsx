@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Activity, ArrowRight, ArrowLeft, Building2, User } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Activity, ArrowRight, ArrowLeft } from "lucide-react";
 
 type Step = "clinic" | "admin";
 
@@ -22,9 +22,19 @@ function slugFromName(name: string): string {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>("clinic");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refCode, setRefCode] = useState<string | null>(null);
+  const [tenantSlug, setTenantSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    const tenant = searchParams.get("tenant");
+    if (ref) setRefCode(ref);
+    if (tenant) setTenantSlug(tenant);
+  }, [searchParams]);
 
   const [clinic, setClinic] = useState({
     name: "",
@@ -66,6 +76,8 @@ export default function RegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ...(refCode ? { ref: refCode } : {}),
+          ...(tenantSlug ? { tenantSlug } : {}),
           clinic: {
             name: clinic.name.trim(),
             slug: (clinic.slug || slugFromName(clinic.name)).trim().toLowerCase(),
