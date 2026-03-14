@@ -31,6 +31,10 @@ const migrations = [
   "0001_invitations.sql",
   "0002_patients.sql",
   "0003_super_admin.sql",
+  "0004_appointments.sql",
+  "0005_clinical_notes.sql",
+  "0006_ivf_cycles.sql",
+  "0007_invoices.sql",
 ];
 
 async function main() {

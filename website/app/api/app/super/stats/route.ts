@@ -6,6 +6,9 @@ import {
   users,
   invitations,
   patients,
+  appointments,
+  ivfCycles,
+  invoices,
 } from "@/db/schema";
 import { eq, sql, desc, isNull, ne } from "drizzle-orm";
 
@@ -94,7 +97,27 @@ export async function GET() {
       .innerJoin(tenants, eq(patients.tenantId, tenants.id))
       .where(ne(tenants.slug, systemTenantSlug));
     const patientsCount = patientsCountRow?.count ?? 0;
-    const ivfCyclesCount = 0;
+
+    const [appointmentsCountRow] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(appointments)
+      .innerJoin(tenants, eq(appointments.tenantId, tenants.id))
+      .where(ne(tenants.slug, systemTenantSlug));
+    const appointmentsCount = appointmentsCountRow?.count ?? 0;
+
+    const [ivfCyclesCountRow] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(ivfCycles)
+      .innerJoin(tenants, eq(ivfCycles.tenantId, tenants.id))
+      .where(ne(tenants.slug, systemTenantSlug));
+    const ivfCyclesCount = ivfCyclesCountRow?.count ?? 0;
+
+    const [invoicesCountRow] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(invoices)
+      .innerJoin(tenants, eq(invoices.tenantId, tenants.id))
+      .where(ne(tenants.slug, systemTenantSlug));
+    const invoicesCount = invoicesCountRow?.count ?? 0;
 
     return NextResponse.json({
       overview: {
@@ -102,6 +125,7 @@ export async function GET() {
         totalUsers: usersCount?.count ?? 0,
         pendingInvitations: pendingInvitesCount?.count ?? 0,
         patientsServed: patientsCount,
+        appointmentsCount,
         ivfCyclesSupported: ivfCyclesCount,
       },
       usersByRole: usersByRole.map((r) => ({ role: r.roleSlug, count: r.count })),
@@ -113,11 +137,12 @@ export async function GET() {
       pendingInvitations,
       modules: {
         patientManagement: "active",
-        scheduling: "planned",
-        emr: "planned",
-        ivfLab: "planned",
-        billing: "planned",
+        scheduling: "active",
+        emr: "active",
+        ivfLab: "active",
+        billing: "active",
       },
+      invoicesCount,
     });
   } catch (e) {
     console.error("super/stats error:", e);

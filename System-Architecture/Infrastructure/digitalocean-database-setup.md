@@ -60,7 +60,7 @@ We provide a script that runs both migration files. From the repo:
    $env:NODE_TLS_REJECT_UNAUTHORIZED="0"
    node scripts/run-migrations.js
    ```
-   You should see: `Ran: 0000_phase2_tenants_users_roles.sql`, `Ran: 0001_invitations.sql`, `Ran: 0002_patients.sql`, `Ran: 0003_super_admin.sql`, then `Migrations finished successfully.`
+   You should see: `Ran: 0000_phase2_tenants_users_roles.sql`, `Ran: 0001_invitations.sql`, `Ran: 0002_patients.sql`, `Ran: 0003_super_admin.sql`, `Ran: 0004_appointments.sql`, then `Migrations finished successfully.` (and any later migrations as we add them).
 
 ### Option B: Run from your computer with psql
 
@@ -81,6 +81,10 @@ We provide a script that runs both migration files. From the repo:
    psql "YOUR_DATABASE_URL" -f db/migrations/0001_invitations.sql
    psql "YOUR_DATABASE_URL" -f db/migrations/0002_patients.sql
    psql "YOUR_DATABASE_URL" -f db/migrations/0003_super_admin.sql
+   psql "YOUR_DATABASE_URL" -f db/migrations/0004_appointments.sql
+   psql "YOUR_DATABASE_URL" -f db/migrations/0005_clinical_notes.sql
+   psql "YOUR_DATABASE_URL" -f db/migrations/0006_ivf_cycles.sql
+   psql "YOUR_DATABASE_URL" -f db/migrations/0007_invoices.sql
    ```
 
    On Windows (PowerShell), use the same URLs in quotes; if the password has special characters, use the URI as given by DigitalOcean (often URL-encoded).
@@ -94,7 +98,7 @@ We provide a script that runs both migration files. From the repo:
    psql "postgresql://..." -f db/migrations/0003_super_admin.sql
    ```
 
-3. If both commands finish without errors, the database is ready. You only need to run these once (or again only when we add new migration files).
+3. If all commands finish without errors, the database is ready. You only need to run these once (or again only when we add new migration files).
 
 ### Option B: Run from DigitalOcean (one-off job or console)
 
@@ -138,7 +142,7 @@ In **App Platform → your app → Web Service (e.g. fertilityos-website) → Se
 
 - [ ] Create PostgreSQL 18 database in App Platform (database name e.g. `fertilityos`).
 - [ ] Ensure web service has `DATABASE_URL` pointing to that database.
-- [ ] Run `0000_phase2_tenants_users_roles.sql`, `0001_invitations.sql`, `0002_patients.sql`, and `0003_super_admin.sql` once (Option A or B).
+- [ ] Run all migration files in order (0000 through 0004 and any later ones) once (Option A or B).
 - [ ] Set `AUTH_SECRET` and `NEXTAUTH_URL`; redeploy.
 - [ ] Test registration and login at `/register` and `/login`.
 

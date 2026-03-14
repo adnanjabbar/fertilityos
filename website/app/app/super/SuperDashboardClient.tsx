@@ -6,7 +6,9 @@ import {
   Users,
   UserPlus,
   UserCircle,
+  Calendar,
   FlaskConical,
+  Receipt,
   Mail,
   Package,
   Server,
@@ -18,11 +20,13 @@ type Overview = {
   totalUsers: number;
   pendingInvitations: number;
   patientsServed: number;
+  appointmentsCount?: number;
   ivfCyclesSupported: number;
 };
 
 type Stats = {
   overview: Overview;
+  invoicesCount?: number;
   usersByRole: { role: string; count: number }[];
   recentTenants: {
     id: string;
@@ -125,10 +129,22 @@ export default function SuperDashboardClient() {
       color: "violet",
     },
     {
+      label: "Appointments",
+      value: o.appointmentsCount ?? 0,
+      icon: Calendar,
+      color: "indigo",
+    },
+    {
       label: "IVF cycles supported",
       value: o.ivfCyclesSupported,
       icon: FlaskConical,
       color: "pink",
+    },
+    {
+      label: "Invoices",
+      value: stats.invoicesCount ?? 0,
+      icon: Receipt,
+      color: "emerald",
     },
   ];
 
@@ -140,7 +156,7 @@ export default function SuperDashboardClient() {
           <TrendingUp className="w-5 h-5 text-slate-600" />
           Platform overview
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {kpis.map((k) => {
             const Icon = k.icon;
             return (
@@ -160,6 +176,10 @@ export default function SuperDashboardClient() {
                         ? "bg-amber-50 text-amber-700"
                         : k.color === "violet"
                         ? "bg-violet-50 text-violet-700"
+                        : k.color === "indigo"
+                        ? "bg-indigo-50 text-indigo-700"
+                        : k.color === "emerald"
+                        ? "bg-emerald-50 text-emerald-700"
                         : "bg-pink-50 text-pink-700"
                     }`}
                   >

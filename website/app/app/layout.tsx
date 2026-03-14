@@ -39,6 +39,18 @@ export default async function AppLayout({
                 >
                   Patients
                 </Link>
+                <Link
+                  href="/app/appointments"
+                  className="text-sm font-medium text-slate-600 hover:text-blue-700"
+                >
+                  Appointments
+                </Link>
+                <Link
+                  href="/app/invoices"
+                  className="text-sm font-medium text-slate-600 hover:text-blue-700"
+                >
+                  Invoices
+                </Link>
                 {session.user.roleSlug === "admin" && (
                   <Link
                     href="/app/team"
