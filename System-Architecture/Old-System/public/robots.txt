@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /patients.html
+Disallow: /cycles.html
+Disallow: /lab.html
+Disallow: /patient-details.html
+Disallow: /cycle-details.html
+Disallow: /patient-intake.html
+Disallow: /lab-orders.html
+Disallow: /lab-tests.html
+Disallow: /semen-report.html
+Disallow: /organization-settings.html
+Disallow: /settings.html
+Disallow: /finance.html
+Disallow: /inventory.html
+Disallow: /assets.html
+Disallow: /reports.html
+Disallow: /api/
+
+Sitemap: https://www.fertilityos.com/sitemap.xml

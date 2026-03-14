@@ -21,6 +21,12 @@
 - **Deploy:** Changes pushed to the connected branch (e.g. `main`) trigger build and deploy; Next.js app runs on port 3000.
 - **Domain:** `thefertilityos.com` / `www.thefertilityos.com` point to the App Platform app.
 
+## Database (PostgreSQL)
+
+- **Create/attach:** Use App Platform **Add Resource → Database → Create and attach**. Prefer PostgreSQL 18; set **database name** (e.g. `fertilityos`).
+- **Connection:** Ensure the web service has **`DATABASE_URL`** set to the DB connection string (DO often injects it under a component name; alias or copy it to `DATABASE_URL`).
+- **Migrations:** Run the SQL files in `website/db/migrations/` **once** (in order). See **`Infrastructure/digitalocean-database-setup.md`** for step-by-step instructions.
+
 ## For development and agents
 
 - **Local:** Run `website/` with `npm run dev` (Next.js default port 3000).

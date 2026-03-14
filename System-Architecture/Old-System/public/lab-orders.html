@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Orders - FertilityOS</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .order-status { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .order-status.ordered { background: #dbeafe; color: #1e40af; }
+        .order-status.collected { background: #fef3c7; color: #92400e; }
+        .order-status.processing { background: #e0e7ff; color: #4338ca; }
+        .order-status.completed { background: #dcfce7; color: #166534; }
+        .order-status.cancelled { background: #fee2e2; color: #991b1b; }
+        .priority-badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+        .priority-badge.stat { background: #dc2626; color: white; }
+        .priority-badge.urgent { background: #f59e0b; color: white; }
+        .priority-badge.routine { background: #6b7280; color: white; }
+        .test-list { font-size: 11px; color: #666; }
+        .test-chip { display: inline-block; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; margin: 2px; font-size: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+                        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>FertilityOS</h2>
+                <p id="clinicName">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span>📊</span> Dashboard</a>
+                <a href="patients.html" class="nav-item"><span>👥</span> Patients</a>
+                <a href="cycles.html" class="nav-item"><span>🔄</span> Cycles</a>
+                <a href="lab.html" class="nav-item"><span>🔬</span> Laboratory</a>
+                <a href="lab-tests.html" class="nav-item"><span>🧪</span> Test Catalog</a>
+                <a href="lab-orders.html" class="nav-item active"><span>📋</span> Lab Orders</a>
+                <a href="finance.html" class="nav-item"><span>💰</span> Finance</a>
+                <a href="assets.html" class="nav-item"><span>🏷️</span> Assets</a>
+                <a href="inventory.html" class="nav-item"><span>📦</span> Inventory</a>
+                <a href="reports.html" class="nav-item"><span>📈</span> Reports</a>
+                <a href="settings.html" class="nav-item"><span>⚙️</span> Settings</a>
+                <a href="organization-settings.html" class="nav-item"><span>🏢</span> Organization</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <p id="userName">Loading...</p>
+                    <p id="userRole" class="text-muted">Role</p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary btn-sm" style="width:100%;">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>📋 Lab Orders</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="openNewOrderModal()">+ New Lab Order</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-details"><h3 id="totalOrders">0</h3><p>Total Orders</p></div></div>
+                <div class="stat-card warning"><div class="stat-icon">⏳</div><div class="stat-details"><h3 id="pendingOrders">0</h3><p>Pending Collection</p></div></div>
+                <div class="stat-card info"><div class="stat-icon">🔬</div><div class="stat-details"><h3 id="processingOrders">0</h3><p>Processing</p></div></div>
+                <div class="stat-card success"><div class="stat-icon">✅</div><div class="stat-details"><h3 id="completedToday">0</h3><p>Completed Today</p></div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Lab Orders</h2>
+                    <div style="display:flex;gap:10px;">
+                        <input type="text" id="searchOrders" class="form-control" placeholder="🔍 Search orders..." style="width:200px;" onkeyup="filterOrders()">
+                        <select id="filterStatus" class="form-control" style="width:150px;" onchange="filterOrders()">
+                            <option value="">All Status</option>
+                            <option value="ordered">Ordered</option>
+                            <option value="collected">Collected</option>
+                            <option value="processing">Processing</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <input type="date" id="filterDate" class="form-control" style="width:150px;" onchange="filterOrders()">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Patient</th>
+                                <th>Tests</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Order Date</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <tr><td colspan="8" class="text-center text-muted">No orders found</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- New Order Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content" style="max-width:900px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h2>📋 New Lab Order</h2>
+                <span class="close" onclick="closeModal('orderModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="orderForm">
+                    <div class="detail-section">
+                        <h3>Patient Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Patient *</label>
+                                <select class="form-control" id="orderPatientId" required onchange="loadPatientInfo()">
+                                    <option value="">Select Patient</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cycle (Optional)</label>
+                                <select class="form-control" id="orderCycleId">
+                                    <option value="">No Cycle</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Priority</label>
+                                <select class="form-control" id="orderPriority">
+                                    <option value="routine">Routine</option>
+                                    <option value="urgent">Urgent</option>
+                                    <option value="stat">STAT</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="patientInfoDisplay" style="display:none;background:#f8fafc;padding:10px;border-radius:8px;margin-bottom:15px;">
+                            <span id="patientGenderBadge"></span>
+                            <span id="patientAgeBadge"></span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Select Tests</h3>
+                        <div class="form-group">
+                            <label>Filter by Category</label>
+                            <select class="form-control" id="testCategoryFilter" onchange="filterTestsByCategory()">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        <div id="testSelectionGrid" style="max-height:300px;overflow-y:auto;border:1px solid #ddd;border-radius:8px;padding:10px;">
+                            <p class="text-muted">Loading tests...</p>
+                        </div>
+                        <div style="margin-top:15px;padding:15px;background:#f0fdf4;border-radius:8px;">
+                            <strong>Selected Tests: <span id="selectedTestCount">0</span></strong>
+                            <div id="selectedTestsList" style="margin-top:10px;"></div>
+                            <div style="margin-top:10px;font-size:18px;font-weight:bold;">
+                                Total: <span id="orderTotal">PKR 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Clinical Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>LMP Date (for females)</label>
+                                <input type="date" class="form-control" id="orderLmpDate">
+                            </div>
+                            <div class="form-group">
+                                <label>Cycle Day</label>
+                                <input type="number" class="form-control" id="orderCycleDay" min="1" max="40">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Clinical Notes / Indication</label>
+                            <textarea class="form-control" id="orderNotes" rows="2" placeholder="e.g., Day 3 hormones for IVF workup..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('orderModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveLabOrder()">📋 Create Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Order Modal -->
+    <div id="viewOrderModal" class="modal">
+        <div class="modal-content" style="max-width:700px;max-height:85vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h2>📋 Lab Order Details</h2>
+                <span class="close" onclick="closeModal('viewOrderModal')">&times;</span>
+            </div>
+            <div class="modal-body" id="viewOrderContent">
+                Loading...
+            </div>
+            <div class="modal-footer" style="display:flex;justify-content:space-between;">
+                <button class="btn btn-primary" onclick="printLabReport()">
+                 🖨 Print Report
+                </button>
+            <button class="btn btn-secondary" onclick="closeModal('viewOrderModal')">
+            Close
+            </button>
+            </div>
+        </div>
+    </div>
+
+<!-- Results Entry Modal -->
+<div id="resultsModal" class="modal">
+    <div class="modal-content" style="max-width:800px;max-height:90vh;overflow-y:auto;border-radius:12px;">
+        <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="margin:0;">🧪 Enter Lab Results</h2>
+            <span class="close" onclick="closeModal('resultsModal')" 
+                  style="cursor:pointer;font-size:24px;font-weight:bold;">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="resultsContainer">
+                Loading...
+            </div>
+        </div>
+
+        <div class="modal-footer" style="text-align:right;margin-top:15px;">
+            <button class="btn btn-secondary" onclick="closeModal('resultsModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveResults()">💾 Save Results</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+
+let allOrders = [];
+let allTests = [];
+let selectedTests = [];
+let allPatients = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    requireAuth();
+    loadUserInfo();
+    loadOrders();
+    loadPatients();
+    loadTestCategories();
+    loadTestsForSelection();
+});
+
+/* ===========================
+   LOAD ORDERS
+=========================== */
+
+async function loadOrders() {
+    try {
+        const data = await apiCall('/lab/orders');
+        if (data && data.success) {
+            allOrders = data.data;
+
+            document.getElementById('totalOrders').textContent = allOrders.length;
+            document.getElementById('pendingOrders').textContent =
+                allOrders.filter(o => o.status === 'ordered').length;
+            document.getElementById('processingOrders').textContent =
+                allOrders.filter(o => o.status === 'processing').length;
+
+            renderOrders(allOrders);
+        }
+    } catch (error) {
+        console.error('Error loading orders:', error);
+    }
+}
+
+function renderOrders(orders) {
+    const tbody = document.getElementById('ordersTable');
+
+    if (!orders || orders.length === 0) {
+        tbody.innerHTML =
+            '<tr><td colspan="8" class="text-center text-muted">No orders found</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = orders.map(o => `
+        <tr>
+            <td><strong>${o.order_number}</strong></td>
+
+            <td>
+                ${o.patient_name || '-'}<br>
+                <small class="text-muted">${o.mrn || ''}</small>
+            </td>
+
+            <td class="test-list">
+                ${(o.tests || []).slice(0,3).map(t =>
+                    `<span class="test-chip">${t}</span>`
+                ).join('')}
+            </td>
+
+            <td>
+                <span class="priority-badge ${o.priority || 'routine'}">
+                    ${(o.priority || 'routine').toUpperCase()}
+                </span>
+            </td>
+
+            <td>
+                <span class="order-status ${o.status}">
+                    ${o.status}
+                </span>
+            </td>
+
+            <td>${formatDate(o.order_date)}</td>
+
+            <td>
+                <strong>
+                    ${formatCurrency(o.net_amount || o.total_amount)}
+                </strong>
+            </td>
+
+            <td>
+                <button class="btn btn-sm btn-secondary"
+                    onclick="viewOrder('${o.id}')">👁️</button>
+
+                ${o.status === 'ordered'
+                    ? `<button class="btn btn-sm btn-success"
+                        onclick="collectSamples('${o.id}')">🧪 Collect</button>`
+                    : ''}
+
+                ${o.status === 'collected'
+                    ? `<button class="btn btn-sm btn-info"
+                        onclick="enterResults('${o.id}')">📝 Results</button>`
+                    : ''}
+            </td>
+        </tr>
+    `).join('');
+}
+
+/* ===========================
+   PATIENT + TEST LOADING
+=========================== */
+
+async function loadPatients() {
+    try {
+        const data = await apiCall('/patients');
+        if (data && data.patients) {
+            allPatients = data.patients;
+
+            document.getElementById('orderPatientId').innerHTML =
+                '<option value="">Select Patient</option>' +
+                allPatients.map(p =>
+                    `<option value="${p.id}"
+                        data-gender="${p.gender}"
+                        data-dob="${p.date_of_birth}">
+                        ${p.full_name} (${p.mrn || p.patient_code})
+                    </option>`
+                ).join('');
+        }
+    } catch (error) {
+        console.error('Error loading patients:', error);
+    }
+}
+
+async function loadTestCategories() {
+    try {
+        const data = await apiCall('/lab/test-categories');
+        if (data && data.success) {
+            document.getElementById('testCategoryFilter').innerHTML =
+                '<option value="">All Categories</option>' +
+                data.data.map(c =>
+                    `<option value="${c.id}">
+                        ${c.category_name}
+                    </option>`
+                ).join('');
+        }
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+async function loadTestsForSelection() {
+    try {
+        const data = await apiCall('/lab/test-definitions?active_only=true');
+        if (data && data.success) {
+            allTests = data.data;
+            renderTestSelection(allTests);
+        }
+    } catch (error) {
+        console.error('Error loading tests:', error);
+    }
+}
+
+function renderTestSelection(tests) {
+    const grid = document.getElementById('testSelectionGrid');
+
+    if (!tests || tests.length === 0) {
+        grid.innerHTML = '<p class="text-muted">No tests available</p>';
+        return;
+    }
+
+    grid.innerHTML = tests.map(t => `
+        <div style="display:flex;align-items:center;padding:8px;border-bottom:1px solid #eee;cursor:pointer;"
+             onclick="toggleTest('${t.id}')">
+
+            <input type="checkbox"
+                   id="test_${t.id}"
+                   ${selectedTests.includes(t.id) ? 'checked' : ''}
+                   style="margin-right:10px;">
+
+            <div style="flex:1;">
+                <strong>${t.test_code}</strong> - ${t.test_name}
+                <br>
+                <small class="text-muted">
+                    ${t.category_name || ''}
+                </small>
+            </div>
+
+            <div style="font-weight:bold;color:#059669;">
+                ${formatCurrency(t.base_price)}
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleTest(testId) {
+    const checkbox = document.getElementById('test_' + testId);
+
+    if (selectedTests.includes(testId)) {
+        selectedTests = selectedTests.filter(id => id !== testId);
+        if (checkbox) checkbox.checked = false;
+    } else {
+        selectedTests.push(testId);
+        if (checkbox) checkbox.checked = true;
+    }
+
+    updateSelectedTests();
+}
+
+function updateSelectedTests() {
+    document.getElementById('selectedTestCount').textContent =
+        selectedTests.length;
+
+    const selectedTestObjects =
+        allTests.filter(t => selectedTests.includes(t.id));
+
+    document.getElementById('selectedTestsList').innerHTML =
+        selectedTestObjects.map(t =>
+            `<span class="test-chip">
+                ${t.test_code}
+                <span style="cursor:pointer;color:red;"
+                      onclick="toggleTest('${t.id}')">
+                    &times;
+                </span>
+            </span>`
+        ).join('');
+
+    const total =
+        selectedTestObjects.reduce(
+            (sum, t) => sum + (parseFloat(t.base_price) || 0),
+            0
+        );
+
+    document.getElementById('orderTotal').textContent =
+        formatCurrency(total);
+}
+
+function openNewOrderModal() {
+    document.getElementById('orderForm').reset();
+    selectedTests = [];
+    updateSelectedTests();
+    document.getElementById('patientInfoDisplay').style.display = 'none';
+    renderTestSelection(allTests);
+    openModal('orderModal');
+}
+/* ===========================
+   CREATE NEW LAB ORDER
+=========================== */
+
+async function saveLabOrder() {
+
+    const patientId = document.getElementById('orderPatientId').value;
+
+    if (!patientId) {
+        alert('Please select a patient');
+        return;
+    }
+
+    if (selectedTests.length === 0) {
+        alert('Please select at least one test');
+        return;
+    }
+
+    const selectedTestObjects =
+        allTests.filter(t => selectedTests.includes(t.id));
+
+    const totalAmount =
+        selectedTestObjects.reduce(
+            (sum, t) => sum + (parseFloat(t.base_price) || 0),
+            0
+        );
+
+    try {
+
+        const response = await apiCall('/lab/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                patient_id: patientId,
+                cycle_id: document.getElementById('orderCycleId').value || null,
+                priority: document.getElementById('orderPriority').value,
+                test_ids: selectedTests,
+                lmp_date: document.getElementById('orderLmpDate').value || null,
+                cycle_day: document.getElementById('orderCycleDay').value || null,
+                clinical_notes: document.getElementById('orderNotes').value || null,
+                total_amount: totalAmount
+            })
+        });
+
+        if (response && response.success) {
+            alert('✓ Lab order created successfully');
+            closeModal('orderModal');
+            loadOrders();
+        } else {
+            alert('Failed to create order');
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert('Error creating lab order');
+    }
+}
+
+/* ===========================
+   VIEW ORDER
+=========================== */
+
+async function viewOrder(id) {
+    try {
+        const data = await apiCall('/lab/orders/' + id);
+        if (!data || !data.success) {
+            alert('Failed to load order');
+            return;
+        }
+
+        const order = data.data;
+        const items = order.items || [];
+
+        let rows = '';
+
+        items.forEach(function(i) {
+
+            let valueDisplay = i.result_numeric || i.result_value || i.result_text || '-';
+
+let valueColor = '#111827';   // default dark
+let flagText = '';
+
+if (i.result_flag === 'H') {
+    valueColor = '#dc2626';   // red
+    flagText = ' H';
+} else if (i.result_flag === 'L') {
+    valueColor = '#2563eb';   // blue
+    flagText = ' L';
+} else if (i.result_flag === 'N') {
+    valueColor = '#059669';   // green
+}
+
+            rows += `
+                <tr>
+                    <td>${i.test_name}</td>
+                   <td style="text-align:center;">
+    <strong style="color:${valueColor};">
+        ${valueDisplay}${flagText}
+    </strong>
+</td>
+                    <td style="text-align:center;">${i.result_unit || '-'}</td>
+                    <td style="text-align:center;">
+                        ${i.reference_min || '-'}
+                        ${i.reference_max ? ' - ' + i.reference_max : ''}
+                    </td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('viewOrderContent').innerHTML = `
+            <div style="padding:20px;">
+
+                <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:15px;">
+                    <h2 style="margin:0;">FertilityOS Laboratory</h2>
+                    <div style="font-size:13px;color:#555;">Diagnostic Report</div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:15px;">
+                    <div>
+                        <strong>Patient:</strong> ${order.patient_name}<br>
+                        <strong>MRN:</strong> ${order.mrn || '-'}<br>
+                        <strong>Gender:</strong> ${order.gender || '-'}
+                    </div>
+
+                    <div style="text-align:right;">
+                        <strong>Order #:</strong> ${order.order_number}<br>
+                        <strong>Date:</strong> ${formatDate(order.order_date)}<br>
+                        <strong>Status:</strong> ${order.status.toUpperCase()}
+                    </div>
+                </div>
+
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                    <thead>
+                        <tr style="background:#f3f4f6;">
+                            <th style="text-align:left;padding:8px;border:1px solid #ddd;">Test</th>
+                            <th style="text-align:center;padding:8px;border:1px solid #ddd;">Result</th>
+                            <th style="text-align:center;padding:8px;border:1px solid #ddd;">Unit</th>
+                            <th style="text-align:center;padding:8px;border:1px solid #ddd;">Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows || '<tr><td colspan="4" style="text-align:center;padding:10px;">No results available</td></tr>'}
+                    </tbody>
+                </table>
+
+                <div style="margin-top:20px;font-size:13px;color:#666;">
+                    <strong>Notes:</strong><br>
+                    All results should be interpreted clinically.
+                </div>
+
+            </div>
+        `;
+
+        openModal('viewOrderModal');
+
+    } catch (error) {
+        console.error(error);
+        alert('Error loading order');
+    }
+}
+
+/* ===========================
+   STATUS UPDATE
+=========================== */
+
+function collectSamples(id) {
+    if (confirm('Mark samples as collected?')) {
+        updateOrderStatus(id, 'collected');
+    }
+}
+
+let currentResultOrderId = null;
+let currentOrderItems = [];
+
+async function enterResults(id) {
+    try {
+        currentResultOrderId = id;
+
+        const data = await apiCall('/lab/orders/' + id);
+        if (!data || !data.success) {
+            alert('Failed to load order');
+            return;
+        }
+
+        const order = data.data;
+        currentOrderItems = order.items || [];
+
+        if (currentOrderItems.length === 0) {
+            document.getElementById('resultsContainer').innerHTML = '<p>No tests found.</p>';
+        } else {
+            let html = '';
+
+            currentOrderItems.forEach(function(item) {
+                html += `
+                    <div style="padding:15px;border-bottom:1px solid #eee;">
+                        <div style="font-weight:600;margin-bottom:5px;">
+                            ${item.test_code} - ${item.test_name}
+                        </div>
+
+                        <div style="font-size:12px;color:#666;margin-bottom:5px;">
+                            Reference: 
+                            ${item.reference_min || '-'} 
+                            ${item.reference_max ? ' - ' + item.reference_max : ''} 
+                            ${item.result_unit || ''}
+                        </div>
+
+                        <div style="display:flex;gap:10px;">
+                            <input type="number" 
+                                   step="any"
+                                   class="form-control"
+                                   placeholder="Numeric Result"
+                                   id="result_numeric_${item.id}"
+                                   style="flex:1;">
+
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Text Result"
+                                   id="result_text_${item.id}"
+                                   style="flex:1;">
+                        </div>
+
+                        <textarea class="form-control"
+                                  placeholder="Interpretation / Notes"
+                                  id="interpretation_${item.id}"
+                                  rows="2"
+                                  style="margin-top:8px;"></textarea>
+                    </div>
+                `;
+            });
+
+            document.getElementById('resultsContainer').innerHTML = html;
+        }
+
+        openModal('resultsModal');
+
+    } catch (error) {
+        console.error(error);
+        alert('Error loading results form');
+    }
+}
+
+async function saveResults() {
+    try {
+        const results = [];
+
+        currentOrderItems.forEach(function(item) {
+            const numeric = document.getElementById('result_numeric_' + item.id).value;
+            const text = document.getElementById('result_text_' + item.id).value;
+            const interpretation = document.getElementById('interpretation_' + item.id).value;
+
+            results.push({
+                id: item.id,
+                result_numeric: numeric || null,
+                result_text: text || null,
+                result_value: numeric || text || null,
+                interpretation: interpretation || null,
+                result_flag: null
+            });
+        });
+
+        const response = await apiCall(`/lab/orders/${currentResultOrderId}/results`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ results })
+        });
+
+        if (response && response.success) {
+            alert('✓ Results saved successfully');
+            closeModal('resultsModal');
+            loadOrders();
+        } else {
+            alert('Failed to save results');
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert('Error saving results');
+    }
+}
+
+async function updateOrderStatus(id, status) {
+    try {
+        const data = await apiCall(`/lab/orders/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+
+        if (data && data.success) {
+            loadOrders();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+/* ===========================
+   UTILITIES
+=========================== */
+
+function formatDate(d) {
+    if (!d) return '-';
+    return new Date(d).toLocaleDateString('en-GB');
+}
+
+function formatCurrency(amount) {
+    return 'PKR ' + (parseFloat(amount) || 0).toLocaleString();
+}
+
+function openModal(id) {
+    document.getElementById(id).style.display = 'block';
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+window.onclick = function(e) {
+    if (e.target.classList.contains('modal')) {
+        e.target.style.display = 'none';
+    }
+};
+function printLabReport() {
+    const orderHtml = document.getElementById('viewOrderContent').innerHTML;
+    const clinicName = document.getElementById('clinicName')?.innerText || 'FertilityOS';
+
+    const printWindow = window.open('', '', 'width=1000,height=800');
+
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Lab Report</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 40px;
+                    position: relative;
+                }
+
+                .header {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+
+                .header h1 {
+                    margin: 0;
+                    font-size: 22px;
+                }
+
+                .header p {
+                    margin: 3px 0;
+                    font-size: 12px;
+                }
+
+                .watermark {
+                    position: fixed;
+                    top: 40%;
+                    left: 20%;
+                    font-size: 80px;
+                    color: rgba(0,0,0,0.05);
+                    transform: rotate(-30deg);
+                    z-index: 0;
+                }
+
+                .report-content {
+                    position: relative;
+                    z-index: 1;
+                }
+
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 15px;
+                }
+
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    font-size: 13px;
+                }
+
+                th {
+                    background: #f3f4f6;
+                    text-align: left;
+                }
+
+                .signature-section {
+                    margin-top: 50px;
+                    display: flex;
+                    justify-content: space-between;
+                }
+
+                .signature-box {
+                    text-align: center;
+                    width: 200px;
+                }
+
+                .signature-line {
+                    margin-top: 50px;
+                    border-top: 1px solid #000;
+                }
+
+                .footer {
+                    margin-top: 30px;
+                    font-size: 11px;
+                    text-align: center;
+                    color: #555;
+                }
+            </style>
+        </head>
+
+        <body>
+
+            <div class="watermark">FINAL REPORT</div>
+
+            <div class="header">
+                <h1>${clinicName}</h1>
+                <p>IVF & Fertility Laboratory Services</p>
+                <p>Confidential Medical Report</p>
+            </div>
+
+            <div class="report-content">
+                ${orderHtml}
+
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>Lab Technologist</p>
+                    </div>
+
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p>Consultant / Verified By</p>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    This report is electronically generated and valid without signature.
+                </div>
+            </div>
+
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+}
+</script>
+</body>
+</html>
+
+
+

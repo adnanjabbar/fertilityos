@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics &amp; Reporting — FertilityOS IVF Clinic Analytics Dashboard</title>
+<meta name="description" content="Track IVF success rates, clinic KPIs, and operational metrics with FertilityOS analytics. Real-time dashboards, custom reports, and data-driven insights for fertility clinic management.">
+<meta name="keywords" content="IVF analytics dashboard, fertility clinic reporting, IVF success rate tracking, clinic KPI dashboard, reproductive medicine analytics, fertility clinic metrics, IVF outcome reporting">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.fertilityos.com/features/analytics.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.fertilityos.com/features/analytics.html">
+<meta property="og:title" content="Analytics & Reporting — FertilityOS">
+<meta property="og:description" content="Track IVF success rates, clinic KPIs, and operational metrics with real-time dashboards and data-driven insights.">
+<meta property="og:site_name" content="FertilityOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Analytics & Reporting — FertilityOS">
+<meta name="twitter:description" content="Track IVF success rates, clinic KPIs, and operational metrics with real-time dashboards and data-driven insights.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Analytics & Reporting",
+  "description": "Track IVF success rates, clinic KPIs, and operational metrics with FertilityOS analytics dashboards.",
+  "url": "https://www.fertilityos.com/features/analytics.html",
+  "isPartOf": { "@type": "WebSite", "name": "FertilityOS", "url": "https://www.fertilityos.com" }
+}
+</script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #0f172a; color: white; line-height: 1.6; }
+header { position: sticky; top: 0; z-index: 100; }
+nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 60px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.07); }
+.logo a { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.5px; text-decoration: none; }
+.nav-links { display: flex; align-items: center; gap: 8px; }
+.nav-links a { color: #cbd5e1; text-decoration: none; padding: 9px 18px; border-radius: 8px; font-weight: 500; font-size: 15px; transition: color 0.2s; }
+.nav-links a:hover { color: white; }
+.nav-links .btn-nav { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 9px 22px; border-radius: 8px; font-weight: 600; transition: opacity 0.2s, transform 0.2s; }
+.nav-links .btn-nav:hover { opacity: 0.9; transform: translateY(-1px); }
+.mobile-toggle { display: none; background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+
+.feature-hero { text-align: center; padding: 100px 20px 70px; max-width: 800px; margin: 0 auto; }
+.feature-hero .breadcrumb { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+.feature-hero .breadcrumb a { color: #818cf8; text-decoration: none; }
+.feature-hero .breadcrumb a:hover { text-decoration: underline; }
+.feature-hero h1 { font-size: 48px; font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; background: linear-gradient(135deg, #f1f5f9 30%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; }
+.feature-hero p { font-size: 19px; color: #94a3b8; max-width: 600px; margin: 0 auto; }
+
+.feature-detail { background: #f8fafc; color: #0f172a; padding: 80px 40px; }
+.feature-detail .container { max-width: 900px; margin: 0 auto; }
+.feature-detail h2 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 20px; color: #0f172a; }
+.feature-detail p { font-size: 16px; color: #475569; line-height: 1.8; margin-bottom: 20px; }
+.feature-detail ul { margin: 20px 0 30px 20px; }
+.feature-detail ul li { font-size: 16px; color: #475569; line-height: 1.8; margin-bottom: 8px; }
+.feature-detail h3 { font-size: 22px; font-weight: 700; margin: 36px 0 14px; color: #1e293b; }
+
+.cta-section { text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%); }
+.cta-section h2 { font-size: 32px; font-weight: 800; margin-bottom: 16px; }
+.cta-section p { font-size: 18px; color: rgba(255,255,255,0.85); margin-bottom: 28px; }
+.cta-section .btn { display: inline-block; background: white; color: #6366f1; padding: 15px 36px; border-radius: 10px; font-weight: 700; font-size: 16px; text-decoration: none; transition: transform 0.2s; }
+.cta-section .btn:hover { transform: translateY(-3px); }
+
+footer { background: #020617; text-align: center; padding: 28px 20px; font-size: 13px; color: #475569; border-top: 1px solid rgba(255,255,255,0.05); }
+footer a { color: #64748b; text-decoration: none; margin: 0 12px; }
+footer a:hover { color: #94a3b8; }
+
+@media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .mobile-toggle { display: block; }
+    .nav-links.active { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #0f172a; padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .feature-hero h1 { font-size: 32px; }
+    .feature-detail { padding: 60px 20px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+<nav aria-label="Main navigation">
+    <div class="logo"><a href="/">FertilityOS</a></div>
+    <button class="mobile-toggle" aria-label="Toggle navigation menu" onclick="document.querySelector('.nav-links').classList.toggle('active')">☰</button>
+    <div class="nav-links">
+        <a href="/#features">Features</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/login.html">Login</a>
+        <a href="/register-wizard.html" class="btn-nav">Start Free Trial</a>
+    </div>
+</nav>
+</header>
+
+<main>
+
+<section class="feature-hero">
+    <div class="breadcrumb"><a href="/">Home</a> &rarr; <a href="/#features">Features</a> &rarr; Analytics</div>
+    <h1>Analytics &amp; Reporting</h1>
+    <p>Monitor IVF success rates, clinic performance, and operational metrics with real-time dashboards that drive data-driven decision making.</p>
+</section>
+
+<section class="feature-detail">
+    <div class="container">
+        <h2>Data-Driven Fertility Clinic Management</h2>
+        <p>FertilityOS analytics gives clinic directors and medical staff instant visibility into clinical outcomes, operational efficiency, and financial performance. Make informed decisions backed by real-time data from your clinic's operations.</p>
+
+        <h3>Clinical Outcome Tracking</h3>
+        <p>Track IVF success rates by protocol, physician, age group, and diagnosis. Monitor implantation rates, clinical pregnancy rates, and live birth rates over time to identify trends and optimize treatment approaches.</p>
+        <ul>
+            <li>IVF success rate tracking by multiple dimensions</li>
+            <li>Implantation and pregnancy rate dashboards</li>
+            <li>Age-stratified outcome analysis</li>
+            <li>Protocol comparison and effectiveness reports</li>
+            <li>Benchmark comparison with industry standards</li>
+        </ul>
+
+        <h3>Operational Metrics</h3>
+        <p>Monitor patient volumes, cycle counts, lab utilization, appointment scheduling efficiency, and staff productivity. Identify bottlenecks and optimize resource allocation.</p>
+        <ul>
+            <li>Patient volume and growth trends</li>
+            <li>Cycle count and type distribution</li>
+            <li>Appointment utilization rates</li>
+            <li>Staff workload and productivity metrics</li>
+            <li>Lab equipment utilization tracking</li>
+        </ul>
+
+        <h3>Financial Reporting</h3>
+        <p>Track revenue, payment collection rates, outstanding balances, and procedure profitability. Generate financial reports for accounting, management, and regulatory purposes.</p>
+        <ul>
+            <li>Revenue tracking and forecasting</li>
+            <li>Payment collection rate analysis</li>
+            <li>Outstanding balance reports</li>
+            <li>Procedure-level profitability analysis</li>
+            <li>Export-ready financial reports</li>
+        </ul>
+
+        <h3>Custom Reports &amp; Data Export</h3>
+        <p>Build custom reports tailored to your clinic's needs. Export data in standard formats for regulatory submissions, research purposes, or integration with external systems.</p>
+    </div>
+</section>
+
+<section class="cta-section">
+    <h2>Make Data-Driven Decisions</h2>
+    <p>See how FertilityOS analytics can help optimize your clinic's outcomes and operations.</p>
+    <a href="/register-wizard.html" class="btn">Start Your Free 14-Day Trial →</a>
+</section>
+
+</main>
+
+<footer>
+    <p style="margin-bottom:10px;">
+        <a href="/">Home</a>
+        <a href="/#features">Features</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="/login.html">Login</a>
+        <a href="/register-wizard.html">Sign Up</a>
+    </p>
+    <p>&copy; 2026 FertilityOS. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

@@ -52,6 +52,7 @@ The immediate priority is the public-facing marketing website at `website/`. Thi
 | Old-System Reference | `Old-System/README.md` | Summary of pre-architecture implementation (reference only) |
 | Skills Registry | `Skills/skills.md` | Global skills and FertilityOS conventions for agents |
 | Deployment | `Infrastructure/deployment.md` | DigitalOcean App Platform, domain (thefertilityos.com), Next.js port 3000 |
+| Database setup (DO) | `Infrastructure/digitalocean-database-setup.md` | Create/attach PostgreSQL 18, run migrations, set DATABASE_URL and auth env |
 
 ---
 

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semen Analysis Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 11px; line-height: 1.4; }
+        .report-container { max-width: 800px; margin: 0 auto; padding: 15px; }
+        
+        .report-header { display: flex; align-items: center; gap: 20px; border-bottom: 3px double #1a365d; padding-bottom: 15px; margin-bottom: 15px; }
+        .clinic-logo { max-height: 70px; max-width: 150px; }
+        .clinic-info { flex: 1; }
+        .clinic-name { font-size: 22px; font-weight: bold; color: #1a365d; }
+        .clinic-subtitle { font-size: 12px; color: #666; }
+        .clinic-contact { font-size: 10px; color: #666; margin-top: 5px; }
+        
+        .report-title { text-align: center; font-size: 16px; font-weight: bold; margin: 15px 0; padding: 8px; background: #1a365d; color: white; }
+        
+        .patient-info { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; padding: 12px; border: 1px solid #ddd; background: #f9fafb; font-size: 11px; }
+        .patient-info div { display: flex; }
+        .patient-info label { font-weight: bold; min-width: 110px; color: #555; }
+        
+        .section { margin-bottom: 12px; }
+        .section-title { font-size: 11px; font-weight: bold; background: #1a365d; color: white; padding: 5px 10px; margin-bottom: 8px; }
+        
+        .results-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        .results-table th, .results-table td { border: 1px solid #ddd; padding: 5px 8px; text-align: left; }
+        .results-table th { background: #f1f5f9; font-weight: bold; }
+        .results-table .abnormal { background: #fee2e2; color: #dc2626; font-weight: bold; }
+        .results-table .normal { background: #dcfce7; color: #166534; }
+        .results-table .reference { color: #666; font-size: 9px; }
+        
+        .diagnosis-box { padding: 12px; border: 2px solid #1a365d; margin: 15px 0; background: #f8fafc; }
+        .diagnosis-box h3 { font-size: 12px; margin-bottom: 10px; color: #1a365d; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+        .diagnosis-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+        .diagnosis-title.normal { color: #166534; }
+        .diagnosis-title.warning { color: #b45309; }
+        .diagnosis-title.danger { color: #dc2626; }
+        
+        .explanation-box { margin-top: 10px; padding: 10px; background: white; border-left: 3px solid #1a365d; font-size: 10px; }
+        .explanation-box h4 { font-size: 11px; color: #1a365d; margin-bottom: 5px; }
+        .explanation-box p { color: #444; margin-bottom: 5px; }
+        .explanation-box ul { margin-left: 15px; color: #444; }
+        .explanation-box .why-tagged { background: #fef3c7; padding: 8px; margin-top: 8px; }
+        
+        .quality-row { display: flex; gap: 15px; margin-top: 10px; }
+        .quality-item { flex: 1; padding: 8px; background: white; border: 1px solid #ddd; }
+        .quality-item label { font-size: 9px; color: #666; display: block; }
+        .quality-item span { font-weight: bold; }
+        
+        .who-reference { margin-top: 12px; padding: 10px; background: #eff6ff; border: 1px solid #bfdbfe; font-size: 9px; color: #1e40af; }
+        
+        .report-footer { margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd; }
+        .signature-section { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px; }
+        .signature-box { text-align: center; }
+        .signature-line { border-top: 1px solid #333; margin-top: 40px; padding-top: 5px; font-size: 10px; }
+        
+        .action-buttons { text-align: center; margin: 15px 0; }
+        .btn { padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; margin: 5px; }
+        .btn-print { background: #1a365d; color: white; }
+        .btn-back { background: #666; color: white; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { font-size: 10px; }
+            .report-container { padding: 0; }
+            @page { margin: 0.5cm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="action-buttons no-print">
+        <button class="btn btn-back" onclick="window.history.back()">← Back</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ Print Report</button>
+    </div>
+
+    <div class="report-container">
+        <div class="report-header">
+            <img id="clinicLogo" class="clinic-logo" style="display:none;">
+            <div class="clinic-info">
+                <div class="clinic-name" id="clinicName">Loading...</div>
+                <div class="clinic-subtitle">IVF & Reproductive Medicine</div>
+                <div class="clinic-contact" id="clinicContact">Loading...</div>
+            </div>
+        </div>
+
+        <div class="report-title">SEMEN ANALYSIS REPORT</div>
+
+        <div class="patient-info">
+            <div><label>Patient Name:</label> <span id="patientName">-</span></div>
+            <div><label>MR Number:</label> <span id="patientMRN">-</span></div>
+            <div><label>Age:</label> <span id="patientAge">-</span></div>
+            <div><label>Sample Number:</label> <span id="sampleNumber">-</span></div>
+            <div><label>Collection Date:</label> <span id="collectionDate">-</span></div>
+            <div><label>Collection Time:</label> <span id="collectionTime">-</span></div>
+            <div><label>Abstinence:</label> <span id="abstinenceDays">-</span></div>
+            <div><label>Method:</label> <span id="collectionMethod">-</span></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">MACROSCOPIC EXAMINATION</div>
+            <table class="results-table">
+                <tr><th style="width:35%">Parameter</th><th style="width:30%">Result</th><th>Reference (WHO 6th Ed)</th></tr>
+                <tr><td>Volume</td><td id="volume">-</td><td class="reference">≥ 1.5 mL</td></tr>
+                <tr><td>pH</td><td id="ph">-</td><td class="reference">≥ 7.2</td></tr>
+                <tr><td>Liquefaction</td><td id="liquefaction">-</td><td class="reference">Complete ≤ 60 min</td></tr>
+                <tr><td>Appearance</td><td id="appearance">-</td><td class="reference">Gray-opalescent</td></tr>
+                <tr><td>Viscosity</td><td id="viscosity">-</td><td class="reference">Normal</td></tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">SPERM CONCENTRATION & MOTILITY</div>
+            <table class="results-table">
+                <tr><th style="width:35%">Parameter</th><th style="width:30%">Result</th><th>Reference (WHO 6th Ed)</th></tr>
+                <tr><td>Concentration</td><td id="concentration">-</td><td class="reference">≥ 16 million/mL</td></tr>
+                <tr><td>Total Sperm Count</td><td id="totalCount">-</td><td class="reference">≥ 39 million</td></tr>
+                <tr><td>Progressive Motility (PR)</td><td id="progressiveMotility">-</td><td class="reference">≥ 30%</td></tr>
+                <tr><td>Non-Progressive (NP)</td><td id="nonProgressiveMotility">-</td><td class="reference">-</td></tr>
+                <tr><td>Immotile</td><td id="immotile">-</td><td class="reference">-</td></tr>
+                <tr><td>Total Motility (PR+NP)</td><td id="totalMotility">-</td><td class="reference">≥ 42%</td></tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">MORPHOLOGY (Kruger Strict Criteria)</div>
+            <table class="results-table">
+                <tr><th style="width:35%">Parameter</th><th style="width:30%">Result</th><th>Reference</th></tr>
+                <tr><td>Normal Forms</td><td id="normalMorphology">-</td><td class="reference">≥ 4%</td></tr>
+                <tr><td>Head Defects</td><td id="headDefects">-</td><td class="reference">-</td></tr>
+                <tr><td>Midpiece Defects</td><td id="midpieceDefects">-</td><td class="reference">-</td></tr>
+                <tr><td>Tail Defects</td><td id="tailDefects">-</td><td class="reference">-</td></tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">VITALITY & OTHER CELLS</div>
+            <table class="results-table">
+                <tr><th style="width:35%">Parameter</th><th style="width:30%">Result</th><th>Reference</th></tr>
+                <tr><td>Vitality (Live)</td><td id="vitality">-</td><td class="reference">≥ 54%</td></tr>
+                <tr><td>Round Cells</td><td id="roundCells">-</td><td class="reference">< 5 M/mL</td></tr>
+                <tr><td>WBC</td><td id="wbc">-</td><td class="reference">< 1 M/mL</td></tr>
+            </table>
+        </div>
+
+        <div class="section" id="processingSection" style="display:none;">
+            <div class="section-title">POST-PROCESSING RESULTS</div>
+            <table class="results-table">
+                <tr><th style="width:35%">Parameter</th><th style="width:30%">Result</th><th>Notes</th></tr>
+                <tr><td>Method</td><td id="processingMethod">-</td><td></td></tr>
+                <tr><td>Post-Wash Volume</td><td id="postWashVolume">-</td><td></td></tr>
+                <tr><td>Post-Wash Concentration</td><td id="postWashConcentration">-</td><td></td></tr>
+                <tr><td>Post-Wash Motility</td><td id="postWashMotility">-</td><td></td></tr>
+            </table>
+        </div>
+
+        <div class="diagnosis-box">
+            <h3>📋 DIAGNOSIS & CLINICAL INTERPRETATION</h3>
+            <div class="diagnosis-title" id="diagnosisTitle">-</div>
+            <div class="quality-row">
+                <div class="quality-item"><label>Sample Quality</label><span id="quality">-</span></div>
+                <div class="quality-item"><label>Recommended For</label><span id="usedFor">-</span></div>
+            </div>
+            <div class="explanation-box" id="explanationBox"></div>
+        </div>
+
+        <div class="section" id="notesSection" style="display:none;">
+            <div class="section-title">REMARKS</div>
+            <p id="notes" style="padding:8px;border:1px solid #ddd;background:#fff;min-height:30px;">-</p>
+        </div>
+
+        <div class="who-reference">
+            <strong>📚 Reference:</strong> WHO Laboratory Manual for the Examination and Processing of Human Semen, 6th Edition (2021). Values represent 5th percentile of fertile men.
+        </div>
+
+        <div class="report-footer">
+            <div class="signature-section">
+                <div class="signature-box"><div class="signature-line">Analyzed By (Embryologist)</div></div>
+                <div class="signature-box"><div class="signature-line">Verified By (Lab Director)</div></div>
+            </div>
+            <p style="text-align:center;margin-top:15px;font-size:9px;color:#666;">
+                Report generated: <span id="reportDate">-</span> | This is a computer-generated report.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const DIAGNOSIS_INFO = {
+            'normozoospermia': { title: 'Normozoospermia', severity: 'normal', definition: 'All parameters within normal WHO reference ranges.', explanation: 'Sperm concentration, motility, and morphology are all normal.', characteristics: ['Concentration ≥ 16 M/mL', 'Progressive motility ≥ 30%', 'Total motility ≥ 42%', 'Normal morphology ≥ 4%'], whyTagged: 'All WHO criteria met - positive finding for fertility.', recommendation: 'Proceed with planned treatment or natural conception.' },
+            'oligozoospermia': { title: 'Oligozoospermia', severity: 'warning', definition: 'Low sperm concentration in the ejaculate.', explanation: 'Fewer sperm than expected, reducing natural conception chances.', characteristics: ['Concentration < 16 M/mL', 'Mild: 10-15 M/mL', 'Moderate: 5-10 M/mL', 'Severe: < 5 M/mL'], whyTagged: 'Sperm concentration below WHO threshold of 16 M/mL.', recommendation: 'IUI, IVF, or ICSI depending on severity.' },
+            'asthenozoospermia': { title: 'Asthenozoospermia', severity: 'warning', definition: 'Reduced sperm motility.', explanation: 'Sperm not moving well enough to reach and fertilize egg.', characteristics: ['Progressive motility < 30%', 'OR Total motility < 42%'], whyTagged: 'Sperm motility below WHO reference values.', recommendation: 'IUI with washed sperm or IVF/ICSI.' },
+            'teratozoospermia': { title: 'Teratozoospermia', severity: 'warning', definition: 'Abnormal sperm morphology.', explanation: 'Higher percentage of abnormally shaped sperm.', characteristics: ['Normal forms < 4%'], whyTagged: 'Normal morphology below 4% (Kruger strict criteria).', recommendation: 'ICSI recommended for best results.' },
+            'oligoasthenozoospermia': { title: 'Oligoasthenozoospermia', severity: 'warning', definition: 'Low count and reduced motility.', explanation: 'Both sperm numbers and movement are compromised.', characteristics: ['Concentration < 16 M/mL', 'AND Motility reduced'], whyTagged: 'Both concentration and motility affected.', recommendation: 'IVF with ICSI recommended.' },
+            'oligoasthenoteratozoospermia': { title: 'OAT Syndrome', severity: 'danger', definition: 'All three parameters abnormal.', explanation: 'Low count, poor motility, and abnormal morphology.', characteristics: ['Concentration < 16 M/mL', 'Progressive motility < 30%', 'Normal morphology < 4%'], whyTagged: 'All three major WHO parameters affected.', recommendation: 'IVF with ICSI. Genetic counseling advised.' },
+            'azoospermia': { title: 'Azoospermia', severity: 'danger', definition: 'No sperm in ejaculate.', explanation: 'Complete absence of sperm - may be obstructive or non-obstructive.', characteristics: ['No sperm detected', 'Requires further evaluation'], whyTagged: 'Zero sperm count after thorough examination.', recommendation: 'Hormonal evaluation, genetic testing. Consider TESE/PESA + ICSI.' },
+            'cryptozoospermia': { title: 'Cryptozoospermia', severity: 'danger', definition: 'Extremely rare sperm.', explanation: 'Very few sperm found only after centrifugation.', characteristics: ['Concentration < 1 M/mL', 'Sperm found only after centrifugation'], whyTagged: 'Extremely low sperm count.', recommendation: 'IVF with ICSI. Consider sperm cryopreservation.' }
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const sampleId = urlParams.get('id');
+        
+        if (sampleId) {
+            loadClinicInfo();
+            loadSemenReport(sampleId);
+        }
+
+        async function loadClinicInfo() {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch('/api/clinic/settings', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const c = result.data;
+                    document.getElementById('clinicName').textContent = c.clinic_name || 'IVF Clinic';
+                    document.getElementById('clinicContact').textContent = 
+                        `${c.address || ''} ${c.city || ''} | Phone: ${c.phone || ''} | Email: ${c.email || ''}`;
+                    
+                    if (c.logo_base64) {
+                        document.getElementById('clinicLogo').src = c.logo_base64;
+                        document.getElementById('clinicLogo').style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading clinic info:', error);
+            }
+        }
+
+        async function loadSemenReport(id) {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`/api/lab/semen-samples/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    populateReport(result.data);
+                } else {
+                    alert('Error loading report');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function populateReport(d) {
+            document.getElementById('patientName').textContent = d.patient_name || '-';
+            document.getElementById('patientMRN').textContent = d.mrn || '-';
+            document.getElementById('sampleNumber').textContent = d.sample_number || '-';
+            document.getElementById('collectionDate').textContent = formatDate(d.collection_date);
+            document.getElementById('collectionTime').textContent = d.collection_time || '-';
+            document.getElementById('abstinenceDays').textContent = d.abstinence_days ? `${d.abstinence_days} days` : '-';
+            document.getElementById('collectionMethod').textContent = capitalize(d.collection_method) || '-';
+            
+            setVal('volume', d.volume_ml, 'mL', {min:1.5});
+            setVal('ph', d.ph, '', {min:7.2});
+            setVal('liquefaction', d.liquefaction_time_min, 'min', {max:60});
+            document.getElementById('appearance').textContent = capitalize(d.appearance) || '-';
+            document.getElementById('viscosity').textContent = capitalize(d.viscosity) || '-';
+            
+            setVal('concentration', d.concentration_million_per_ml, 'M/mL', {min:16});
+            setVal('totalCount', d.total_sperm_count_million, 'M', {min:39});
+            setVal('progressiveMotility', d.progressive_motility_percent, '%', {min:30});
+            document.getElementById('nonProgressiveMotility').textContent = d.non_progressive_motility_percent ? `${d.non_progressive_motility_percent}%` : '-';
+            document.getElementById('immotile').textContent = d.immotile_percent ? `${d.immotile_percent}%` : '-';
+            setVal('totalMotility', d.total_motility_percent, '%', {min:42});
+            
+            setVal('normalMorphology', d.normal_morphology_percent, '%', {min:4});
+            document.getElementById('headDefects').textContent = d.head_defects_percent ? `${d.head_defects_percent}%` : '-';
+            document.getElementById('midpieceDefects').textContent = d.midpiece_defects_percent ? `${d.midpiece_defects_percent}%` : '-';
+            document.getElementById('tailDefects').textContent = d.tail_defects_percent ? `${d.tail_defects_percent}%` : '-';
+            
+            setVal('vitality', d.vitality_percent, '%', {min:54});
+            setVal('roundCells', d.round_cells_million_per_ml, 'M/mL', {max:5});
+            setVal('wbc', d.wbc_million_per_ml, 'M/mL', {max:1});
+            
+            if (d.processing_method) {
+                document.getElementById('processingSection').style.display = 'block';
+                document.getElementById('processingMethod').textContent = capitalize(d.processing_method.replace(/_/g,' '));
+                document.getElementById('postWashVolume').textContent = d.post_wash_volume_ml ? `${d.post_wash_volume_ml} mL` : '-';
+                document.getElementById('postWashConcentration').textContent = d.post_wash_concentration ? `${d.post_wash_concentration} M/mL` : '-';
+                document.getElementById('postWashMotility').textContent = d.post_wash_motility_percent ? `${d.post_wash_motility_percent}%` : '-';
+            }
+            
+            populateDiagnosis(d.diagnosis, d.sample_quality, d.used_for);
+            
+            if (d.notes) {
+                document.getElementById('notesSection').style.display = 'block';
+                document.getElementById('notes').textContent = d.notes;
+            }
+            
+            document.getElementById('reportDate').textContent = new Date().toLocaleString();
+        }
+
+        function setVal(id, val, unit, criteria) {
+            const el = document.getElementById(id);
+            if (!val && val !== 0) { el.textContent = '-'; return; }
+            el.textContent = `${val} ${unit}`;
+            const num = parseFloat(val);
+            let abnormal = false;
+            if (criteria.min !== undefined && num < criteria.min) abnormal = true;
+            if (criteria.max !== undefined && num > criteria.max) abnormal = true;
+            el.className = abnormal ? 'abnormal' : 'normal';
+        }
+
+        function populateDiagnosis(diagnosis, quality, usedFor) {
+            document.getElementById('quality').textContent = capitalize(quality) || '-';
+            document.getElementById('usedFor').textContent = capitalize(usedFor) || 'Pending';
+            
+            const info = DIAGNOSIS_INFO[diagnosis];
+            const titleEl = document.getElementById('diagnosisTitle');
+            const boxEl = document.getElementById('explanationBox');
+            
+            if (info) {
+                titleEl.textContent = info.title;
+                titleEl.className = `diagnosis-title ${info.severity}`;
+                boxEl.innerHTML = `
+                    <h4>📖 ${info.definition}</h4>
+                    <p>${info.explanation}</p>
+                    <ul>${info.characteristics.map(c => `<li>${c}</li>`).join('')}</ul>
+                    <div class="why-tagged"><strong>⚠️ Why:</strong> ${info.whyTagged}</div>
+                    <p style="margin-top:8px;"><strong>💊 Recommendation:</strong> ${info.recommendation}</p>
+                `;
+            } else {
+                titleEl.textContent = diagnosis ? capitalize(diagnosis) : 'Pending';
+                boxEl.innerHTML = '<p>Interpretation pending physician review.</p>';
+            }
+        }
+
+        function formatDate(d) { return d ? new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-'; }
+        function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g,' ') : ''; }
+    </script>
+</body>
+</html>
