@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# WHO ICD-11 full dataset (download separately; see db/seed-data/README-ICD11.md)
+website/db/seed-data/icd11-mms-en.zip
+website/db/seed-data/icd11-mms/

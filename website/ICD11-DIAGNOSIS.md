@@ -58,11 +58,26 @@ Indexes: `(tenant_id, patient_id)`; `icd11_code`.
 
 ## ICD-11 data (seed / import)
 
-- **Subset seed:** `db/seed-data/icd11-subset.json` contains a fertility/reproductive-health subset of ICD-11 codes (e.g. female/male infertility, endometriosis, PCOS, recurrent pregnancy loss) with full title and description so "ICD-11 Disease Detail" can show complete text per code.
-- **Script:** From `website/` run:
-  - `node scripts/seed-icd11.js` — loads the subset JSON.
-  - `node scripts/seed-icd11.js path/to/icd11-full.json` — loads a custom file with the same JSON shape (e.g. export from WHO ICD-11).
-- Rows are upserted by `code`, so re-running is safe.
+The system is seeded with the **full WHO ICD-11 for Mortality and Morbidity Statistics (MMS)** — all codable categories, nothing left behind.
+
+### Full WHO ICD-11 MMS (recommended)
+
+- **Source:** WHO Linearization Mini Output (English):  
+  https://icd.who.int/dev11/Downloads/Download?fileName=LinearizationMiniOutput-MMS-en.zip  
+  Download and unzip so that `LinearizationMiniOutput-MMS-en.txt` is at  
+  `website/db/seed-data/icd11-mms/LinearizationMiniOutput-MMS-en.txt`.
+- **Script:** From `website/`:  
+  `node scripts/seed-icd11-full.js`  
+  Parses the tab-separated file and upserts all rows with a code (~35,600+ entities) into `icd11_entities`. Optional:  
+  `node scripts/seed-icd11-full.js /path/to/LinearizationMiniOutput-MMS-en.txt`
+- **Count:** From `website/`: `node scripts/count-icd11.js` to print the number of ICD-11 records in the database.
+
+### Subset seed (optional)
+
+- **Subset:** `db/seed-data/icd11-subset.json` contains a small fertility-focused subset with full `description` text. Use only if you need a minimal set for testing.
+- **Script:** `node scripts/seed-icd11.js` — loads the subset.  
+  `node scripts/seed-icd11.js path/to/custom.json` — loads a custom file with the same JSON shape.
+- Rows are upserted by `code`; running the full seed after a subset will add/update all MMS codes.
 
 ## APIs
 
