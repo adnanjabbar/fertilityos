@@ -52,6 +52,8 @@ export async function createCheckoutSession(params: {
   successUrl: string;
   cancelUrl: string;
   metadata?: { tenantId: string };
+  /** Optional 14-day free trial before first charge. */
+  trialPeriodDays?: number;
 }): Promise<Stripe.Checkout.Session | null> {
   const stripe = getStripe();
   if (!stripe) return null;
@@ -63,7 +65,10 @@ export async function createCheckoutSession(params: {
     success_url: params.successUrl,
     cancel_url: params.cancelUrl,
     metadata: params.metadata ?? {},
-    subscription_data: { metadata: params.metadata },
+    subscription_data: {
+      metadata: params.metadata,
+      ...(params.trialPeriodDays != null ? { trial_period_days: params.trialPeriodDays } : {}),
+    },
   });
   return session;
 }

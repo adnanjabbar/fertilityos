@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { appointments } from "@/db/schema";
+import { appointments, tenantIntegrations } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 
-const DAILY_API_KEY = process.env.DAILY_API_KEY;
 const DAILY_API_URL = "https://api.daily.co/v1/rooms";
 
 function sanitizeRoomName(id: string): string {
@@ -14,7 +13,7 @@ function sanitizeRoomName(id: string): string {
 /**
  * POST /api/app/appointments/[id]/video-room
  * Create or get a Daily.co video room for this appointment. Returns { url }.
- * If DAILY_API_KEY is not set, returns 503.
+ * Uses the clinic's own Daily.co API key (Settings → Integrations). No platform key.
  */
 export async function POST(
   _request: Request,
@@ -46,9 +45,16 @@ export async function POST(
     return NextResponse.json({ url: appointment.videoRoomId });
   }
 
-  if (!DAILY_API_KEY) {
+  const [integration] = await db
+    .select({ dailyApiKey: tenantIntegrations.dailyApiKey })
+    .from(tenantIntegrations)
+    .where(eq(tenantIntegrations.tenantId, session.user.tenantId))
+    .limit(1);
+
+  const dailyApiKey = integration?.dailyApiKey?.trim();
+  if (!dailyApiKey) {
     return NextResponse.json(
-      { error: "Video calls are not configured. Set DAILY_API_KEY." },
+      { error: "Video calls are not configured. Add your Daily.co API key in Settings → Integrations." },
       { status: 503 }
     );
   }
@@ -58,7 +64,7 @@ export async function POST(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${DAILY_API_KEY}`,
+      Authorization: `Bearer ${dailyApiKey}`,
     },
     body: JSON.stringify({
       name: roomName,

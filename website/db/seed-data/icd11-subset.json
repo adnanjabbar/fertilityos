@@ -1,0 +1,162 @@
+[
+  {
+    "code": "GA00",
+    "title": "Diseases of the female genital system",
+    "description": "Block of codes for diseases of the female genital system including inflammatory diseases, endometriosis, infertility, and other conditions affecting the uterus, ovaries, fallopian tubes, cervix, vagina and vulva.",
+    "parentCode": null,
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA10",
+    "title": "Endometriosis",
+    "description": "Endometriosis is a condition in which tissue similar to the lining of the uterus (endometrium) grows outside the uterine cavity. It may present with dysmenorrhoea, dyspareunia, chronic pelvic pain, and infertility. Common sites include the ovaries, pelvic peritoneum, uterosacral ligaments, and rectovaginal septum.",
+    "parentCode": "GA00",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA10.B",
+    "title": "Endometriosis of the reproductive system",
+    "description": "Endometriosis affecting the reproductive organs: ovaries (endometrioma), fallopian tubes, uterus (adenomyosis), cervix, or other reproductive structures. May cause infertility, pelvic pain, and menstrual dysfunction.",
+    "parentCode": "GA10",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA10.Z",
+    "title": "Endometriosis of unspecified site",
+    "description": "Endometriosis where the specific site is not specified or documented.",
+    "parentCode": "GA10",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA31",
+    "title": "Female infertility",
+    "description": "Female infertility is the inability to conceive after 12 months or more of regular unprotected sexual intercourse. Causes include ovulatory disorders, tubal or peritoneal factors, uterine or cervical factors, and unexplained infertility.",
+    "parentCode": "GA00",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA31.0",
+    "title": "Primary female infertility",
+    "description": "Primary female infertility: the woman has never achieved a clinical pregnancy. Subcategories include uterine origin, tubal origin, ovarian origin, cervical origin, and other or multiple causes.",
+    "parentCode": "GA31",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA31.00",
+    "title": "Primary female infertility of uterine origin",
+    "description": "Primary infertility due to uterine factors such as congenital uterine anomalies, uterine fibroids, Asherman syndrome, or other uterine pathology affecting implantation or pregnancy maintenance.",
+    "parentCode": "GA31.0",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA31.01",
+    "title": "Primary female infertility of tubal origin",
+    "description": "Primary infertility due to tubal factors including bilateral tubal occlusion, hydrosalpinx, previous ectopic pregnancy, or pelvic adhesive disease affecting the fallopian tubes.",
+    "parentCode": "GA31.0",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA31.02",
+    "title": "Primary female infertility of ovarian origin",
+    "description": "Primary infertility due to ovarian factors including anovulation, diminished ovarian reserve, premature ovarian insufficiency, or polycystic ovary syndrome (PCOS) affecting ovulation.",
+    "parentCode": "GA31.0",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA31.Z",
+    "title": "Female infertility without specification whether primary or secondary",
+    "description": "Female infertility where it is not specified whether the woman has never conceived (primary) or has had a previous pregnancy (secondary). Includes cases of ovarian dysfunction, tubal factor, cervical factor, unexplained infertility, or male factor in the partner.",
+    "parentCode": "GA31",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GA32",
+    "title": "Polycystic ovarian syndrome",
+    "description": "Polycystic ovarian syndrome (PCOS) is a common endocrine disorder characterised by hyperandrogenism, ovulatory dysfunction, and polycystic ovarian morphology. Features may include irregular menstruation, infertility, hirsutism, acne, and metabolic sequelae including insulin resistance.",
+    "parentCode": "GA00",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GA00",
+    "sectionTitle": "Diseases of the female genital system"
+  },
+  {
+    "code": "GB50",
+    "title": "Diseases of the male genital system",
+    "description": "Block of codes for diseases of the male genital system including disorders of the testes, epididymis, prostate, seminal vesicles, penis, and scrotum.",
+    "parentCode": null,
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GB50",
+    "sectionTitle": "Diseases of the male genital system"
+  },
+  {
+    "code": "GB52",
+    "title": "Male infertility",
+    "description": "Male infertility is the inability to achieve pregnancy in a fertile female partner due to male factors. Causes include oligozoospermia, azoospermia, asthenozoospermia, teratozoospermia, ejaculatory dysfunction, hormonal disorders, genetic factors, or obstruction.",
+    "parentCode": "GB50",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GB50",
+    "sectionTitle": "Diseases of the male genital system"
+  },
+  {
+    "code": "GB52.0",
+    "title": "Azoospermia",
+    "description": "Absence of spermatozoa in the ejaculate. May be obstructive (post-testicular) or non-obstructive (testicular or pre-testicular). Evaluation includes semen analysis, hormonal profile, and genetic testing where indicated.",
+    "parentCode": "GB52",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GB50",
+    "sectionTitle": "Diseases of the male genital system"
+  },
+  {
+    "code": "GB52.1",
+    "title": "Oligozoospermia",
+    "description": "Reduced sperm concentration in the ejaculate (below reference values, typically less than 15 million sperm per milliliter). May be mild, moderate, or severe. Often idiopathic; may be associated with varicocele, infection, or hormonal deficiency.",
+    "parentCode": "GB52",
+    "chapterCode": "GA",
+    "chapterTitle": "Diseases of the genitourinary system",
+    "sectionCode": "GB50",
+    "sectionTitle": "Diseases of the male genital system"
+  },
+  {
+    "code": "JB63.0",
+    "title": "Recurrent pregnancy loss",
+    "description": "Recurrent pregnancy loss (RPL) is the occurrence of two or more failed clinical pregnancies. Causes may include genetic factors, uterine anomalies, antiphospholipid syndrome, endocrine disorders, thrombophilias, or unexplained. Evaluation includes karyotype, uterine imaging, and targeted testing.",
+    "parentCode": "JB63",
+    "chapterCode": "JB",
+    "chapterTitle": "Pregnancy, childbirth or the puerperium",
+    "sectionCode": "JB63",
+    "sectionTitle": "Complications of pregnancy"
+  }
+]

@@ -46,6 +46,13 @@ const migrations = [
   "0016_donors.sql",
   "0017_audit_logs.sql",
   "0018_surrogacy_cases.sql",
+  "0019_embryo_genetic_results.sql",
+  "0020_reminder_channel_and_sms.sql",
+  "0021_icd11_and_patient_diagnoses.sql",
+  "0022_formulary_prescriptions.sql",
+  "0023_mr_number_and_print_jobs.sql",
+  "0024_letterhead_prescription_portal_2fa.sql",
+  "0025_tenant_integrations_and_trial_signups.sql",
 ];
 
 async function main() {

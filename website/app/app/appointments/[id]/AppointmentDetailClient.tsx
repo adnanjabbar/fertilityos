@@ -16,6 +16,8 @@ type Appointment = {
   type: string;
   status: string;
   notes: string | null;
+  reminderSentAt: string | null;
+  reminderSmsSentAt: string | null;
   videoRoomId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -283,6 +285,23 @@ export default function AppointmentDetailClient({ appointmentId }: { appointment
                 <div className="sm:col-span-2">
                   <dt className="text-sm font-medium text-slate-500">Notes</dt>
                   <dd className="mt-1 text-slate-900 whitespace-pre-wrap">{appointment.notes}</dd>
+                </div>
+              )}
+              {(appointment.reminderSentAt || appointment.reminderSmsSentAt) && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-slate-500">Reminders sent</dt>
+                  <dd className="mt-1 flex flex-wrap gap-2">
+                    {appointment.reminderSentAt && (
+                      <span className="inline-flex items-center gap-1 text-sm text-slate-700">
+                        Email sent {formatDateTime(appointment.reminderSentAt)}
+                      </span>
+                    )}
+                    {appointment.reminderSmsSentAt && (
+                      <span className="inline-flex items-center gap-1 text-sm text-slate-700">
+                        SMS sent {formatDateTime(appointment.reminderSmsSentAt)}
+                      </span>
+                    )}
+                  </dd>
                 </div>
               )}
             </dl>

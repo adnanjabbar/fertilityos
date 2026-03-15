@@ -86,6 +86,7 @@ export async function POST(request: Request) {
     successUrl,
     cancelUrl,
     metadata: { tenantId: session.user.tenantId },
+    trialPeriodDays: 14,
   });
 
   if (!checkoutSession?.url) {

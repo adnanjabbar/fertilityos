@@ -15,7 +15,7 @@ const planFeatureKeys = {
 const plans = [
   {
     planKey: "starter" as const,
-    prices: { monthly: 299, quarterly: 284, yearly: 239 },
+    prices: { monthly: 29.99, quarterly: 85, yearly: 287 },
     color: "slate",
     featureKeys: planFeatureKeys.starter,
     ctaKey: "startFreeTrial" as const,
@@ -23,7 +23,7 @@ const plans = [
   },
   {
     planKey: "growth" as const,
-    prices: { monthly: 699, quarterly: 664, yearly: 559 },
+    prices: { monthly: 49.99, quarterly: 142, yearly: 479 },
     color: "blue",
     featureKeys: planFeatureKeys.growth,
     ctaKey: "startFreeTrial" as const,
@@ -31,10 +31,10 @@ const plans = [
   },
   {
     planKey: "scale" as const,
-    prices: { monthly: 1499, quarterly: 1424, yearly: 1199 },
+    prices: { monthly: 79.99, quarterly: 228, yearly: 767 },
     color: "teal",
     featureKeys: planFeatureKeys.scale,
-    ctaKey: "contactSales" as const,
+    ctaKey: "startFreeTrial" as const,
     popular: false,
   },
 ];
@@ -48,13 +48,14 @@ const addonKeys = [
   "complianceAudit",
 ] as const;
 
+// Small modules $4.99/mo; larger/complex modules $6.99/mo (add-on pricing).
 const addonPrices: Record<(typeof addonKeys)[number], { monthly: number; quarterly: number; yearly: number }> = {
-  telemedicine: { monthly: 99, quarterly: 94, yearly: 79 },
-  patientPortal: { monthly: 79, quarterly: 75, yearly: 63 },
-  donorManagement: { monthly: 129, quarterly: 123, yearly: 103 },
-  inventoryManagement: { monthly: 69, quarterly: 66, yearly: 55 },
-  analyticsReporting: { monthly: 89, quarterly: 85, yearly: 71 },
-  complianceAudit: { monthly: 59, quarterly: 56, yearly: 47 },
+  telemedicine: { monthly: 6.99, quarterly: 19.9, yearly: 67 },
+  patientPortal: { monthly: 4.99, quarterly: 14.2, yearly: 48 },
+  donorManagement: { monthly: 6.99, quarterly: 19.9, yearly: 67 },
+  inventoryManagement: { monthly: 4.99, quarterly: 14.2, yearly: 48 },
+  analyticsReporting: { monthly: 6.99, quarterly: 19.9, yearly: 67 },
+  complianceAudit: { monthly: 4.99, quarterly: 14.2, yearly: 48 },
 };
 
 const planColors: Record<string, { card: string; btn: string; badge: string }> = {

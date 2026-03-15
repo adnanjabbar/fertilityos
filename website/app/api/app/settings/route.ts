@@ -6,8 +6,10 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 const SUPPORTED_CURRENCIES = ["USD", "EUR", "GBP", "AUD", "CAD", "CHF", "JPY", "INR"] as const;
+const REMINDER_CHANNELS = ["email", "sms", "both"] as const;
 const patchSchema = z.object({
-  defaultCurrency: z.enum(SUPPORTED_CURRENCIES),
+  defaultCurrency: z.enum(SUPPORTED_CURRENCIES).optional(),
+  reminderChannel: z.enum(REMINDER_CHANNELS).optional(),
 });
 
 /**
@@ -21,7 +23,7 @@ export async function GET() {
   }
 
   const [tenant] = await db
-    .select({ defaultCurrency: tenants.defaultCurrency })
+    .select({ defaultCurrency: tenants.defaultCurrency, reminderChannel: tenants.reminderChannel })
     .from(tenants)
     .where(eq(tenants.id, session.user.tenantId))
     .limit(1);
@@ -32,6 +34,7 @@ export async function GET() {
 
   return NextResponse.json({
     defaultCurrency: tenant.defaultCurrency ?? "USD",
+    reminderChannel: tenant.reminderChannel ?? "email",
   });
 }
 
@@ -63,18 +66,24 @@ export async function PATCH(request: Request) {
     );
   }
 
+  const updatePayload: Partial<{ defaultCurrency: string; reminderChannel: "email" | "sms" | "both"; updatedAt: Date }> = {
+    updatedAt: new Date(),
+  };
+  if (parsed.data.defaultCurrency !== undefined) updatePayload.defaultCurrency = parsed.data.defaultCurrency;
+  if (parsed.data.reminderChannel !== undefined) updatePayload.reminderChannel = parsed.data.reminderChannel;
+
   const [updated] = await db
     .update(tenants)
-    .set({
-      defaultCurrency: parsed.data.defaultCurrency,
-      updatedAt: new Date(),
-    })
+    .set(updatePayload)
     .where(eq(tenants.id, session.user.tenantId))
-    .returning({ defaultCurrency: tenants.defaultCurrency });
+    .returning({ defaultCurrency: tenants.defaultCurrency, reminderChannel: tenants.reminderChannel });
 
   if (!updated) {
     return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ defaultCurrency: updated.defaultCurrency });
+  return NextResponse.json({
+    defaultCurrency: updated.defaultCurrency ?? "USD",
+    reminderChannel: updated.reminderChannel ?? "email",
+  });
 }

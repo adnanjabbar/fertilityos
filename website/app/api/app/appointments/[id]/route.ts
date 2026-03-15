@@ -41,6 +41,8 @@ export async function GET(
       type: appointments.type,
       status: appointments.status,
       notes: appointments.notes,
+      reminderSentAt: appointments.reminderSentAt,
+      reminderSmsSentAt: appointments.reminderSmsSentAt,
       videoRoomId: appointments.videoRoomId,
       createdAt: appointments.createdAt,
       updatedAt: appointments.updatedAt,

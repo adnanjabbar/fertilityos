@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { signOut } from "@/auth";
-import { User, Calendar, FileText, LayoutDashboard, LogOut } from "lucide-react";
+import { User, Calendar, FileText, LayoutDashboard, LogOut, Pill } from "lucide-react";
 
 export default function PortalAppLayout({
   children,
@@ -35,6 +35,13 @@ export default function PortalAppLayout({
             >
               <Calendar className="w-4 h-4" />
               Appointments
+            </Link>
+            <Link
+              href="/portal/prescriptions"
+              className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 text-sm"
+            >
+              <Pill className="w-4 h-4" />
+              Prescriptions
             </Link>
             <Link
               href="/portal/invoices"

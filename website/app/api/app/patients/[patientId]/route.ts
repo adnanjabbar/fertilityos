@@ -6,6 +6,8 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { logAudit, getClientIp } from "@/lib/audit";
 
+const NATIONAL_ID_TYPES = ["national_id", "ssn", "citizen_id", "other"] as const;
+
 const updatePatientSchema = z.object({
   firstName: z.string().min(1).max(255).optional(),
   lastName: z.string().min(1).max(255).optional(),
@@ -19,6 +21,8 @@ const updatePatientSchema = z.object({
   postalCode: z.string().max(32).optional().nullable(),
   gender: z.string().max(32).optional().nullable(),
   notes: z.string().optional().nullable(),
+  nationalIdType: z.enum(NATIONAL_ID_TYPES).optional().nullable(),
+  nationalIdValue: z.string().max(255).optional().nullable(),
 });
 
 export async function GET(
@@ -97,6 +101,8 @@ export async function PATCH(
   if (data.postalCode !== undefined) updateValues.postalCode = data.postalCode?.trim() || null;
   if (data.gender !== undefined) updateValues.gender = data.gender?.trim() || null;
   if (data.notes !== undefined) updateValues.notes = data.notes?.trim() || null;
+  if (data.nationalIdType !== undefined) updateValues.nationalIdType = data.nationalIdType ?? null;
+  if (data.nationalIdValue !== undefined) updateValues.nationalIdValue = data.nationalIdValue?.trim() || null;
 
   const [updated] = await db
     .update(patients)

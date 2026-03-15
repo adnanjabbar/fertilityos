@@ -1,14 +1,12 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { signOut } from "@/auth";
-import { Activity, LogOut } from "lucide-react";
 import { db } from "@/db";
 import { tenants } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { isModuleEnabled } from "@/lib/modules";
 import { getTranslations } from "next-intl/server";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import AppSidebar, { type NavGroup } from "./AppSidebar";
+import AppTopBar from "./AppTopBar";
 
 export default async function AppLayout({
   children,
@@ -33,120 +31,120 @@ export default async function AppLayout({
   const showPatients = isModuleEnabled(enabledModules, "patientManagement");
   const showAppointments = isModuleEnabled(enabledModules, "scheduling");
   const showInvoices = isModuleEnabled(enabledModules, "billing");
+  const isAdmin = session.user.roleSlug === "admin";
+  const isSuperAdmin = session.user.roleSlug === "super_admin";
+  const showDonors =
+    isAdmin || session.user.roleSlug === "embryologist" || session.user.roleSlug === "lab_tech";
+
+  const navGroups: NavGroup[] = [
+    {
+      labelKey: "groupMain",
+      items: [{ href: "/app/dashboard", labelKey: "dashboard", iconKey: "dashboard" }],
+    },
+    {
+      labelKey: "groupClinical",
+      items: [
+        ...(showPatients ? [{ href: "/app/patients", labelKey: "patients", iconKey: "patients" as const }] : []),
+        ...(showAppointments
+          ? [{ href: "/app/appointments", labelKey: "appointments", iconKey: "appointments" as const }]
+          : []),
+      ].filter(Boolean) as NavGroup["items"],
+    },
+    {
+      labelKey: "groupBilling",
+      items: [
+        ...(showInvoices ? [{ href: "/app/invoices", labelKey: "invoices", iconKey: "invoices" as const }] : []),
+        { href: "/app/reports", labelKey: "reports", iconKey: "reports" },
+        ...(isAdmin ? [{ href: "/app/billing", labelKey: "billing", iconKey: "billing" as const }] : []),
+      ].filter(Boolean) as NavGroup["items"],
+    },
+    ...(showDonors || isAdmin
+      ? [
+          {
+            labelKey: "groupLab" as const,
+            items: [
+              ...(showDonors ? [{ href: "/app/donors", labelKey: "donors", iconKey: "donors" as const }] : []),
+              ...(isAdmin
+                ? [
+                    { href: "/app/surrogacy", labelKey: "surrogacy", iconKey: "surrogacy" as const },
+                    { href: "/app/inventory", labelKey: "inventory", iconKey: "inventory" as const },
+                    { href: "/app/medications", labelKey: "medications", iconKey: "medications" as const },
+                  ]
+                : []),
+            ].filter(Boolean) as NavGroup["items"],
+          },
+        ]
+      : []),
+    ...(isAdmin
+      ? [
+          {
+            labelKey: "groupAdmin" as const,
+            items: [
+              { href: "/app/referrals", labelKey: "referrals", iconKey: "referrals" },
+              { href: "/app/team", labelKey: "team", iconKey: "team" },
+              { href: "/app/developers", labelKey: "developers", iconKey: "developers" },
+              { href: "/app/compliance", labelKey: "compliance", iconKey: "compliance" },
+              { href: "/app/audit-logs", labelKey: "auditLog", iconKey: "auditLog" },
+              { href: "/app/settings/letterhead", labelKey: "letterhead", iconKey: "letterhead" },
+              { href: "/app/settings/integrations", labelKey: "integrations", iconKey: "integrations" },
+            ],
+          },
+        ]
+      : []),
+    ...(isSuperAdmin
+      ? [
+          {
+            labelKey: "groupPlatform" as const,
+            items: [{ href: "/app/super", labelKey: "superDashboard", iconKey: "superDashboard" }],
+          },
+        ]
+      : []),
+  ].filter((g) => g.items.length > 0);
+
+  const labels: Record<string, string> = {
+    dashboard: t("dashboard"),
+    patients: t("patients"),
+    appointments: t("appointments"),
+    invoices: t("invoices"),
+    reports: t("reports"),
+    billing: t("billing"),
+    donors: t("donors"),
+    surrogacy: t("surrogacy"),
+    inventory: t("inventory"),
+    medications: t("medications"),
+    referrals: t("referrals"),
+    team: t("team"),
+    developers: t("developers"),
+    compliance: t("compliance"),
+    auditLog: t("auditLog"),
+    letterhead: t("letterhead"),
+    integrations: t("integrations"),
+    superDashboard: t("superDashboard"),
+    logOut: t("logOut"),
+    groupMain: t("groupMain"),
+    groupClinical: t("groupClinical"),
+    groupBilling: t("groupBilling"),
+    groupLab: t("groupLab"),
+    groupAdmin: t("groupAdmin"),
+    groupPlatform: t("groupPlatform"),
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-6">
-              <Link href="/app/dashboard" className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-700">
-                  <Activity className="w-5 h-5 text-white" strokeWidth={2.5} />
-                </div>
-                <span className="font-bold text-xl text-slate-900 tracking-tight">
-                  Fertility<span className="text-teal-600">OS</span>
-                </span>
-              </Link>
-              <nav className="hidden sm:flex items-center gap-4">
-                <Link
-                  href="/app/dashboard"
-                  className="text-sm font-medium text-slate-600 hover:text-blue-700"
-                >
-                  {t("dashboard")}
-                </Link>
-                {showPatients && (
-                  <Link
-                    href="/app/patients"
-                    className="text-sm font-medium text-slate-600 hover:text-blue-700"
-                  >
-                    {t("patients")}
-                  </Link>
-                )}
-                {showAppointments && (
-                  <Link
-                    href="/app/appointments"
-                    className="text-sm font-medium text-slate-600 hover:text-blue-700"
-                  >
-                    {t("appointments")}
-                  </Link>
-                )}
-                {showInvoices && (
-                  <Link
-                    href="/app/invoices"
-                    className="text-sm font-medium text-slate-600 hover:text-blue-700"
-                  >
-                    {t("invoices")}
-                  </Link>
-                )}
-                <Link
-                  href="/app/reports"
-                  className="text-sm font-medium text-slate-600 hover:text-blue-700"
-                >
-                  {t("reports")}
-                </Link>
-                {session.user.roleSlug === "admin" && (
-                  <Link
-                    href="/app/billing"
-                    className="text-sm font-medium text-slate-600 hover:text-blue-700"
-                  >
-                    {t("billing")}
-                  </Link>
-                )}
-                {(session.user.roleSlug === "admin" || session.user.roleSlug === "embryologist" || session.user.roleSlug === "lab_tech") && (
-                  <Link href="/app/donors" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("donors")}</Link>
-                )}
-                {session.user.roleSlug === "admin" && (
-                  <>
-                    <Link href="/app/surrogacy" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("surrogacy")}</Link>
-                    <Link href="/app/inventory" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("inventory")}</Link>
-                    <Link href="/app/referrals" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("referrals")}</Link>
-                    <Link href="/app/team" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("team")}</Link>
-                    <Link href="/app/developers" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("developers")}</Link>
-                    <Link href="/app/compliance" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("compliance")}</Link>
-                    <Link href="/app/audit-logs" className="text-sm font-medium text-slate-600 hover:text-blue-700">{t("auditLog")}</Link>
-                  </>
-                )}
-                {session.user.roleSlug === "super_admin" && (
-                  <Link
-                    href="/app/super"
-                    className="text-sm font-medium text-amber-700 hover:text-amber-800"
-                  >
-                    {t("superDashboard")}
-                  </Link>
-                )}
-              </nav>
-            </div>
-            <div className="flex items-center gap-4">
-              <LanguageSwitcher variant="buttons" className="shrink-0" />
-              <span className="text-sm text-slate-600 hidden sm:block">
-                <span className="font-medium text-slate-900">
-                  {session.user.tenantName ?? t("clinic")}
-                </span>
-                {" · "}
-                {session.user.name}
-              </span>
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({ redirectTo: "/" });
-                }}
-              >
-                <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 hover:border-slate-300 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  {t("logOut")}
-                </button>
-              </form>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      <div className="flex min-h-screen">
+        <AppSidebar
+          navGroups={navGroups}
+          labels={labels}
+          userName={session.user.name ?? "User"}
+          tenantName={session.user.tenantName ?? null}
+        />
+        <main className="flex-1 min-w-0 relative pt-14 lg:pt-14">
+          <AppTopBar userName={session.user.name ?? "User"} tenantName={session.user.tenantName ?? null} />
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+            {children}
           </div>
-        </div>
-      </header>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

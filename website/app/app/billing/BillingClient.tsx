@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CreditCard, ExternalLink, Loader2, Settings2 } from "lucide-react";
+import { Calendar, CreditCard, ExternalLink, Loader2, Settings2 } from "lucide-react";
 
 const CURRENCIES = [
   { value: "USD", label: "USD — US Dollar" },
@@ -22,6 +22,7 @@ type SubscriptionState = {
 
 type SettingsState = {
   defaultCurrency: string;
+  reminderChannel: "email" | "sms" | "both";
 };
 
 export default function BillingClient({ isAdmin = false }: { isAdmin?: boolean }) {
@@ -31,18 +32,21 @@ export default function BillingClient({ isAdmin = false }: { isAdmin?: boolean }
   const [actionLoading, setActionLoading] = useState<"checkout" | "portal" | "settings" | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [settingsCurrency, setSettingsCurrency] = useState<string>("USD");
+  const [reminderChannel, setReminderChannel] = useState<"email" | "sms" | "both">("email");
+  const [reminderSaveLoading, setReminderSaveLoading] = useState(false);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/app/billing/subscription").then((res) =>
         res.ok ? res.json() : { status: "incomplete", hasCustomer: false, currentPeriodEnd: null }
       ),
-      fetch("/api/app/settings").then((res) => (res.ok ? res.json() : { defaultCurrency: "USD" })),
+      fetch("/api/app/settings").then((res) => (res.ok ? res.json() : { defaultCurrency: "USD", reminderChannel: "email" })),
     ])
       .then(([subData, settingsData]) => {
         setSub(subData);
         setSettings(settingsData);
         setSettingsCurrency(settingsData.defaultCurrency ?? "USD");
+        setReminderChannel(settingsData.reminderChannel ?? "email");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -106,10 +110,32 @@ export default function BillingClient({ isAdmin = false }: { isAdmin?: boolean }
         setMessage({ type: "error", text: data.error ?? (res.status === 403 ? "Only admins can change this." : "Failed to save.") });
         return;
       }
-      setSettings({ defaultCurrency: data.defaultCurrency ?? settingsCurrency });
+      setSettings((prev) => ({ defaultCurrency: data.defaultCurrency ?? settingsCurrency, reminderChannel: prev?.reminderChannel ?? "email" }));
       setMessage({ type: "success", text: "Default currency updated." });
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleSaveReminderChannel = async () => {
+    if (!isAdmin) return;
+    setReminderSaveLoading(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/app/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reminderChannel }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMessage({ type: "error", text: data.error ?? (res.status === 403 ? "Only admins can change this." : "Failed to save.") });
+        return;
+      }
+      setSettings((prev) => ({ defaultCurrency: prev?.defaultCurrency ?? "USD", reminderChannel: data.reminderChannel ?? reminderChannel }));
+      setMessage({ type: "success", text: "Reminder channel updated." });
+    } finally {
+      setReminderSaveLoading(false);
     }
   };
 
@@ -247,6 +273,51 @@ export default function BillingClient({ isAdmin = false }: { isAdmin?: boolean }
         </div>
         {!isAdmin && settings && (
           <p className="text-xs text-slate-500 mt-2">Only admins can change the default currency.</p>
+        )}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 max-w-xl">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+            <Calendar className="w-5 h-5 text-slate-600" />
+          </div>
+          <div>
+            <h2 className="font-bold text-slate-900">Appointment reminders</h2>
+            <p className="text-sm text-slate-500">How to send reminders: email, SMS, or both.</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-[200px]">
+            <label htmlFor="reminder-channel" className="block text-sm font-medium text-slate-700 mb-1">Reminder channel</label>
+            <select
+              id="reminder-channel"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-slate-50"
+              value={reminderChannel}
+              onChange={(e) => setReminderChannel(e.target.value as "email" | "sms" | "both")}
+              disabled={!isAdmin}
+            >
+              <option value="email">Email only</option>
+              <option value="sms">SMS only</option>
+              <option value="both">Email and SMS</option>
+            </select>
+          </div>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={handleSaveReminderChannel}
+              disabled={reminderSaveLoading || reminderChannel === (settings?.reminderChannel ?? "email")}
+              className="px-5 py-2.5 rounded-xl bg-blue-700 text-white font-semibold hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {reminderSaveLoading ? (
+                <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Saving…</span>
+              ) : (
+                "Save"
+              )}
+            </button>
+          )}
+        </div>
+        {!isAdmin && settings && (
+          <p className="text-xs text-slate-500 mt-2">Only admins can change the reminder channel.</p>
         )}
       </div>
     </div>

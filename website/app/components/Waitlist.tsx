@@ -4,17 +4,39 @@ import { useState } from "react";
 import { ArrowRight, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+type SubmitState = "idle" | "loading" | "success" | "already_requested" | "error";
+
 export default function Waitlist() {
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [clinicName, setClinicName] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const t = useTranslations("landing.waitlist");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    setSubmitted(true);
+    setSubmitState("loading");
+    try {
+      const res = await fetch("/api/landing/trial-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, phone: phone || undefined, clinicName: clinicName || undefined }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data.allowed === true) {
+        setSubmitState("success");
+      } else if (data.reason === "already_requested") {
+        setSubmitState("already_requested");
+      } else {
+        setSubmitState("error");
+      }
+    } catch {
+      setSubmitState("error");
+    }
   };
+
+  const submitted = submitState === "success" || submitState === "already_requested";
 
   return (
     <section id="waitlist" className="py-24 bg-white">
@@ -33,7 +55,20 @@ export default function Waitlist() {
           {t("subtitle")}
         </p>
 
-        {submitted ? (
+        {submitState === "loading" ? (
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center">
+            <p className="text-slate-600">Submitting…</p>
+          </div>
+        ) : submitState === "already_requested" ? (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8">
+            <h3 className="text-xl font-bold text-amber-800 mb-2">
+              Already registered
+            </h3>
+            <p className="text-amber-700">
+              This email has already been used for a trial or waitlist signup. Each clinic can only request one 14-day trial. Contact us if you need help.
+            </p>
+          </div>
+        ) : submitted ? (
           <div className="bg-teal-50 border border-teal-200 rounded-2xl p-8">
             <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center mx-auto mb-4">
               <Mail className="w-7 h-7 text-teal-600" />
@@ -84,10 +119,28 @@ export default function Waitlist() {
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
                 />
               </div>
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
+                  {t("phone")} <span className="text-slate-400">({t("optional")})</span>
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  placeholder={t("phonePlaceholder")}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+                />
+                <p className="text-xs text-slate-500 mt-1">{t("trialDataHint")}</p>
+              </div>
             </div>
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold text-base hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-0.5"
+              disabled={submitState === "loading"}
+              className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold text-base hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-0.5 disabled:opacity-50"
             >
               {t("joinWaitlist")}
               <ArrowRight className="w-5 h-5" />

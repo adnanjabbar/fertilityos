@@ -5,6 +5,7 @@ import { patients } from "@/db/schema";
 import { eq, desc, or, ilike, and } from "drizzle-orm";
 import { z } from "zod";
 import { logAudit, getClientIp } from "@/lib/audit";
+import { generateNextMrNumber } from "@/lib/mr";
 
 const createPatientSchema = z.object({
   firstName: z.string().min(1, "First name is required").max(255),
@@ -85,10 +86,13 @@ export async function POST(request: Request) {
     ? new Date(data.dateOfBirth)
     : null;
 
+  const mrNumber = await generateNextMrNumber(session.user.tenantId);
+
   const [created] = await db
     .insert(patients)
     .values({
       tenantId: session.user.tenantId,
+      mrNumber,
       firstName: data.firstName.trim(),
       lastName: data.lastName.trim(),
       dateOfBirth,
@@ -104,6 +108,7 @@ export async function POST(request: Request) {
     })
     .returning({
       id: patients.id,
+      mrNumber: patients.mrNumber,
       firstName: patients.firstName,
       lastName: patients.lastName,
       dateOfBirth: patients.dateOfBirth,
