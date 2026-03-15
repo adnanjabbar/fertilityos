@@ -51,7 +51,9 @@ _ (and optionally 1h) before appointment. Use Resend, SendGrid, or nodemailer; s
 
 **Phase 6 completed:** Donors, audit logging, multi-currency, surrogacy. See `phase-6-handoff.md`.
 
-**Next batch:** Phase 7 — PGT/PGS logging, prescriptions, ICD-10 diagnosis, SMS reminders. See `phase-7-handoff.md`.
+**Phase 7 completed:** PGT/PGS logging, formulary & prescriptions, full ICD-11 diagnosis, letterhead/QR/patient 2FA, MR printing, SMS reminders, tenant integrations (Twilio/Daily), pricing ($29.99/$49.99/$79.99), 14-day trial and trial signup storage. See `phase-7-handoff.md`. Full WHO ICD-11 MMS seeded via `seed-icd11-full.js`.
+
+**Next batch:** Phase 8 — WhatsApp integration (tenant-owned), newsletter/automated emails (platform vs custom domain), LIS/LIMS lab connectors, optional multi-location. See `phase-8-handoff.md`.
 
 ---
 
