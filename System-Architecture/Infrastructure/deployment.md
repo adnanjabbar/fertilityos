@@ -32,8 +32,9 @@ Set these in the App’s **Settings → App-Level Environment Variables** (or co
 | `NEXTAUTH_URL` | `https://www.thefertilityos.com` | Canonical app URL |
 | **`AUTH_URL`** | `https://www.thefertilityos.com` | Same as NEXTAUTH_URL; required for Auth.js v5 |
 | **`AUTH_TRUST_HOST`** | `true` | **Required** to avoid 503 UntrustedHost on non-Vercel hosts |
+| **`NPM_CONFIG_LEGACY_PEER_DEPS`** | `true` | Optional: set if the build fails with npm peer dependency conflict (repo also has `.npmrc` with `legacy-peer-deps=true`) |
 
-Without `AUTH_TRUST_HOST=true` and `AUTH_URL`, the site can return **503** when calling `/api/auth/session` or signing in.
+Without `AUTH_TRUST_HOST=true` and `AUTH_URL`, the site can return **503** when calling `/api/auth/session` or signing in. If the **build** fails with "upstream dependency conflict" or "eresolve", add `NPM_CONFIG_LEGACY_PEER_DEPS=true` and redeploy.
 
 **If you see 503 or "UntrustedHost" in logs:**  
 Add `AUTH_TRUST_HOST=true` and `AUTH_URL=https://www.thefertilityos.com` (or your live URL) to the app’s environment variables, then trigger a new deploy (e.g. redeploy from the DO dashboard or push a small commit).
