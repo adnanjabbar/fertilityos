@@ -71,7 +71,7 @@ export default function ReferralsClient() {
   };
 
   const formatDate = (s: string) =>
-    new Date(s).toLocaleDateString(undefined, { dateStyle: "short", timeStyle: "short" });
+    new Date(s).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
 
   if (loading) {
     return <div className="text-slate-600">Loading…</div>;

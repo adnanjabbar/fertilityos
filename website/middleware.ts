@@ -16,8 +16,16 @@ function getSubdomainSlug(hostname: string): string | null {
   return null;
 }
 
+const CANONICAL_HOST = "www.thefertilityos.com";
+
 export default auth((req) => {
   const hostname = req.nextUrl.hostname;
+  // Normalize thefertilityos.com → www so the document always loads from www (avoids CORS on RSC/fetch)
+  if (hostname === "thefertilityos.com" && (req.method === "GET" || req.method === "HEAD")) {
+    const url = new URL(req.nextUrl.pathname + req.nextUrl.search, `https://${CANONICAL_HOST}`);
+    return NextResponse.redirect(url, 308);
+  }
+
   const slug = getSubdomainSlug(hostname);
   const requestHeaders = new Headers(req.headers);
   if (slug) requestHeaders.set("x-tenant-slug", slug);
@@ -66,5 +74,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/app/:path*", "/portal/:path*", "/login", "/register"],
+  matcher: ["/", "/app/:path*", "/portal/:path*", "/login", "/register"],
 };

@@ -94,7 +94,7 @@ export default function DevelopersClient() {
 
   const formatDate = (s: string | null) =>
     s
-      ? new Date(s).toLocaleDateString(undefined, {
+      ? new Date(s).toLocaleString(undefined, {
           dateStyle: "short",
           timeStyle: "short",
         })
