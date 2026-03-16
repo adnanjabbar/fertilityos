@@ -31,10 +31,17 @@ export default async function AppLayout({
   const showPatients = isModuleEnabled(enabledModules, "patientManagement");
   const showAppointments = isModuleEnabled(enabledModules, "scheduling");
   const showInvoices = isModuleEnabled(enabledModules, "billing");
+  const showLab = isModuleEnabled(enabledModules, "labManagement");
   const isAdmin = session.user.roleSlug === "admin";
   const isSuperAdmin = session.user.roleSlug === "super_admin";
   const showDonors =
     isAdmin || session.user.roleSlug === "embryologist" || session.user.roleSlug === "lab_tech";
+  const showLabNav =
+    showLab &&
+    (isAdmin ||
+      session.user.roleSlug === "lab_tech" ||
+      session.user.roleSlug === "embryologist" ||
+      session.user.roleSlug === "doctor");
 
   const navGroups: NavGroup[] = [
     {
@@ -58,11 +65,12 @@ export default async function AppLayout({
         ...(isAdmin ? [{ href: "/app/billing", labelKey: "billing", iconKey: "billing" as const }] : []),
       ].filter(Boolean) as NavGroup["items"],
     },
-    ...(showDonors || isAdmin
+    ...(showDonors || isAdmin || showLabNav
       ? [
           {
             labelKey: "groupLab" as const,
             items: [
+              ...(showLabNav ? [{ href: "/app/lab", labelKey: "lab", iconKey: "lab" as const }] : []),
               ...(showDonors ? [{ href: "/app/donors", labelKey: "donors", iconKey: "donors" as const }] : []),
               ...(isAdmin
                 ? [
@@ -111,6 +119,7 @@ export default async function AppLayout({
     invoices: t("invoices"),
     reports: t("reports"),
     billing: t("billing"),
+    lab: t("lab"),
     donors: t("donors"),
     surrogacy: t("surrogacy"),
     inventory: t("inventory"),

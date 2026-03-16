@@ -70,6 +70,7 @@ export const MODULE_SLUGS = [
   "emr",
   "ivfLab",
   "billing",
+  "labManagement",
 ] as const;
 export type ModuleSlug = (typeof MODULE_SLUGS)[number];
 
@@ -881,5 +882,107 @@ export const labResultMappings = pgTable(
   (table) => [
     index("lab_result_mappings_connector_idx").on(table.connectorId),
     uniqueIndex("lab_result_mappings_connector_external_idx").on(table.connectorId, table.externalCode),
+  ]
+);
+
+// --- Native LIS (Lab Information Management System) ---
+
+export const labSpecimens = pgTable(
+  "lab_specimens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => patients.id, { onDelete: "cascade" }),
+    specimenType: varchar("specimen_type", { length: 64 }).notNull(),
+    collectedAt: timestamp("collected_at", { withTimezone: true }),
+    receivedAt: timestamp("received_at", { withTimezone: true }),
+    status: varchar("status", { length: 32 }).notNull().default("pending"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("lab_specimens_tenant_idx").on(table.tenantId),
+    index("lab_specimens_patient_idx").on(table.patientId),
+  ]
+);
+
+export const labTests = pgTable(
+  "lab_tests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    code: varchar("code", { length: 64 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    unit: varchar("unit", { length: 32 }),
+    referenceRangeLow: varchar("reference_range_low", { length: 64 }),
+    referenceRangeHigh: varchar("reference_range_high", { length: 64 }),
+    referenceRangeText: text("reference_range_text"),
+    isPanel: boolean("is_panel").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("lab_tests_tenant_code_idx").on(table.tenantId, table.code),
+    index("lab_tests_tenant_idx").on(table.tenantId),
+  ]
+);
+
+export const labPanels = pgTable(
+  "lab_panels",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    panelTestId: uuid("panel_test_id")
+      .notNull()
+      .references(() => labTests.id, { onDelete: "cascade" }),
+    memberTestId: uuid("member_test_id")
+      .notNull()
+      .references(() => labTests.id, { onDelete: "cascade" }),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("lab_panels_tenant_idx").on(table.tenantId),
+    index("lab_panels_panel_idx").on(table.panelTestId),
+  ]
+);
+
+export const labOrderItems = pgTable(
+  "lab_order_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => labOrders.id, { onDelete: "cascade" }),
+    testId: uuid("test_id")
+      .notNull()
+      .references(() => labTests.id, { onDelete: "restrict" }),
+    specimenId: uuid("specimen_id").references(() => labSpecimens.id, { onDelete: "set null" }),
+    status: varchar("status", { length: 32 }).notNull().default("pending"),
+    resultValue: varchar("result_value", { length: 255 }),
+    resultUnit: varchar("result_unit", { length: 32 }),
+    referenceRange: varchar("reference_range", { length: 128 }),
+    resultAt: timestamp("result_at", { withTimezone: true }),
+    performedBy: uuid("performed_by").references(() => users.id, { onDelete: "set null" }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("lab_order_items_tenant_idx").on(table.tenantId),
+    index("lab_order_items_order_idx").on(table.orderId),
+    index("lab_order_items_test_idx").on(table.testId),
   ]
 );

@@ -141,6 +141,7 @@ export async function GET() {
         emr: "active",
         ivfLab: "active",
         billing: "active",
+        labManagement: "active",
       },
       invoicesCount,
     });

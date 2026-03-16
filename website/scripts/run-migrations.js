@@ -57,6 +57,7 @@ const migrations = [
   "0027_whatsapp_integration.sql",
   "0028_lab_connectors.sql",
   "0029_locations_multi_location.sql",
+  "0030_native_lis.sql",
 ];
 
 async function main() {
