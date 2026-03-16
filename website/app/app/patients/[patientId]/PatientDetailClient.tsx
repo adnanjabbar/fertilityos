@@ -2,6 +2,7 @@
 
 import { Fragment, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Pencil, Save, X, FileText, Plus, FlaskConical, Stethoscope, Trash2, Pill, Printer } from "lucide-react";
 
 type Patient = {
@@ -249,12 +250,15 @@ export default function PatientDetailClient({
   patientId: string;
   canAddCustomDiagnosis?: boolean;
 }) {
+  const router = useRouter();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [form, setForm] = useState<Partial<Patient>>({});
   const [notes, setNotes] = useState<ClinicalNote[]>([]);
   const [notesLoading, setNotesLoading] = useState(false);
@@ -882,6 +886,23 @@ export default function PatientDetailClient({
     }
   };
 
+  const handleDeletePatient = async () => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/app/patients/${patientId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Failed to delete patient");
+        setShowDeleteConfirm(false);
+        return;
+      }
+      router.push("/app/patients");
+      router.refresh();
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   if (loading) return <div className="text-slate-500 py-8">Loading…</div>;
   if (error || !patient) {
     return (
@@ -896,6 +917,34 @@ export default function PatientDetailClient({
 
   return (
     <div className="space-y-6">
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete patient</h3>
+            <p className="text-slate-600 mb-4">
+              Permanently remove this patient and all related records (appointments, lab orders, notes, etc.)? This cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteLoading}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeletePatient}
+                disabled={deleteLoading}
+                className="px-4 py-2 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-60"
+              >
+                {deleteLoading ? "Deleting…" : "Delete permanently"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <Link
           href="/app/patients"
@@ -925,6 +974,14 @@ export default function PatientDetailClient({
             >
               <Pencil className="w-4 h-4" />
               Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 text-red-700 font-medium hover:bg-red-50 min-h-[44px]"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete patient
             </button>
           </div>
         ) : (

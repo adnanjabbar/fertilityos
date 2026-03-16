@@ -9,6 +9,7 @@ const bodySchema = z.object({
   token: z.string().min(1),
   fullName: z.string().min(1, "Full name is required").max(255),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  phone: z.string().max(64).optional(),
 });
 
 export async function POST(request: Request) {
@@ -21,7 +22,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { token, fullName, password } = parsed.data;
+  const { token, fullName, password, phone: rawPhone } = parsed.data;
+  const phone = rawPhone?.trim().replace(/\s/g, "") || undefined;
 
   const [inv] = await db
     .select()
@@ -69,6 +71,7 @@ export async function POST(request: Request) {
     fullName: fullName.trim(),
     roleSlug: inv.roleSlug,
     emailVerifiedAt: new Date(),
+    ...(phone && { phone, phoneVerifiedAt: new Date() }),
   });
 
   await db

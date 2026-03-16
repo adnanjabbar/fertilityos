@@ -24,7 +24,10 @@ export async function createAndSendEmailVerification(params: {
 
   const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
   const recent = await db
-    .select({ id: emailVerificationCodes.id })
+    .select({
+      id: emailVerificationCodes.id,
+      createdAt: emailVerificationCodes.createdAt,
+    })
     .from(emailVerificationCodes)
     .where(
       and(
@@ -34,7 +37,20 @@ export async function createAndSendEmailVerification(params: {
       )
     );
   if (recent.length >= RATE_LIMIT_MAX_SENDS) {
-    return { ok: false, error: "Too many attempts. Please try again later." };
+    const oldestCreatedAt = recent.reduce(
+      (min, r) => (r.createdAt < min ? r.createdAt : min),
+      recent[0]!.createdAt
+    );
+    const windowEndMs =
+      oldestCreatedAt.getTime() + RATE_LIMIT_WINDOW_MINUTES * 60 * 1000;
+    const minutesLeft = Math.max(
+      1,
+      Math.ceil((windowEndMs - Date.now()) / (60 * 1000))
+    );
+    return {
+      ok: false,
+      error: `Too many attempts. Please try again in ${minutesLeft} minute${minutesLeft !== 1 ? "s" : ""}.`,
+    };
   }
 
   const code = String(randomInt(100000, 999999));

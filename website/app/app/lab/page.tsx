@@ -10,6 +10,7 @@ export default async function LabPage() {
     session.user.roleSlug === "admin" ||
     session.user.roleSlug === "lab_tech" ||
     session.user.roleSlug === "embryologist" ||
+    session.user.roleSlug === "pathologist" ||
     session.user.roleSlug === "doctor";
   if (!allowed) redirect("/app/dashboard");
 

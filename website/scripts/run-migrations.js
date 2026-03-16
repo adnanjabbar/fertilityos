@@ -62,6 +62,7 @@ const migrations = [
   "0032_patients_country_length.sql",
   "0033_otp_verification_sso.sql",
   "0034_verified_emails.sql",
+  "0035_pathologist_and_lab_approval.sql",
 ];
 
 async function main() {

@@ -42,6 +42,11 @@ function LoginForm() {
     }
   };
 
+  const handleOAuth = (provider: "google" | "azure-ad") => {
+    setError(null);
+    void signIn(provider, { callbackUrl });
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center py-12 px-4">
       <Link
@@ -119,6 +124,39 @@ function LoginForm() {
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>
+
+          {(process.env.NEXT_PUBLIC_OAUTH_GOOGLE === "1" || process.env.NEXT_PUBLIC_OAUTH_MICROSOFT === "1") && (
+            <>
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-white px-2 text-slate-500">Or continue with</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {process.env.NEXT_PUBLIC_OAUTH_GOOGLE === "1" && (
+                  <button
+                    type="button"
+                    onClick={() => handleOAuth("google")}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 transition"
+                  >
+                    Google
+                  </button>
+                )}
+                {process.env.NEXT_PUBLIC_OAUTH_MICROSOFT === "1" && (
+                  <button
+                    type="button"
+                    onClick={() => handleOAuth("azure-ad")}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 transition"
+                  >
+                    Microsoft
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </form>
 
         <p className="text-center text-slate-600 mt-6">

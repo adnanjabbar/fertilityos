@@ -52,6 +52,7 @@ const ROLE_LABELS: Record<string, string> = {
   nurse: "Nurse",
   embryologist: "Embryologist",
   lab_tech: "Lab Tech",
+  pathologist: "Pathologist",
   reception: "Reception",
   radiologist: "Radiologist",
   staff: "Staff",

@@ -20,6 +20,19 @@ function slugFromName(name: string): string {
     .slice(0, 64);
 }
 
+function stepDescription(step: Step): string {
+  switch (step) {
+    case "email":
+      return "Verify your work email to continue.";
+    case "clinic":
+      return "Enter your clinic details. You'll set your admin account next.";
+    case "admin":
+      return "Create the administrator account and verify your phone.";
+    default:
+      return "";
+  }
+}
+
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -248,9 +261,7 @@ export default function RegisterPage() {
           Register your clinic
         </h1>
         <p className="text-slate-600 mb-8">
-          {step === "clinic"
-            ? "Enter your clinic details. You’ll set your admin account next."
-            : "Create the administrator account and verify your phone."}
+          {stepDescription(step)}
         </p>
 
         {error && (
@@ -447,18 +458,77 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label htmlFor="email" className={labelClass}>
+              <label htmlFor="admin-email" className={labelClass}>
                 Work email <span className="text-red-500">*</span>
               </label>
               <input
-                id="email"
+                id="admin-email"
                 type="email"
                 placeholder="you@yourclinic.com"
                 value={admin.email}
-                onChange={(e) => setAdmin((a) => ({ ...a, email: e.target.value }))}
-                className={inputClass}
-                required
+                readOnly
+                className={inputClass + " bg-slate-50"}
               />
+            </div>
+            <div>
+              <label htmlFor="admin-phone" className={labelClass}>
+                Phone (optional)
+              </label>
+              <input
+                id="admin-phone"
+                type="tel"
+                placeholder="+1 234 567 8900"
+                value={admin.phone}
+                onChange={(e) => {
+                  setAdmin((a) => ({ ...a, phone: e.target.value }));
+                  setPhoneVerified(false);
+                }}
+                className={inputClass}
+                disabled={phoneCodeSent}
+              />
+              {admin.phone.trim() && !phoneVerified && !phoneCodeSent && (
+                <button
+                  type="button"
+                  onClick={handleSendPhoneCode}
+                  disabled={loading}
+                  className="mt-2 w-full py-2 rounded-lg border border-blue-600 text-blue-700 font-semibold text-sm hover:bg-blue-50"
+                >
+                  {loading ? "Sending…" : "Send verification code"}
+                </button>
+              )}
+              {phoneCodeSent && (
+                <div className="mt-2 space-y-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder="000000"
+                    value={phoneCode}
+                    onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, ""))}
+                    className={inputClass}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setPhoneCodeSent(false); setPhoneCode(""); }}
+                      className="py-2 px-4 rounded-lg border border-slate-200 text-slate-700 text-sm font-semibold"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleVerifyPhone}
+                      disabled={loading || phoneCode.length !== 6}
+                      className="flex-1 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold disabled:opacity-60"
+                    >
+                      {loading ? "Verifying…" : "Verify"}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {phoneVerified && admin.phone.trim() && (
+                <p className="mt-1 text-sm text-green-600 font-medium">Phone verified</p>
+              )}
             </div>
             <div>
               <label htmlFor="password" className={labelClass}>
@@ -486,7 +556,7 @@ export default function RegisterPage() {
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (admin.phone.trim() !== "" && !phoneVerified)}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:pointer-events-none"
               >
                 {loading ? "Creating account…" : "Create clinic & account"}

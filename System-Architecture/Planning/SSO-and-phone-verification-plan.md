@@ -120,3 +120,37 @@
 - **HIPAA**: Strong identity (SSO + verified email + phone), audit all verification events, BAA with providers, and document in compliance checklist.
 
 Implementing Phase 1 (OTP service + patient phone verification + audit) gives immediate security and UX benefit and unblocks Phase 2 (clinic signup verification) and Phase 4 (staff verify phone).
+
+---
+
+## Compliance checklist (implementation reference)
+
+This section documents what is implemented (or planned) for compliance and security documentation.
+
+### (a) Email verification at clinic registration
+
+- **Table**: `verified_emails` — stores email + context + `verifiedAt` / `usedAt` for one-time use.
+- **Context**: `clinic_register` — used during clinic registration to verify the admin’s email before completing signup.
+- **Flow**: 6-digit code sent to email via `email_verification_codes`; on success a row is written to `verified_emails` and consumed when the clinic is created.
+- **Rate limit**: Max 3 sends per email + context per 15 minutes; user-facing message includes “try again in X minutes”.
+
+### (b) Phone verification (OTP)
+
+- **Use cases**: Admin signup, staff invite, and patient phone verification.
+- **Delivery**: 6-digit OTP via WhatsApp (when tenant has it configured) or SMS (Twilio); see `lib/otp.ts`, `lib/sms.ts`, `lib/whatsapp.ts`.
+- **Storage**: `otp_codes` table (phone, context, code, expires_at, tenant_id). Contexts: `admin_signup`, `staff_invite`, `patient_verify`.
+- **Rate limit**: Max 3 sends per phone + context per 15 minutes; error message: “Too many attempts. Please try again in X minutes.”
+- **Expiry**: Codes expire after 10 minutes.
+
+### (c) SSO and account linking
+
+- **Providers**: Google and Microsoft (OAuth via NextAuth). Apple Sign In can be added later.
+- **Linking**: `user_accounts` table stores provider (e.g. `google`, `microsoft`) and provider account id per user for SSO sign-in and “Link Google/Microsoft” in settings.
+- **Flow**: New users can sign up with SSO or email; existing email users can link a provider for passwordless login.
+
+### HIPAA / security considerations
+
+- **Identity assurance**: Verified email (at clinic registration) and verified phone (admin signup, staff invite, patient) support strong identity and reduce phishing and account takeover risk.
+- **Audit trails**: Verification events (email/OTP sent and verified) should be logged in `audit_logs` (e.g. `auth.email_verification_sent`, `auth.phone_verification_succeeded`) for compliance reviews and incident response.
+- **Access control**: Phone verification can gate sensitive actions and first-time staff app access; tenant-scoped sessions and RBAC remain in place.
+- **BAA**: Ensure email (e.g. SendGrid/Resend), SMS/WhatsApp (e.g. Twilio, Meta), and SSO providers are covered under BAAs where they process PHI or support authentication.

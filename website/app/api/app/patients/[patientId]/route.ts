@@ -131,3 +131,51 @@ export async function PATCH(
 
   return NextResponse.json(updated);
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ patientId: string }> }
+) {
+  const session = await auth();
+  if (!session?.user?.tenantId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { patientId } = await params;
+
+  const [patient] = await db
+    .select({ id: patients.id, firstName: patients.firstName, lastName: patients.lastName })
+    .from(patients)
+    .where(
+      and(
+        eq(patients.id, patientId),
+        eq(patients.tenantId, session.user.tenantId)
+      )
+    )
+    .limit(1);
+
+  if (!patient) {
+    return NextResponse.json({ error: "Patient not found" }, { status: 404 });
+  }
+
+  await db
+    .delete(patients)
+    .where(
+      and(
+        eq(patients.id, patientId),
+        eq(patients.tenantId, session.user.tenantId)
+      )
+    );
+
+  await logAudit({
+    tenantId: session.user.tenantId,
+    userId: session.user.id,
+    action: "patient.delete",
+    entityType: "patient",
+    entityId: patientId,
+    details: { firstName: patient.firstName, lastName: patient.lastName },
+    ipAddress: getClientIp(_request),
+  });
+
+  return NextResponse.json({ success: true });
+}

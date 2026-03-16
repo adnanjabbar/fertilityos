@@ -11,6 +11,7 @@ const bodySchema = z.object({
   phone: z.string().min(1, "Phone is required"),
   code: z.string().length(6, "Code must be 6 digits"),
   context: z.enum(["admin_signup", "staff_invite", "patient_verify"]),
+  inviteToken: z.string().optional(),
   patientId: z.string().uuid().optional(),
 });
 

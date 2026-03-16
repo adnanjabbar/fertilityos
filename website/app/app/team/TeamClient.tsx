@@ -8,6 +8,7 @@ const ROLES = [
   { value: "nurse", label: "Nurse" },
   { value: "embryologist", label: "Embryologist" },
   { value: "lab_tech", label: "Lab Technician" },
+  { value: "pathologist", label: "Pathologist" },
   { value: "reception", label: "Reception" },
   { value: "radiologist", label: "Radiologist" },
   { value: "staff", label: "Staff" },

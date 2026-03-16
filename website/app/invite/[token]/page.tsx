@@ -9,6 +9,10 @@ const inputClass =
   "w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition";
 const labelClass = "block text-sm font-semibold text-slate-700 mb-2";
 
+function normalizePhone(phone: string): string {
+  return phone.trim().replace(/\s/g, "");
+}
+
 type InviteInfo = {
   email: string;
   roleSlug: string;
@@ -27,6 +31,13 @@ export default function InvitePage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // Optional phone verification
+  const [phone, setPhone] = useState("");
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -48,16 +59,78 @@ export default function InvitePage() {
       .finally(() => setLoading(false));
   }, [token]);
 
+  const handleSendOtp = async () => {
+    const normalized = normalizePhone(phone);
+    if (!normalized || !token) return;
+    setError(null);
+    setSendingOtp(true);
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: normalized,
+          context: "staff_invite",
+          inviteToken: token,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Failed to send code.");
+        return;
+      }
+      setOtpCode("");
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const normalized = normalizePhone(phone);
+    if (!normalized || !token || otpCode.length !== 6) return;
+    setError(null);
+    setVerifyingOtp(true);
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: normalized,
+          code: otpCode.trim(),
+          context: "staff_invite",
+          inviteToken: token,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Invalid or expired code.");
+        return;
+      }
+      setPhoneVerified(true);
+      setError(null);
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token || !fullName.trim() || password.length < 8) return;
     setError(null);
     setSubmitting(true);
     try {
+      const payload: { token: string; fullName: string; password: string; phone?: string } = {
+        token,
+        fullName: fullName.trim(),
+        password,
+      };
+      if (phoneVerified && phone.trim()) {
+        payload.phone = normalizePhone(phone);
+      }
       const res = await fetch("/api/auth/accept-invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, fullName: fullName.trim(), password }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -145,6 +218,61 @@ export default function InvitePage() {
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4"
         >
+          {/* Optional phone verification */}
+          <div className="space-y-3 pb-4 border-b border-slate-100">
+            <p className="text-sm font-semibold text-slate-700">Phone (optional)</p>
+            {!phoneVerified ? (
+              <>
+                <div className="flex gap-2">
+                  <input
+                    id="phone"
+                    type="tel"
+                    placeholder="Phone number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className={inputClass}
+                    disabled={sendingOtp || verifyingOtp}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={sendingOtp || !normalizePhone(phone)}
+                    className="shrink-0 px-4 py-3 rounded-xl bg-slate-100 text-slate-800 font-semibold text-sm hover:bg-slate-200 disabled:opacity-50 transition"
+                  >
+                    {sendingOtp ? "Sending…" : "Send code"}
+                  </button>
+                </div>
+                {normalizePhone(phone) && (
+                  <div className="flex gap-2">
+                    <input
+                      id="otpCode"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Enter 6-digit code"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      className={inputClass}
+                      maxLength={6}
+                      disabled={verifyingOtp}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleVerifyOtp}
+                      disabled={verifyingOtp || otpCode.length !== 6}
+                      className="shrink-0 px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 transition"
+                    >
+                      {verifyingOtp ? "Verifying…" : "Verify"}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-teal-700">
+                ✓ {normalizePhone(phone)} verified
+              </p>
+            )}
+          </div>
+
           <div>
             <label htmlFor="fullName" className={labelClass}>Full name</label>
             <input

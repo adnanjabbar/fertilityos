@@ -15,6 +15,7 @@ const createSchema = z.object({
     "nurse",
     "embryologist",
     "lab_tech",
+    "pathologist",
     "reception",
     "radiologist",
     "staff",

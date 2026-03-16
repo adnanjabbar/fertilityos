@@ -10,6 +10,7 @@ const VALID_ROLES = [
   "nurse",
   "embryologist",
   "lab_tech",
+  "pathologist",
   "reception",
   "radiologist",
   "staff",

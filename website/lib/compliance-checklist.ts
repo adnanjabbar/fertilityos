@@ -30,7 +30,15 @@ export const COMPLIANCE_CHECKLIST: ComplianceSection[] = [
         title: "Unique user identification",
         description: "Each user has a unique identifier; no shared accounts.",
         fertilityOsImplements:
-          "Auth.js (NextAuth) with unique user IDs; users sign up/in with email; tenant-scoped sessions.",
+          "Auth.js (NextAuth) with unique user IDs; sign up/in via SSO (Google, Microsoft) or email; tenant-scoped sessions. Account linking via user_accounts for multiple sign-in methods.",
+        status: "implemented",
+      },
+      {
+        id: "identity-verification",
+        title: "Identity verification (email & phone)",
+        description: "Verification of email and phone to support identity assurance and audit.",
+        fertilityOsImplements:
+          "Email verification at clinic registration (verified_emails, clinic_register context, 6-digit code). Phone verification via 6-digit OTP (WhatsApp/SMS) for admin signup, staff invite, and patient phone (otp_codes; rate limits: 3 per 15 min per phone/email+context). See lib/otp.ts, lib/email-verification.ts.",
         status: "implemented",
       },
       {

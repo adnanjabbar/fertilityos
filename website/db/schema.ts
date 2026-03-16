@@ -18,6 +18,7 @@ export const roleSlugEnum = pgEnum("role_slug", [
   "nurse",
   "embryologist",
   "lab_tech",
+  "pathologist",
   "reception",
   "radiologist",
   "staff",
@@ -906,6 +907,16 @@ export const labConnectors = pgTable(
   (table) => [index("lab_connectors_tenant_idx").on(table.tenantId)]
 );
 
+export const LAB_ORDER_STATUSES = [
+  "ordered",
+  "sample_collected",
+  "in_processing",
+  "completed",
+  "awaiting_final_approval",
+  "published",
+] as const;
+export type LabOrderStatus = (typeof LAB_ORDER_STATUSES)[number];
+
 export const labOrders = pgTable(
   "lab_orders",
   {
@@ -921,10 +932,12 @@ export const labOrders = pgTable(
     connectorId: uuid("connector_id").references(() => labConnectors.id, { onDelete: "set null" }),
     externalId: varchar("external_id", { length: 255 }),
     orderCode: varchar("order_code", { length: 128 }),
-    status: varchar("status", { length: 32 }).notNull().default("pending"),
+    status: varchar("status", { length: 32 }).notNull().default("ordered"),
     requestedAt: timestamp("requested_at", { withTimezone: true }),
     resultAt: timestamp("result_at", { withTimezone: true }),
     resultPayload: jsonb("result_payload").$type<Record<string, unknown>>(),
+    approvedBy: uuid("approved_by").references(() => users.id, { onDelete: "set null" }),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

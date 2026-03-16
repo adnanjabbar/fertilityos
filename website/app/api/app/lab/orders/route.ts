@@ -98,7 +98,7 @@ export async function POST(request: Request) {
       tenantId: session.user.tenantId,
       patientId,
       connectorId: null,
-      status: "pending",
+      status: "ordered",
       requestedAt: new Date(),
     })
     .returning({ id: labOrders.id });
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
       tenantId: session.user.tenantId,
       orderId: order.id,
       testId,
-      status: "pending",
+      status: "ordered",
     }))
   );
 

@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
+import AzureAD from "next-auth/providers/azure-ad";
 import { db } from "./db";
 import { users, tenants, patients, patientPortalTokens } from "./db/schema";
 import { eq, and, gt, isNull } from "drizzle-orm";
@@ -32,10 +34,29 @@ declare module "@auth/core/jwt" {
   }
 }
 
+const OAUTH_PROVIDERS = ["google", "azure-ad"] as const;
+
 // Production (e.g. DigitalOcean): set AUTH_TRUST_HOST=true and AUTH_URL in env to avoid 503 UntrustedHost.
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers: [
+    ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
+      ? [
+          Google({
+            clientId: process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET,
+          }),
+        ]
+      : []),
+    ...(process.env.AUTH_MICROSOFT_ID && process.env.AUTH_MICROSOFT_SECRET
+      ? [
+          AzureAD({
+            clientId: process.env.AUTH_MICROSOFT_ID,
+            clientSecret: process.env.AUTH_MICROSOFT_SECRET,
+            tenantId: process.env.AUTH_MICROSOFT_TENANT_ID ?? "common",
+          }),
+        ]
+      : []),
     Credentials({
       name: "credentials",
       credentials: {
@@ -126,7 +147,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      // OAuth sign-in: resolve or create user in DB and set token from our user shape (dynamic import to avoid Node crypto in Edge)
+      if (account && OAUTH_PROVIDERS.includes(account.provider as (typeof OAUTH_PROVIDERS)[number])) {
+        const oauthEmail = (user?.email ?? token.email ?? "") as string;
+        const oauthName = (user?.name ?? token.name ?? oauthEmail) as string;
+        const { getOrCreateOAuthUser } = await import("./lib/auth-oauth");
+        const resolved = await getOrCreateOAuthUser(
+          account.provider,
+          account.providerAccountId,
+          oauthEmail,
+          oauthName
+        );
+        if (resolved) {
+          token.id = resolved.id;
+          token.email = resolved.email;
+          token.name = resolved.name;
+          token.tenantId = resolved.tenantId;
+          token.roleSlug = resolved.roleSlug;
+          token.tenantName = resolved.tenantName;
+          token.patientId = undefined;
+          void logAudit({
+            tenantId: resolved.tenantId,
+            userId: resolved.id,
+            action: "auth.sign_in",
+            entityType: "user",
+            entityId: resolved.id,
+            details: { email: resolved.email, roleSlug: resolved.roleSlug, provider: account.provider },
+          }).catch(() => {});
+        }
+        return token;
+      }
+      // Credentials / portal-token sign-in
       if (user) {
         token.id = user.id;
         token.email = user.email ?? "";

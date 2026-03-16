@@ -41,7 +41,10 @@ export default async function AppLayout({
     (isAdmin ||
       session.user.roleSlug === "lab_tech" ||
       session.user.roleSlug === "embryologist" ||
+      session.user.roleSlug === "pathologist" ||
       session.user.roleSlug === "doctor");
+  const showReportsToApprove =
+    showLab && (isAdmin || session.user.roleSlug === "pathologist");
 
   const navGroups: NavGroup[] = [
     {
@@ -71,6 +74,7 @@ export default async function AppLayout({
             labelKey: "groupLab" as const,
             items: [
               ...(showLabNav ? [{ href: "/app/lab", labelKey: "lab", iconKey: "lab" as const }] : []),
+              ...(showReportsToApprove ? [{ href: "/app/lab/reports", labelKey: "reportsToApprove", iconKey: "lab" as const }] : []),
               ...(showDonors ? [{ href: "/app/donors", labelKey: "donors", iconKey: "donors" as const }] : []),
               ...(isAdmin
                 ? [
