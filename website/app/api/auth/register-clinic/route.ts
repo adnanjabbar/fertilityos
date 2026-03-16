@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/db";
 import { tenants, users, referralCodes, referralSignups } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { consumeVerifiedEmail } from "@/lib/email-verification";
 
 const registerSchema = z.object({
   ref: z.string().max(64).optional(),
@@ -27,6 +28,7 @@ const registerSchema = z.object({
     email: z.string().email("Invalid email"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     fullName: z.string().min(1, "Full name is required").max(255),
+    phone: z.string().max(64).optional(),
   }),
 });
 
@@ -43,6 +45,19 @@ export async function POST(request: Request) {
     }
 
     const { clinic, admin, ref: refCode, tenantSlug } = parsed.data;
+    const email = admin.email.trim().toLowerCase();
+
+    const emailVerified = await consumeVerifiedEmail({
+      email,
+      context: "clinic_register",
+    });
+    if (!emailVerified) {
+      return NextResponse.json(
+        { error: "Email not verified. Please complete email verification first." },
+        { status: 400 }
+      );
+    }
+
     const slug = clinic.slug.toLowerCase().replace(/\s+/g, "-");
 
     let referralCodeId: string | null = null;
@@ -121,8 +136,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const email = admin.email.trim().toLowerCase();
     const passwordHash = await bcrypt.hash(admin.password, 12);
+    const adminPhone = admin.phone?.trim().replace(/\s/g, "") || null;
 
     const [newUser] = await db
       .insert(users)
@@ -132,6 +147,9 @@ export async function POST(request: Request) {
         passwordHash,
         fullName: admin.fullName.trim(),
         roleSlug: "admin",
+        emailVerifiedAt: new Date(),
+        phone: adminPhone,
+        phoneVerifiedAt: adminPhone ? new Date() : null,
       })
       .returning({ id: users.id, email: users.email });
 

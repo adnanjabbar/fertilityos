@@ -59,6 +59,9 @@ const migrations = [
   "0029_locations_multi_location.sql",
   "0030_native_lis.sql",
   "0031_lab_catalog_patient_spouse_reports.sql",
+  "0032_patients_country_length.sql",
+  "0033_otp_verification_sso.sql",
+  "0034_verified_emails.sql",
 ];
 
 async function main() {

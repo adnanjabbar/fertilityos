@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Activity, ArrowRight, ArrowLeft } from "lucide-react";
 
-type Step = "clinic" | "admin";
+type Step = "email" | "clinic" | "admin";
 
 const inputClass =
   "w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition";
@@ -23,11 +23,16 @@ function slugFromName(name: string): string {
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [step, setStep] = useState<Step>("clinic");
+  const [step, setStep] = useState<Step>("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refCode, setRefCode] = useState<string | null>(null);
   const [tenantSlug, setTenantSlug] = useState<string | null>(null);
+  const [emailCodeSent, setEmailCodeSent] = useState(false);
+  const [emailCode, setEmailCode] = useState("");
+  const [phoneCodeSent, setPhoneCodeSent] = useState(false);
+  const [phoneCode, setPhoneCode] = useState("");
+  const [phoneVerified, setPhoneVerified] = useState(false);
 
   useEffect(() => {
     const ref = searchParams.get("ref");
@@ -51,7 +56,120 @@ export default function RegisterPage() {
     email: "",
     password: "",
     fullName: "",
+    phone: "",
   });
+
+  const handleSendEmailCode = async () => {
+    if (!admin.email.trim()) {
+      setError("Enter your email.");
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/send-email-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: admin.email.trim(), context: "clinic_register" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Failed to send code");
+        return;
+      }
+      setEmailCodeSent(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    if (!admin.email.trim() || emailCode.length !== 6) {
+      setError("Enter the 6-digit code from your email.");
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: admin.email.trim(),
+          code: emailCode.trim(),
+          context: "clinic_register",
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Invalid or expired code");
+        return;
+      }
+      setStep("clinic");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendPhoneCode = async () => {
+    const phone = admin.phone.trim().replace(/\s/g, "");
+    if (!phone) {
+      setError("Enter your phone number.");
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone,
+          context: "admin_signup",
+          recipientName: admin.fullName.trim() || "You",
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Failed to send code");
+        return;
+      }
+      setPhoneCodeSent(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyPhone = async () => {
+    const phone = admin.phone.trim().replace(/\s/g, "");
+    if (!phone || phoneCode.length !== 6) {
+      setError("Enter the 6-digit code from your phone.");
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone,
+          code: phoneCode.trim(),
+          context: "admin_signup",
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Invalid or expired code");
+        return;
+      }
+      setPhoneVerified(true);
+      setPhoneCodeSent(false);
+      setPhoneCode("");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleClinicNext = () => {
     if (!clinic.name.trim()) {
@@ -93,6 +211,7 @@ export default function RegisterPage() {
             email: admin.email.trim().toLowerCase(),
             password: admin.password,
             fullName: admin.fullName.trim(),
+            phone: admin.phone.trim().replace(/\s/g, "") || undefined,
           },
         }),
       });
@@ -131,7 +250,7 @@ export default function RegisterPage() {
         <p className="text-slate-600 mb-8">
           {step === "clinic"
             ? "Enter your clinic details. You’ll set your admin account next."
-            : "Create the administrator account for your clinic."}
+            : "Create the administrator account and verify your phone."}
         </p>
 
         {error && (
@@ -140,7 +259,65 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {step === "clinic" ? (
+        {step === "email" ? (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+            <div>
+              <label htmlFor="register-email" className={labelClass}>Work email <span className="text-red-500">*</span></label>
+              <input
+                id="register-email"
+                type="email"
+                placeholder="you@yourclinic.com"
+                value={admin.email}
+                onChange={(e) => setAdmin((a) => ({ ...a, email: e.target.value }))}
+                className={inputClass}
+                disabled={emailCodeSent}
+              />
+            </div>
+            {!emailCodeSent ? (
+              <button
+                type="button"
+                onClick={handleSendEmailCode}
+                disabled={loading}
+                className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 disabled:opacity-60"
+              >
+                {loading ? "Sending…" : "Send verification code"}
+              </button>
+            ) : (
+              <>
+                <div>
+                  <label htmlFor="emailCode" className={labelClass}>Verification code (check your email)</label>
+                  <input
+                    id="emailCode"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder="000000"
+                    value={emailCode}
+                    onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, ""))}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setEmailCodeSent(false); setEmailCode(""); }}
+                    className="px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50"
+                  >
+                    Use different email
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleVerifyEmail}
+                    disabled={loading || emailCode.length !== 6}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 disabled:opacity-60"
+                  >
+                    {loading ? "Verifying…" : "Verify and continue"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : step === "clinic" ? (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
             <div>
               <label htmlFor="clinic-name" className={labelClass}>

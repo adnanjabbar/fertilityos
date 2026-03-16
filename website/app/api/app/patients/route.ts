@@ -7,27 +7,54 @@ import { z } from "zod";
 import { logAudit, getClientIp } from "@/lib/audit";
 import { generateNextMrNumber } from "@/lib/mr";
 
+const optionalEmail = z
+  .union([z.string().email(), z.literal(""), z.literal(null)])
+  .optional()
+  .nullable()
+  .transform((v) => (v === "" || v === null ? undefined : v));
+
+const optionalString = (maxLen: number) =>
+  z
+    .union([z.string().max(maxLen), z.literal(""), z.literal(null)])
+    .optional()
+    .nullable()
+    .transform((v) => (v === "" || v === null ? undefined : v));
+
 const createPatientSchema = z.object({
-  firstName: z.string().min(1, "First name is required").max(255),
-  lastName: z.string().min(1, "Last name is required").max(255),
-  dateOfBirth: z.string().optional(),
-  email: z.string().email().optional().or(z.literal("")),
-  phone: z.string().max(64).optional(),
-  address: z.string().max(500).optional(),
-  city: z.string().max(128).optional(),
-  state: z.string().max(128).optional(),
-  country: z.string().max(2).optional(),
-  postalCode: z.string().max(32).optional(),
-  gender: z.string().max(32).optional(),
-  genderIdentity: z.string().max(64).optional(),
-  relationshipStatus: z.string().max(32).optional(),
-  coupleType: z.string().max(32).optional(),
-  spouseFirstName: z.string().max(255).optional(),
-  spouseLastName: z.string().max(255).optional(),
-  spouseDateOfBirth: z.string().optional(),
-  spouseEmail: z.string().email().optional().or(z.literal("")),
-  spousePhone: z.string().max(64).optional(),
-  notes: z.string().optional(),
+  firstName: z
+    .string()
+    .min(1, "First name is required")
+    .max(255)
+    .transform((s) => s?.trim())
+    .refine((s) => s.length > 0, "First name is required"),
+  lastName: z
+    .string()
+    .min(1, "Last name is required")
+    .max(255)
+    .transform((s) => s?.trim())
+    .refine((s) => s.length > 0, "Last name is required"),
+  dateOfBirth: optionalString(32),
+  email: optionalEmail,
+  phone: optionalString(64),
+  address: optionalString(500),
+  city: optionalString(128),
+  state: optionalString(128),
+  country: z
+    .union([z.string().max(128), z.literal(""), z.literal(null)])
+    .optional()
+    .nullable()
+    .transform((v) => (v === "" || v === null ? undefined : v)),
+  postalCode: optionalString(32),
+  gender: optionalString(32),
+  genderIdentity: optionalString(64),
+  relationshipStatus: optionalString(32),
+  coupleType: optionalString(32),
+  spouseFirstName: optionalString(255),
+  spouseLastName: optionalString(255),
+  spouseDateOfBirth: optionalString(32),
+  spouseEmail: optionalEmail,
+  spousePhone: optionalString(64),
+  notes: optionalString(5000),
 });
 
 export async function GET(request: Request) {
@@ -86,10 +113,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = createPatientSchema.safeParse(body);
+  // Normalize: some clients send null for optional fields; Zod optional() expects undefined
+  const raw = body as Record<string, unknown>;
+  const normalized =
+    raw && typeof raw === "object"
+      ? Object.fromEntries(
+          Object.entries(raw).map(([k, v]) => [k, v === null ? undefined : v])
+        )
+      : raw;
+
+  const parsed = createPatientSchema.safeParse(normalized);
   if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const message = Object.entries(fieldErrors)
+      .map(([f, errs]) => `${f}: ${(errs || []).join(", ")}`)
+      .join("; ");
     return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+      {
+        error: "Validation failed",
+        details: fieldErrors,
+        message: message || "Validation failed",
+      },
       { status: 400 }
     );
   }
@@ -115,7 +159,7 @@ export async function POST(request: Request) {
       address: data.address?.trim() || null,
       city: data.city?.trim() || null,
       state: data.state?.trim() || null,
-      country: data.country?.trim().toUpperCase() || null,
+      country: data.country ? data.country.trim() : null,
       postalCode: data.postalCode?.trim() || null,
       gender: data.gender?.trim() || null,
       genderIdentity: data.genderIdentity?.trim() || null,

@@ -24,3 +24,23 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* Phone input with country: single border from wrapper, flag + country code visible */
+.PhoneInputWrapper.PhoneInput,
+.PhoneInputWrapper .PhoneInput {
+  border: none;
+  box-shadow: none;
+}
+.PhoneInputWrapper .PhoneInputInput {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+.PhoneInputWrapper .PhoneInputCountrySelect {
+  margin-right: 0.5rem;
+}
+.PhoneInputWrapper .PhoneInputCountryIconImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

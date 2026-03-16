@@ -12,6 +12,7 @@ type Patient = {
   dateOfBirth: string | null;
   email: string | null;
   phone: string | null;
+  phoneVerifiedAt: string | null;
   address: string | null;
   city: string | null;
   state: string | null;
@@ -24,6 +25,109 @@ type Patient = {
   createdAt: string;
   updatedAt: string;
 };
+
+function VerifyPhoneButton({
+  patientId,
+  phone,
+  onVerified,
+}: {
+  patientId: string;
+  phone: string;
+  onVerified: () => void;
+}) {
+  const [step, setStep] = useState<"idle" | "sent" | "verifying">("idle");
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSend = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: phone.trim().replace(/\s/g, ""),
+          context: "patient_verify",
+          patientId,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Failed to send code");
+        return;
+      }
+      setStep("sent");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!code.trim() || code.length !== 6) return;
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: phone.trim().replace(/\s/g, ""),
+          code: code.trim(),
+          context: "patient_verify",
+          patientId,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Invalid or expired code");
+        return;
+      }
+      setStep("idle");
+      setCode("");
+      onVerified();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (step === "sent") {
+    return (
+      <form onSubmit={handleVerify} className="inline-flex items-center gap-2 flex-wrap">
+        <input
+          type="text"
+          inputMode="numeric"
+          maxLength={6}
+          placeholder="6-digit code"
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+          className="w-24 px-2 py-1 rounded border border-slate-200 text-sm"
+        />
+        <button type="submit" disabled={loading} className="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">
+          {loading ? "Verifying…" : "Verify"}
+        </button>
+        <button type="button" onClick={() => { setStep("idle"); setCode(""); setError(null); }} className="text-xs text-slate-500 hover:text-slate-700">Cancel</button>
+        {error && <span className="text-xs text-red-600">{error}</span>}
+      </form>
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={handleSend}
+        disabled={loading}
+        className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 hover:bg-amber-200 disabled:opacity-50"
+      >
+        {loading ? "Sending…" : "Verify phone"}
+      </button>
+      {error && <span className="text-xs text-red-600">{error}</span>}
+    </>
+  );
+}
 
 type ClinicalNote = {
   id: string;
@@ -252,6 +356,12 @@ export default function PatientDetailClient({
       })
       .catch(() => setError("Patient not found"))
       .finally(() => setLoading(false));
+  }, [patientId]);
+
+  const fetchPatient = useCallback(() => {
+    fetch(`/api/app/patients/${patientId}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data && setPatient(data));
   }, [patientId]);
 
   const fetchNotes = useCallback(() => {
@@ -990,7 +1100,20 @@ export default function PatientDetailClient({
               </div>
               <div>
                 <dt className="text-xs font-medium text-slate-500 uppercase tracking-wider">Phone</dt>
-                <dd className="text-slate-900 mt-0.5">{patient.phone ?? "—"}</dd>
+                <dd className="text-slate-900 mt-0.5 flex items-center gap-2">
+                  {patient.phone ?? "—"}
+                  {patient.phone && (
+                    patient.phoneVerifiedAt ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Verified</span>
+                    ) : (
+                      <VerifyPhoneButton
+                        patientId={patient.id}
+                        phone={patient.phone}
+                        onVerified={() => fetchPatient()}
+                      />
+                    )
+                  )}
+                </dd>
               </div>
               {(patient.nationalIdType || patient.nationalIdValue) && (
                 <div>

@@ -17,7 +17,7 @@ const updatePatientSchema = z.object({
   address: z.string().max(500).optional().nullable(),
   city: z.string().max(128).optional().nullable(),
   state: z.string().max(128).optional().nullable(),
-  country: z.string().max(2).optional().nullable(),
+  country: z.string().max(128).optional().nullable(),
   postalCode: z.string().max(32).optional().nullable(),
   gender: z.string().max(32).optional().nullable(),
   notes: z.string().optional().nullable(),

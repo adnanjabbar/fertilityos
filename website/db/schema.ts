@@ -122,10 +122,12 @@ export const users = pgTable(
       .references(() => tenants.id, { onDelete: "cascade" }),
     defaultLocationId: uuid("default_location_id").references(() => locations.id, { onDelete: "set null" }),
     email: varchar("email", { length: 255 }).notNull(),
-    passwordHash: text("password_hash").notNull(),
+    passwordHash: text("password_hash"),
     fullName: varchar("full_name", { length: 255 }).notNull(),
     roleSlug: roleSlugEnum("role_slug").notNull().default("staff"),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+    phone: varchar("phone", { length: 64 }),
+    phoneVerifiedAt: timestamp("phone_verified_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -193,7 +195,7 @@ export const patients = pgTable(
     address: text("address"),
     city: varchar("city", { length: 128 }),
     state: varchar("state", { length: 128 }),
-    country: varchar("country", { length: 2 }),
+    country: varchar("country", { length: 128 }),
     postalCode: varchar("postal_code", { length: 32 }),
     gender: varchar("gender", { length: 32 }),
     genderIdentity: varchar("gender_identity", { length: 64 }),
@@ -207,6 +209,7 @@ export const patients = pgTable(
     notes: text("notes"),
     nationalIdType: varchar("national_id_type", { length: 32 }),
     nationalIdValue: varchar("national_id_value", { length: 255 }),
+    phoneVerifiedAt: timestamp("phone_verified_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -443,6 +446,64 @@ export const patientOtpCodes = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [index("patient_otp_codes_patient_expires_idx").on(table.patientId, table.expiresAt)]
+);
+
+export const otpCodes = pgTable(
+  "otp_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    context: varchar("context", { length: 32 }).notNull(),
+    phone: varchar("phone", { length: 64 }).notNull(),
+    code: varchar("code", { length: 8 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("otp_codes_phone_context_expires_idx").on(table.phone, table.context, table.expiresAt)]
+);
+
+export const emailVerificationCodes = pgTable(
+  "email_verification_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: varchar("email", { length: 255 }).notNull(),
+    code: varchar("code", { length: 8 }).notNull(),
+    context: varchar("context", { length: 32 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("email_verification_codes_email_context_expires_idx").on(table.email, table.context, table.expiresAt)]
+);
+
+export const verifiedEmails = pgTable(
+  "verified_emails",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: varchar("email", { length: 255 }).notNull(),
+    context: varchar("context", { length: 32 }).notNull(),
+    verifiedAt: timestamp("verified_at", { withTimezone: true }).defaultNow().notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex("verified_emails_email_context_idx").on(table.email, table.context)]
+);
+
+export const userAccounts = pgTable(
+  "user_accounts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    provider: varchar("provider", { length: 32 }).notNull(),
+    providerAccountId: varchar("provider_account_id", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("user_accounts_provider_account_idx").on(table.provider, table.providerAccountId),
+    index("user_accounts_user_id_idx").on(table.userId),
+  ]
 );
 
 export const referralCodes = pgTable(

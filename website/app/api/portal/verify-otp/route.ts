@@ -64,6 +64,11 @@ export async function POST(req: Request) {
       expiresAt,
     });
 
+    await db
+      .update(patients)
+      .set({ phoneVerifiedAt: new Date() })
+      .where(eq(patients.id, patient.id));
+
     await db.delete(patientOtpCodes).where(eq(patientOtpCodes.id, verificationId));
 
     const baseUrl = process.env.NEXTAUTH_URL ?? process.env.VERCEL_URL ?? "http://localhost:3000";

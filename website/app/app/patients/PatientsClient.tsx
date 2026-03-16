@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserPlus, Search, Users } from "lucide-react";
+import { PhoneInputWithCountry } from "@/app/components/PhoneInputWithCountry";
+import { SearchableGeoSelect, type GeoOption } from "@/app/components/SearchableGeoSelect";
 
 type PatientRow = {
   id: string;
@@ -42,6 +44,8 @@ export default function PatientsClient() {
     city: "",
     state: "",
     country: "",
+    countryCode: "",
+    stateCode: "",
     postalCode: "",
     gender: "",
     genderIdentity: "",
@@ -54,8 +58,49 @@ export default function PatientsClient() {
     spousePhone: "",
     notes: "",
   });
+  const [countryOptions, setCountryOptions] = useState<GeoOption[]>([]);
+  const [stateOptions, setStateOptions] = useState<GeoOption[]>([]);
+  const [cityOptions, setCityOptions] = useState<GeoOption[]>([]);
+  const [geoLoading, setGeoLoading] = useState({ countries: false, states: false, cities: false });
   const showSpouse = form.relationshipStatus === "partnered" || form.relationshipStatus === "married";
   const showCoupleType = showSpouse;
+
+  useEffect(() => {
+    if (!showAddForm) return;
+    setGeoLoading((g) => ({ ...g, countries: true }));
+    fetch("/api/app/geo/countries")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr) => setCountryOptions(Array.isArray(arr) ? arr : []))
+      .finally(() => setGeoLoading((g) => ({ ...g, countries: false })));
+  }, [showAddForm]);
+
+  useEffect(() => {
+    if (!form.countryCode) {
+      setStateOptions([]);
+      setCityOptions([]);
+      return;
+    }
+    setGeoLoading((g) => ({ ...g, states: true }));
+    fetch(`/api/app/geo/states?country=${encodeURIComponent(form.countryCode)}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr) => setStateOptions(Array.isArray(arr) ? arr : []))
+      .finally(() => setGeoLoading((g) => ({ ...g, states: false })));
+    setCityOptions([]);
+  }, [form.countryCode]);
+
+  useEffect(() => {
+    if (!form.countryCode || !form.stateCode) {
+      setCityOptions([]);
+      return;
+    }
+    setGeoLoading((g) => ({ ...g, cities: true }));
+    fetch(
+      `/api/app/geo/cities?country=${encodeURIComponent(form.countryCode)}&state=${encodeURIComponent(form.stateCode)}`
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr) => setCityOptions(Array.isArray(arr) ? arr : []))
+      .finally(() => setGeoLoading((g) => ({ ...g, cities: false })));
+  }, [form.countryCode, form.stateCode]);
 
   const fetchList = useCallback(async () => {
     try {
@@ -110,7 +155,15 @@ export default function PatientsClient() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setAddError(data.error || data.details?.firstName?.[0] || "Failed to create patient.");
+        const msg = data.message || data.error;
+        const details = data.details as Record<string, string[] | undefined> | undefined;
+        const fromDetails = details
+          ? Object.entries(details)
+              .flatMap(([field, errs]) => (errs || []).map((e) => `${field}: ${e}`))
+              .filter(Boolean)
+              .join(". ")
+          : "";
+        setAddError(msg && fromDetails ? `${msg} — ${fromDetails}` : msg || fromDetails || "Failed to create patient.");
         return;
       }
       setShowAddForm(false);
@@ -124,6 +177,8 @@ export default function PatientsClient() {
         city: "",
         state: "",
         country: "",
+        countryCode: "",
+        stateCode: "",
         postalCode: "",
         gender: "",
         genderIdentity: "",
@@ -219,12 +274,11 @@ export default function PatientsClient() {
             </div>
             <div>
               <label htmlFor="phone" className={labelClass}>Phone</label>
-              <input
+              <PhoneInputWithCountry
                 id="phone"
-                type="tel"
-                className={inputClass}
                 value={form.phone}
-                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                onChange={(v) => setForm((f) => ({ ...f, phone: v ?? "" }))}
+                placeholder="e.g. 312 499 1701"
               />
             </div>
             <div>
@@ -238,20 +292,55 @@ export default function PatientsClient() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label htmlFor="city" className={labelClass}>City</label>
-                <input id="city" className={inputClass} value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} />
-              </div>
-              <div>
-                <label htmlFor="state" className={labelClass}>State</label>
-                <input id="state" className={inputClass} value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))} />
-              </div>
-              <div>
                 <label htmlFor="country" className={labelClass}>Country</label>
-                <input id="country" className={inputClass} placeholder="e.g. US" value={form.country} onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))} />
+                <SearchableGeoSelect
+                  id="country"
+                  placeholder="Search country…"
+                  value={form.country}
+                  onChange={(name, code) =>
+                    setForm((f) => ({ ...f, country: name, countryCode: code ?? "", state: "", stateCode: "", city: "" }))
+                  }
+                  options={countryOptions}
+                  loading={geoLoading.countries}
+                  getDisplayLabel={(c) => (c.flag ? `${c.flag} ${c.name}` : c.name)}
+                />
+              </div>
+              <div>
+                <label htmlFor="state" className={labelClass}>State / Province</label>
+                <SearchableGeoSelect
+                  id="state"
+                  placeholder="Search state…"
+                  value={form.state}
+                  onChange={(name, code) =>
+                    setForm((f) => ({ ...f, state: name, stateCode: code ?? "", city: "" }))
+                  }
+                  options={stateOptions}
+                  loading={geoLoading.states}
+                  disabled={!form.countryCode}
+                  getDisplayLabel={(s) => s.name}
+                />
+              </div>
+              <div>
+                <label htmlFor="city" className={labelClass}>City</label>
+                <SearchableGeoSelect
+                  id="city"
+                  placeholder="Search city…"
+                  value={form.city}
+                  onChange={(name) => setForm((f) => ({ ...f, city: name }))}
+                  options={cityOptions}
+                  loading={geoLoading.cities}
+                  disabled={!form.stateCode}
+                  getDisplayLabel={(c) => c.name}
+                />
               </div>
               <div>
                 <label htmlFor="postalCode" className={labelClass}>Postal code</label>
-                <input id="postalCode" className={inputClass} value={form.postalCode} onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))} />
+                <input
+                  id="postalCode"
+                  className={inputClass}
+                  value={form.postalCode}
+                  onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))}
+                />
               </div>
             </div>
             <div>
@@ -327,7 +416,12 @@ export default function PatientsClient() {
                 </div>
                 <div>
                   <label htmlFor="spousePhone" className={labelClass}>Partner phone</label>
-                  <input id="spousePhone" type="tel" className={inputClass} value={form.spousePhone} onChange={(e) => setForm((f) => ({ ...f, spousePhone: e.target.value }))} />
+                  <PhoneInputWithCountry
+                    id="spousePhone"
+                    value={form.spousePhone}
+                    onChange={(v) => setForm((f) => ({ ...f, spousePhone: v ?? "" }))}
+                    placeholder="Partner phone number"
+                  />
                 </div>
               </div>
             )}
