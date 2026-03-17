@@ -10,6 +10,7 @@ import {
   jsonb,
   integer,
   boolean,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 export const roleSlugEnum = pgEnum("role_slug", [
@@ -110,6 +111,8 @@ export const tenantBranding = pgTable("tenant_branding", {
   footerWebsite: varchar("footer_website", { length: 512 }),
   footerText: text("footer_text"),
   logoUrl: text("logo_url"),
+  primaryColor: varchar("primary_color", { length: 32 }),
+  showPoweredBy: boolean("show_powered_by").default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -312,15 +315,76 @@ export const embryos = pgTable(
     cycleId: uuid("cycle_id")
       .notNull()
       .references(() => ivfCycles.id, { onDelete: "cascade" }),
+    fertilizationEventId: uuid("fertilization_event_id").references(
+      () => fertilizationEvents.id,
+      { onDelete: "set null" }
+    ),
     day: varchar("day", { length: 16 }),
+    dayCreated: integer("day_created"),
     grade: varchar("grade", { length: 64 }),
+    gradeDetail: varchar("grade_detail", { length: 64 }),
     status: varchar("status", { length: 32 }).notNull().default("fresh"),
+    source: varchar("source", { length: 32 }).default("fresh"),
+    disposition: varchar("disposition", { length: 32 }).default("culture"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("embryos_tenant_cycle_idx").on(table.tenantId, table.cycleId), index("embryos_fertilization_event_idx").on(table.fertilizationEventId)]
+);
+
+export const oocyteRetrievals = pgTable(
+  "oocyte_retrievals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    cycleId: uuid("cycle_id")
+      .notNull()
+      .references(() => ivfCycles.id, { onDelete: "cascade" }),
+    retrievalDate: timestamp("retrieval_date", { withTimezone: true }),
+    performedById: uuid("performed_by_id").references(() => users.id, { onDelete: "set null" }),
+    oocytesTotal: integer("oocytes_total"),
+    oocytesMature: integer("oocytes_mature"),
+    oocytesImmature: integer("oocytes_immature"),
+    oocytesMii: integer("oocytes_mii"),
+    oocytesGv: integer("oocytes_gv"),
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex("embryos_tenant_cycle_idx").on(table.tenantId, table.cycleId),
+    index("oocyte_retrievals_tenant_idx").on(table.tenantId),
+    index("oocyte_retrievals_cycle_idx").on(table.cycleId),
+  ]
+);
+
+export const fertilizationEvents = pgTable(
+  "fertilization_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    cycleId: uuid("cycle_id")
+      .notNull()
+      .references(() => ivfCycles.id, { onDelete: "cascade" }),
+    opuId: uuid("opu_id").references(() => oocyteRetrievals.id, { onDelete: "set null" }),
+    fertilizationType: varchar("fertilization_type", { length: 32 }).notNull().default("icsi"),
+    oocytesInseminated: integer("oocytes_inseminated"),
+    oocytesFertilized: integer("oocytes_fertilized"),
+    zygotesNormal: integer("zygotes_normal"),
+    zygotesAbnormal: integer("zygotes_abnormal"),
+    performedAt: timestamp("performed_at", { withTimezone: true }),
+    performedById: uuid("performed_by_id").references(() => users.id, { onDelete: "set null" }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("fertilization_events_tenant_idx").on(table.tenantId),
+    index("fertilization_events_cycle_idx").on(table.cycleId),
   ]
 );
 
@@ -345,6 +409,78 @@ export const embryoGeneticResults = pgTable(
   (table) => [
     index("embryo_genetic_results_embryo_idx").on(table.embryoId),
     index("embryo_genetic_results_tenant_idx").on(table.tenantId),
+  ]
+);
+
+export const embryoTransfers = pgTable(
+  "embryo_transfers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    cycleId: uuid("cycle_id")
+      .notNull()
+      .references(() => ivfCycles.id, { onDelete: "cascade" }),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => patients.id, { onDelete: "cascade" }),
+    transferDate: timestamp("transfer_date", { withTimezone: true }).notNull(),
+    transferType: varchar("transfer_type", { length: 32 }).notNull().default("fresh"),
+    numberEmbryosTransferred: integer("number_embryos_transferred"),
+    numberImplanted: integer("number_implanted"),
+    performedById: uuid("performed_by_id").references(() => users.id, { onDelete: "set null" }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("embryo_transfers_tenant_idx").on(table.tenantId),
+    index("embryo_transfers_cycle_idx").on(table.cycleId),
+  ]
+);
+
+export const embryoTransferEmbryos = pgTable(
+  "embryo_transfer_embryos",
+  {
+    transferId: uuid("transfer_id")
+      .notNull()
+      .references(() => embryoTransfers.id, { onDelete: "cascade" }),
+    embryoId: uuid("embryo_id")
+      .notNull()
+      .references(() => embryos.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.transferId, table.embryoId] }),
+    index("embryo_transfer_embryos_embryo_idx").on(table.embryoId),
+  ]
+);
+
+export const cryoStraws = pgTable(
+  "cryo_straws",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    embryoId: uuid("embryo_id")
+      .notNull()
+      .references(() => embryos.id, { onDelete: "cascade" }),
+    cycleId: uuid("cycle_id")
+      .notNull()
+      .references(() => ivfCycles.id, { onDelete: "cascade" }),
+    strawLabel: varchar("straw_label", { length: 128 }),
+    storageLocation: varchar("storage_location", { length: 255 }),
+    frozenAt: timestamp("frozen_at", { withTimezone: true }).notNull(),
+    thawedAt: timestamp("thawed_at", { withTimezone: true }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("cryo_straws_tenant_idx").on(table.tenantId),
+    index("cryo_straws_cycle_idx").on(table.cycleId),
+    index("cryo_straws_embryo_idx").on(table.embryoId),
   ]
 );
 

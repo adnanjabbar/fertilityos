@@ -55,7 +55,7 @@ _ (and optionally 1h) before appointment. Use Resend, SendGrid, or nodemailer; s
 
 **Phase 8 completed:** WhatsApp integration (tenant-owned), newsletter/email campaigns (TheFertilityOS footer: gradient “FertilityOS” → www.thefertilityos.com), LIS/LIMS lab connectors, multi-location. See `phase-8-handoff.md`.
 
-**Next batch:** Phase 9 — PWA/mobile foundation, API marketplace/catalog, enterprise/white-label/SSO, security hardening, mobile apps exploration. See `phase-9-handoff.md`.
+**Phase 9 completed:** PWA (manifest, service worker, offline page), security hardening (rate limiting on auth/OTP, CSP and security headers, audit for patient list view), public Integrations catalog (`/integrations`), white-label (logo, primary color, “Powered by” toggle in Letterhead settings), and mobile-apps exploration doc. See `website/PWA-AND-MOBILE.md`, `website/SECURITY-AND-COMPLIANCE.md`, `website/API-MARKETPLACE.md`, `website/ENTERPRISE-WHITELABEL.md`, `website/MOBILE-APPS.md`.
 
 ---
 

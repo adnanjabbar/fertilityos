@@ -54,6 +54,7 @@
       "links": {
         "features": "Características",
         "modules": "Módulos",
+        "integrations": "Integraciones",
         "pricing": "Precios",
         "howItWorks": "Cómo funciona",
         "roadmap": "Hoja de ruta",
@@ -112,6 +113,31 @@
         "support": "Soporte (Scale+)"
       }
     },
+    "integrations": {
+      "title": "Integraciones y socios",
+      "subtitle": "Conecta FertilityOS con tus herramientas. Configura cada integración en el panel o sigue la documentación del proveedor.",
+      "configureInDashboard": "Configurar en el panel",
+      "docs": "Documentación",
+      "footer": "Más integraciones (contabilidad, EMR, HL7) próximamente. Contáctanos para colaboraciones.",
+      "items": {
+        "twilio": "Twilio",
+        "twilioDesc": "SMS y voz para verificación OTP y recordatorios de citas. Configura Account SID, Auth Token y número remitente.",
+        "daily": "Daily.co",
+        "dailyDesc": "Vídeo compatible con HIPAA para telemedicina. Incluye visitas por vídeo en citas con grabación y notas.",
+        "whatsapp": "WhatsApp Business",
+        "whatsappDesc": "API de WhatsApp Business por inquilino para mensajería y notificaciones. Meta Business Suite o API directa.",
+        "stripe": "Stripe",
+        "stripeDesc": "Suscripciones y pagos. Portal de cliente y Checkout para facturación; webhooks mantienen el estado.",
+        "resend": "Resend",
+        "resendDesc": "Email transaccional y campañas. Modo plataforma usa Resend con pie FertilityOS; SMTP personalizado opcional.",
+        "lis": "LIS / Conectores de laboratorio",
+        "lisDesc": "Conexión con sistemas de información de laboratorio y LIMS. Catálogo NABL, LIS nativo y flujos de aprobación de informes.",
+        "google": "Inicio de sesión con Google",
+        "googleDesc": "OAuth para el personal. SSO opcional con Microsoft y Apple. Configura URIs de redirección en las consolas de proveedores.",
+        "api": "Claves API",
+        "apiDesc": "Acceso API REST para sistemas externos. Crea y revoca claves en Desarrolladores; uso para integraciones y automatización."
+      }
+    },
     "modules": {
       "badge": "Modular por diseño",
       "title": "Cada módulo que necesita tu clínica.",
@@ -130,7 +156,7 @@
         "patientManagement": { "name": "Gestión de pacientes", "description": "Perfiles completos, historial médico, consentimientos, vinculación pareja/donante y gestión documental. El centro de cada trayectoria del paciente." },
         "scheduling": { "name": "Agenda y citas", "description": "Calendario multi-profesional con reservas arrastrar-y-soltar, recordatorios SMS/email automáticos y plantillas de citas recurrentes." },
         "emr": { "name": "Historial médico electrónico", "description": "Notas clínicas en formato SOAP, códigos ICD-10, prescripciones, cartas de derivación y trazabilidad para cumplimiento." },
-        "ivfLab": { "name": "Laboratorio FIV y embriología", "description": "Seguimiento completo del ciclo FIV: protocolos de estimulación, recuperación ovocitaria, tasas de fertilización, gradación embrionaria (Gardner), criopreservación y custodia." },
+        "ivfLab": { "name": "Laboratorio FIV y embriología", "description": "Flujo completo de embriología: OPU (recuperación ovocitaria), fertilización (FIV/ICSI), seguimiento de embriones con disposición, transferencias, pajas de criopreservación y descongelación, resultados PGT/PGS y custodia." },
         "billing": { "name": "Gestión financiera y facturación", "description": "Precios de tratamientos, facturas, pagos, reclamaciones a seguros e informes. Integrado con Stripe." },
         "staff": { "name": "Personal y roles", "description": "Incorporar médicos, enfermeras, embriólogos, técnicos de laboratorio, recepción y roles personalizados con permisos por módulo." },
         "donor": { "name": "Gestión de donantes", "description": "Perfiles de donantes de óvulos y esperma, flujos de emparejamiento, consentimientos y cumplimiento legal." },
@@ -147,7 +173,11 @@
         "surrogacy": { "name": "Casos de subrogación", "description": "Seguimiento de casos de subrogación, padres de intención, datos de gestante, estado y fechas. Número de caso y notas por inquilino." },
         "referrals": { "name": "Programa de referidos", "description": "Códigos y enlaces de referidos; seguimiento de inscripciones. Aplicar código en el registro." },
         "apiKeys": { "name": "Claves API", "description": "Crear y gestionar claves API para integraciones. Listar, revocar y usar en sistemas externos." },
-        "multiCurrency": { "name": "Multi-moneda", "description": "Moneda por defecto del inquilino (USD, EUR, GBP, etc.). Facturas e importes en la moneda elegida." }
+        "multiCurrency": { "name": "Multi-moneda", "description": "Moneda por defecto del inquilino (USD, EUR, GBP, etc.). Facturas e importes en la moneda elegida." },
+        "labManagement": { "name": "Gestión de laboratorio y LIS", "description": "Pedidos de laboratorio, catálogo, conectores LIS/LIMS, flujos de aprobación de informes e integración nativa. Roles de patólogo y técnico con flujos NABL." },
+        "securityReport": { "name": "Informe de seguridad y cumplimiento", "description": "Vista centralizada de seguridad: estado SSO, correos verificados, OTP y sesiones, y preparación para auditorías." },
+        "emailCampaigns": { "name": "Campañas de email", "description": "Campañas de newsletter y marketing. Crear, enviar y seguir campañas con marca del inquilino y gestión de listas." },
+        "multiLocation": { "name": "Multi-sede", "description": "Gestionar varias sedes. Establecer sede por defecto y preferida por inquilino; soporte para ubicaciones en citas y operaciones." }
       }
     },
     "howItWorks": {
@@ -291,6 +321,7 @@
       "reports": "Informes",
       "billing": "Facturación",
       "lab": "Laboratorio",
+      "reportsToApprove": "Informes a aprobar",
       "donors": "Donantes",
       "surrogacy": "Subrogación",
       "inventory": "Inventario",
@@ -305,6 +336,8 @@
       "locations": "Ubicaciones",
       "integrations": "Integraciones",
       "labIntegration": "Integración de laboratorio",
+      "settings": "Configuración",
+      "securityReport": "Informe de seguridad",
       "superDashboard": "Super panel",
       "logOut": "Cerrar sesión",
       "brand": "FertilityOS",

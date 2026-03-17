@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   title: "FertilityOS — The Operating System for Fertility Care",
   description:
     "FertilityOS is the world's first comprehensive SaaS platform built specifically for fertility clinics and reproductive health centers. Manage patients, IVF cycles, lab workflows, scheduling, billing, and your entire team — in one place.",
+  manifest: "/manifest.json",
+  themeColor: "#2563eb",
+  viewport: { width: "device-width", initialScale: 1, maximumScale: 5 },
   keywords: [
     "fertility clinic software",
     "IVF management system",

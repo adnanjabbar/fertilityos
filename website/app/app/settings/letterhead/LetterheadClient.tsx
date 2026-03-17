@@ -17,6 +17,8 @@ type BrandingState = {
   footerWebsite: string | null;
   footerText: string | null;
   logoUrl: string | null;
+  primaryColor: string | null;
+  showPoweredBy: boolean;
 };
 
 const TEMPLATE_SLUGS = [
@@ -39,6 +41,8 @@ const defaultState: BrandingState = {
   footerWebsite: null,
   footerText: null,
   logoUrl: null,
+  primaryColor: null,
+  showPoweredBy: true,
 };
 
 const inputClass =
@@ -99,6 +103,8 @@ export default function LetterheadClient() {
           footerWebsite: form.footerWebsite && form.footerWebsite.trim() ? form.footerWebsite.trim() : null,
           footerText: form.footerText && form.footerText.trim() ? form.footerText.trim() : null,
           logoUrl: form.logoUrl && form.logoUrl.trim() ? form.logoUrl.trim() : null,
+          primaryColor: form.primaryColor && form.primaryColor.trim() ? form.primaryColor.trim() : null,
+          showPoweredBy: form.showPoweredBy,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -199,6 +205,35 @@ export default function LetterheadClient() {
                 className={inputClass}
               />
             </div>
+          </div>
+        </section>
+
+        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">White-label (app)</h2>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="primaryColor" className={labelClass}>
+                Primary color (hex)
+              </label>
+              <input
+                id="primaryColor"
+                type="text"
+                value={form.primaryColor ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, primaryColor: e.target.value.trim() || null }))}
+                placeholder="#2563eb"
+                className={inputClass}
+              />
+              <p className="text-xs text-slate-500 mt-1">Used for active states in the dashboard. Leave empty for default blue.</p>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.showPoweredBy}
+                onChange={(e) => setForm((f) => ({ ...f, showPoweredBy: e.target.checked }))}
+                className="rounded border-slate-300 w-5 h-5"
+              />
+              <span className="text-slate-700">Show &quot;Powered by FertilityOS&quot; in the app</span>
+            </label>
           </div>
         </section>
 

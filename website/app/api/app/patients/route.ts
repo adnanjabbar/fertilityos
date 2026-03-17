@@ -93,6 +93,18 @@ export async function GET(request: Request) {
       .where(conditions.length > 1 ? and(...conditions) : conditions[0])
       .orderBy(desc(patients.createdAt));
 
+    if (list.length > 50) {
+      void logAudit({
+        tenantId: session.user.tenantId,
+        userId: session.user.id,
+        action: "patient_list_view",
+        entityType: "patient",
+        entityId: null,
+        details: { count: list.length, query: q || null },
+        ipAddress: getClientIp(request),
+      }).catch(() => {});
+    }
+
     return NextResponse.json(list);
   } catch (err) {
     console.error("GET /api/app/patients error:", err);

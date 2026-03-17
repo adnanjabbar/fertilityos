@@ -8,6 +8,7 @@ import { users, tenants, patients, patientPortalTokens, userSessions } from "./d
 import { eq, and, gt, isNull } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { logAudit } from "./lib/audit";
+import { rateLimitAuth } from "./lib/rate-limit";
 
 declare module "next-auth" {
   interface User {
@@ -117,6 +118,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
         const email = String(credentials.email).trim().toLowerCase();
         const password = String(credentials.password);
+
+        const hdrs = await headers();
+        const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";
+        const { allowed } = rateLimitAuth(`${ip}:${email}`);
+        if (!allowed) {
+          throw new Error("Too many sign-in attempts. Try again in 15 minutes.");
+        }
 
         const [row] = await db
           .select({

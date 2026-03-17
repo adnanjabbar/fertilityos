@@ -6,6 +6,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { createAndSendOtp } from "@/lib/otp";
 import { logAudit } from "@/lib/audit";
+import { rateLimitOtp } from "@/lib/rate-limit";
 
 const bodySchema = z.object({
   phone: z.string().min(1, "Phone is required"),
@@ -27,6 +28,16 @@ export async function POST(request: Request) {
     }
 
     const { phone, context, inviteToken, patientId, recipientName } = parsed.data;
+
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+    const otpIdentifier = `${ip}:${phone}:${context}`;
+    const { allowed } = rateLimitOtp(otpIdentifier);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many OTP requests. Try again in 15 minutes." },
+        { status: 429 }
+      );
+    }
 
     if (context === "admin_signup") {
       const result = await createAndSendOtp({

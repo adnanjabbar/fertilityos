@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { tenants } from "@/db/schema";
+import { tenants, tenantBranding } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { isModuleEnabled } from "@/lib/modules";
 import { getTranslations } from "next-intl/server";
@@ -46,10 +46,79 @@ export default async function AppLayout({
   const showReportsToApprove =
     showLab && (isAdmin || session.user.roleSlug === "pathologist");
 
+  const labItems: NavGroup["items"] = [];
+  if (showLabNav || showReportsToApprove || showDonors || isAdmin) {
+    const children: NavGroup["items"] = [
+      ...(showLabNav ? [{ href: "/app/lab", labelKey: "lab", iconKey: "lab" as const }] : []),
+      ...(showReportsToApprove ? [{ href: "/app/lab/reports", labelKey: "reportsToApprove", iconKey: "lab" as const }] : []),
+      ...(showDonors ? [{ href: "/app/donors", labelKey: "donors", iconKey: "donors" as const }] : []),
+      ...(isAdmin
+        ? [
+            { href: "/app/surrogacy", labelKey: "surrogacy", iconKey: "surrogacy" as const },
+            { href: "/app/inventory", labelKey: "inventory", iconKey: "inventory" as const },
+            { href: "/app/medications", labelKey: "medications", iconKey: "medications" as const },
+          ]
+        : []),
+    ].filter(Boolean) as NavGroup["items"];
+    if (children.length > 1) {
+      labItems.push({ href: "/app/lab", labelKey: "lab", iconKey: "lab", children });
+    } else {
+      labItems.push(...children);
+    }
+  }
+
+  let branding: { logoUrl: string | null; primaryColor: string | null; showPoweredBy: boolean } = {
+    logoUrl: null,
+    primaryColor: null,
+    showPoweredBy: true,
+  };
+  if (session.user.tenantId) {
+    const [row] = await db
+      .select({ logoUrl: tenantBranding.logoUrl, primaryColor: tenantBranding.primaryColor, showPoweredBy: tenantBranding.showPoweredBy })
+      .from(tenantBranding)
+      .where(eq(tenantBranding.tenantId, session.user.tenantId))
+      .limit(1);
+    if (row) {
+      branding = {
+        logoUrl: row.logoUrl ?? null,
+        primaryColor: row.primaryColor ?? null,
+        showPoweredBy: row.showPoweredBy ?? true,
+      };
+    }
+  }
+
+  const adminItems: NavGroup["items"] = isAdmin
+    ? [
+        { href: "/app/referrals", labelKey: "referrals", iconKey: "referrals" },
+        { href: "/app/team", labelKey: "team", iconKey: "team" },
+        { href: "/app/developers", labelKey: "developers", iconKey: "developers" },
+        { href: "/app/compliance", labelKey: "compliance", iconKey: "compliance" },
+        { href: "/app/audit-logs", labelKey: "auditLog", iconKey: "auditLog" },
+        { href: "/app/security-report", labelKey: "securityReport", iconKey: "auditLog" },
+        { href: "/app/email-campaigns", labelKey: "emailCampaigns", iconKey: "emailCampaigns" },
+        {
+          href: "#",
+          labelKey: "settings",
+          iconKey: "settings",
+          children: [
+            { href: "/app/settings/letterhead", labelKey: "letterhead", iconKey: "letterhead" },
+            { href: "/app/settings/locations", labelKey: "locations", iconKey: "locations" },
+            { href: "/app/settings/integrations", labelKey: "integrations", iconKey: "integrations" },
+            { href: "/app/settings/lab-integration", labelKey: "labIntegration", iconKey: "labIntegration" },
+          ],
+        },
+      ]
+    : [];
+
   const navGroups: NavGroup[] = [
     {
       labelKey: "groupMain",
-      items: [{ href: "/app/dashboard", labelKey: "dashboard", iconKey: "dashboard" }],
+      items: [
+        { href: "/app/dashboard", labelKey: "dashboard", iconKey: "dashboard" },
+        ...(session.user.roleSlug !== "patient"
+          ? [{ href: "/app/account/security", labelKey: "accountSecurity", iconKey: "compliance" as const }]
+          : []),
+      ],
     },
     {
       labelKey: "groupClinical",
@@ -68,45 +137,8 @@ export default async function AppLayout({
         ...(isAdmin ? [{ href: "/app/billing", labelKey: "billing", iconKey: "billing" as const }] : []),
       ].filter(Boolean) as NavGroup["items"],
     },
-    ...(showDonors || isAdmin || showLabNav
-      ? [
-          {
-            labelKey: "groupLab" as const,
-            items: [
-              ...(showLabNav ? [{ href: "/app/lab", labelKey: "lab", iconKey: "lab" as const }] : []),
-              ...(showReportsToApprove ? [{ href: "/app/lab/reports", labelKey: "reportsToApprove", iconKey: "lab" as const }] : []),
-              ...(showDonors ? [{ href: "/app/donors", labelKey: "donors", iconKey: "donors" as const }] : []),
-              ...(isAdmin
-                ? [
-                    { href: "/app/surrogacy", labelKey: "surrogacy", iconKey: "surrogacy" as const },
-                    { href: "/app/inventory", labelKey: "inventory", iconKey: "inventory" as const },
-                    { href: "/app/medications", labelKey: "medications", iconKey: "medications" as const },
-                  ]
-                : []),
-            ].filter(Boolean) as NavGroup["items"],
-          },
-        ]
-      : []),
-    ...(isAdmin
-      ? [
-          {
-            labelKey: "groupAdmin" as const,
-            items: [
-              { href: "/app/referrals", labelKey: "referrals", iconKey: "referrals" },
-              { href: "/app/team", labelKey: "team", iconKey: "team" },
-              { href: "/app/developers", labelKey: "developers", iconKey: "developers" },
-              { href: "/app/compliance", labelKey: "compliance", iconKey: "compliance" },
-              { href: "/app/audit-logs", labelKey: "auditLog", iconKey: "auditLog" },
-              { href: "/app/security-report", labelKey: "securityReport", iconKey: "auditLog" },
-              { href: "/app/email-campaigns", labelKey: "emailCampaigns", iconKey: "emailCampaigns" },
-              { href: "/app/settings/letterhead", labelKey: "letterhead", iconKey: "letterhead" },
-              { href: "/app/settings/locations", labelKey: "locations", iconKey: "locations" },
-              { href: "/app/settings/integrations", labelKey: "integrations", iconKey: "integrations" },
-              { href: "/app/settings/lab-integration", labelKey: "labIntegration", iconKey: "labIntegration" },
-            ],
-          },
-        ]
-      : []),
+    ...(labItems.length > 0 ? [{ labelKey: "groupLab" as const, items: labItems }] : []),
+    ...(adminItems.length > 0 ? [{ labelKey: "groupAdmin" as const, items: adminItems }] : []),
     ...(isSuperAdmin
       ? [
           {
@@ -134,6 +166,7 @@ export default async function AppLayout({
     developers: t("developers"),
     compliance: t("compliance"),
     auditLog: t("auditLog"),
+    accountSecurity: t("accountSecurity"),
     emailCampaigns: t("emailCampaigns"),
     letterhead: t("letterhead"),
     locations: t("locations"),
@@ -141,6 +174,7 @@ export default async function AppLayout({
     labIntegration: t("labIntegration"),
     securityReport: t("securityReport"),
     superDashboard: t("superDashboard"),
+    settings: t("settings"),
     logOut: t("logOut"),
     groupMain: t("groupMain"),
     groupClinical: t("groupClinical"),
@@ -158,6 +192,9 @@ export default async function AppLayout({
           labels={labels}
           userName={session.user.name ?? "User"}
           tenantName={session.user.tenantName ?? null}
+          brandingLogoUrl={branding.logoUrl}
+          brandingPrimaryColor={branding.primaryColor}
+          showPoweredBy={branding.showPoweredBy}
         />
         <main className="flex-1 min-w-0 relative pt-14 lg:pt-14">
           <AppTopBar userName={session.user.name ?? "User"} tenantName={session.user.tenantName ?? null} />

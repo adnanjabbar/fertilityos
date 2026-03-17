@@ -2,7 +2,7 @@ import { Activity } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 const footerLinkConfig = {
-  Product: ["features", "modules", "pricing", "howItWorks", "roadmap"] as const,
+  Product: ["features", "modules", "integrations", "pricing", "howItWorks", "roadmap"] as const,
   Company: ["about", "blog", "careers", "contact"] as const,
   Legal: ["privacyPolicy", "termsOfService", "hipaaPolicy", "cookiePolicy"] as const,
   Support: ["documentation", "apiReference", "statusPage", "helpCenter"] as const,
@@ -11,6 +11,7 @@ const footerLinkConfig = {
 const hrefByKey: Record<string, string> = {
   features: "#features",
   modules: "#modules",
+  integrations: "/integrations",
   pricing: "#pricing",
   howItWorks: "#how-it-works",
   roadmap: "#",

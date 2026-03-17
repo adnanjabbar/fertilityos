@@ -20,6 +20,9 @@ import {
   Share2,
   Code,
   Coins,
+  MapPin,
+  Mail,
+  ShieldCheck,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -30,12 +33,14 @@ const moduleConfig = [
   { key: "ivfLab", icon: FlaskConical, badge: "specialty", badgeColor: "teal" },
   { key: "billing", icon: CreditCard, badge: "core", badgeColor: "blue" },
   { key: "staff", icon: Stethoscope, badge: "core", badgeColor: "blue" },
+  { key: "labManagement", icon: FlaskConical, badge: "addon", badgeColor: "pink" },
   { key: "donor", icon: Baby, badge: "addon", badgeColor: "pink" },
   { key: "telemedicine", icon: Video, badge: "addon", badgeColor: "pink" },
   { key: "patientPortal", icon: Globe, badge: "addon", badgeColor: "pink" },
   { key: "inventory", icon: Package, badge: "addon", badgeColor: "pink" },
   { key: "analytics", icon: BarChart3, badge: "addon", badgeColor: "pink" },
   { key: "compliance", icon: Shield, badge: "addon", badgeColor: "pink" },
+  { key: "securityReport", icon: ShieldCheck, badge: "addon", badgeColor: "pink" },
   { key: "formulary", icon: Pill, badge: "addon", badgeColor: "pink" },
   { key: "icd11", icon: BookOpen, badge: "addon", badgeColor: "pink" },
   { key: "letterheadPrint", icon: Printer, badge: "addon", badgeColor: "pink" },
@@ -43,8 +48,10 @@ const moduleConfig = [
   { key: "auditLogs", icon: ScrollText, badge: "addon", badgeColor: "pink" },
   { key: "surrogacy", icon: Heart, badge: "addon", badgeColor: "pink" },
   { key: "referrals", icon: Share2, badge: "addon", badgeColor: "pink" },
+  { key: "emailCampaigns", icon: Mail, badge: "addon", badgeColor: "pink" },
   { key: "apiKeys", icon: Code, badge: "addon", badgeColor: "pink" },
   { key: "multiCurrency", icon: Coins, badge: "addon", badgeColor: "pink" },
+  { key: "multiLocation", icon: MapPin, badge: "addon", badgeColor: "pink" },
 ];
 
 const badgeStyles: Record<string, string> = {

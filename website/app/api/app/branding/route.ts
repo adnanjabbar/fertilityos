@@ -19,6 +19,8 @@ const patchSchema = z.object({
   footerWebsite: z.string().max(512).optional().nullable(),
   footerText: z.string().optional().nullable(),
   logoUrl: z.string().max(2048).optional().nullable(),
+  primaryColor: z.string().max(32).optional().nullable(),
+  showPoweredBy: z.boolean().optional(),
 });
 
 export type BrandingResponse = {
@@ -35,6 +37,8 @@ export type BrandingResponse = {
   footerWebsite: string | null;
   footerText: string | null;
   logoUrl: string | null;
+  primaryColor: string | null;
+  showPoweredBy: boolean;
 };
 
 const defaults: BrandingResponse = {
@@ -51,6 +55,8 @@ const defaults: BrandingResponse = {
   footerWebsite: null,
   footerText: null,
   logoUrl: null,
+  primaryColor: null,
+  showPoweredBy: true,
 };
 
 /**
@@ -87,6 +93,8 @@ export async function GET() {
     footerWebsite: row.footerWebsite,
     footerText: row.footerText,
     logoUrl: row.logoUrl,
+    primaryColor: row.primaryColor ?? null,
+    showPoweredBy: row.showPoweredBy ?? true,
   });
 }
 
@@ -167,6 +175,8 @@ export async function PATCH(request: Request) {
       footerWebsite: updated.footerWebsite,
       footerText: updated.footerText,
       logoUrl: updated.logoUrl,
+      primaryColor: updated.primaryColor ?? null,
+      showPoweredBy: updated.showPoweredBy ?? true,
     });
   }
 
@@ -187,6 +197,8 @@ export async function PATCH(request: Request) {
       footerWebsite: updatePayload.footerWebsite ?? null,
       footerText: updatePayload.footerText ?? null,
       logoUrl: updatePayload.logoUrl ?? null,
+      primaryColor: updatePayload.primaryColor ?? null,
+      showPoweredBy: updatePayload.showPoweredBy ?? true,
     })
     .returning();
 
@@ -207,5 +219,7 @@ export async function PATCH(request: Request) {
     footerWebsite: inserted.footerWebsite,
     footerText: inserted.footerText,
     logoUrl: inserted.logoUrl,
+    primaryColor: inserted.primaryColor ?? null,
+    showPoweredBy: inserted.showPoweredBy ?? true,
   });
 }

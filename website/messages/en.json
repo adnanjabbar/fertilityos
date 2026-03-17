@@ -54,6 +54,7 @@
       "links": {
         "features": "Features",
         "modules": "Modules",
+        "integrations": "Integrations",
         "pricing": "Pricing",
         "howItWorks": "How It Works",
         "roadmap": "Roadmap",
@@ -112,6 +113,31 @@
         "support": "Support (Scale+)"
       }
     },
+    "integrations": {
+      "title": "Integrations & Partners",
+      "subtitle": "Connect FertilityOS with your existing tools. Configure each integration in your dashboard or follow the provider docs.",
+      "configureInDashboard": "Configure in Dashboard",
+      "docs": "Docs",
+      "footer": "More integrations (accounting, EMR, HL7) coming soon. Contact us for partnership.",
+      "items": {
+        "twilio": "Twilio",
+        "twilioDesc": "SMS and voice for OTP verification and appointment reminders. Configure Account SID, Auth Token, and sender number.",
+        "daily": "Daily.co",
+        "dailyDesc": "HIPAA-compliant video for telemedicine. Embed video visits in appointments with recording and notes.",
+        "whatsapp": "WhatsApp Business",
+        "whatsappDesc": "Tenant-owned WhatsApp Business API for messaging and notifications. Meta Business Suite or direct API.",
+        "stripe": "Stripe",
+        "stripeDesc": "Subscriptions and payments. Customer Portal and Checkout for billing; webhooks keep status in sync.",
+        "resend": "Resend",
+        "resendDesc": "Transactional and campaign email. Platform mode uses Resend with FertilityOS footer; optional custom SMTP.",
+        "lis": "LIS / Lab Connectors",
+        "lisDesc": "Connect to lab information systems and LIMS. NABL-ready catalog, native LIS, and report approval workflows.",
+        "google": "Google Sign-In",
+        "googleDesc": "OAuth sign-in for staff. Optional Microsoft and Apple SSO. Configure redirect URIs in provider consoles.",
+        "api": "API Keys",
+        "apiDesc": "REST API access for external systems. Create and revoke keys in Developers; use for integrations and automation."
+      }
+    },
     "modules": {
       "badge": "Modular by Design",
       "title": "Every module your clinic needs.",
@@ -130,7 +156,7 @@
         "patientManagement": { "name": "Patient Management", "description": "Complete patient profiles, medical history, consents, partner/donor linkage, and document management. The central hub for every patient's journey." },
         "scheduling": { "name": "Scheduling & Appointments", "description": "Multi-provider calendar with drag-and-drop booking, automated SMS/email reminders, waitlist management, and recurring appointment templates." },
         "emr": { "name": "Electronic Medical Records", "description": "Clinical notes in SOAP format, ICD-10 diagnosis codes, prescription management, referral letters, and a complete audit trail for compliance." },
-        "ivfLab": { "name": "IVF Lab & Embryology", "description": "Full IVF cycle tracking — stimulation protocols, egg retrieval, fertilization rates, embryo grading (Gardner scale), cryopreservation, PGT/PGS results, and chain of custody." },
+        "ivfLab": { "name": "IVF Lab & Embryology", "description": "Full embryology workflow: OPU (oocyte retrieval), fertilization (IVF/ICSI), embryo tracking with disposition, transfers, cryopreservation straws and thaw, PGT/PGS results, and chain of custody." },
         "billing": { "name": "Financial Management & Billing", "description": "Treatment package pricing, invoice generation, payment tracking, insurance claim management, and financial reporting. Integrated with Stripe." },
         "staff": { "name": "Staff & Role Management", "description": "Onboard doctors, nurses, embryologists, lab technicians, reception, radiologists, and custom staff roles. Granular module-level permissions per role." },
         "donor": { "name": "Donor Management", "description": "Manage egg and sperm donor profiles, matching workflows, consent documentation, legal compliance tracking, and anonymization controls." },
@@ -147,7 +173,11 @@
         "surrogacy": { "name": "Surrogacy Cases", "description": "Track surrogacy cases, intended parents, surrogate details, status and dates. Case number and notes per tenant." },
         "referrals": { "name": "Referral Program", "description": "Referral codes and share links; track signups. Apply code at registration for attribution." },
         "apiKeys": { "name": "API Keys", "description": "Create and manage API keys for integrations. List, revoke, and use keys for external systems." },
-        "multiCurrency": { "name": "Multi-Currency", "description": "Tenant default currency (USD, EUR, GBP, etc.). Invoices and amounts display in chosen currency." }
+        "multiCurrency": { "name": "Multi-Currency", "description": "Tenant default currency (USD, EUR, GBP, etc.). Invoices and amounts display in chosen currency." },
+        "labManagement": { "name": "Lab Management & LIS", "description": "Lab orders, catalog, LIS/LIMS connectors, report approval workflows, and native lab integration. Pathologist and lab tech roles with NABL-ready workflows." },
+        "securityReport": { "name": "Security & Compliance Report", "description": "Centralized security overview: SSO status, verified emails, OTP and session management, and compliance readiness for audits." },
+        "emailCampaigns": { "name": "Email Campaigns", "description": "Newsletter and marketing email campaigns. Create, send, and track campaigns with tenant branding and list management." },
+        "multiLocation": { "name": "Multi-Location", "description": "Manage multiple clinic locations. Set default and preferred location per tenant; support for locations across appointments and operations." }
       }
     },
     "howItWorks": {
@@ -301,11 +331,13 @@
       "developers": "Developers",
       "compliance": "Compliance",
       "auditLog": "Audit log",
+      "accountSecurity": "Account & Security",
       "emailCampaigns": "Email campaigns",
       "letterhead": "Letterhead & printing",
       "locations": "Locations",
       "integrations": "Integrations",
       "labIntegration": "Lab integration",
+      "settings": "Settings",
       "superDashboard": "Super Dashboard",
       "logOut": "Log out",
       "brand": "FertilityOS",

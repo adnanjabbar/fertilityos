@@ -161,6 +161,64 @@ type Embryo = {
   day: string | null;
   grade: string | null;
   status: string;
+  disposition?: string | null;
+  source?: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type Opu = {
+  id: string;
+  cycleId: string;
+  retrievalDate: string | null;
+  oocytesTotal: number | null;
+  oocytesMature: number | null;
+  oocytesImmature: number | null;
+  oocytesMii: number | null;
+  oocytesGv: number | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type FertilizationEvent = {
+  id: string;
+  cycleId: string;
+  opuId: string | null;
+  fertilizationType: string;
+  oocytesInseminated: number | null;
+  oocytesFertilized: number | null;
+  zygotesNormal: number | null;
+  zygotesAbnormal: number | null;
+  performedAt: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type Transfer = {
+  id: string;
+  cycleId: string;
+  patientId: string;
+  transferDate: string;
+  transferType: string;
+  numberEmbryosTransferred: number | null;
+  numberImplanted: number | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  embryoIds?: string[];
+};
+
+type CryoStraw = {
+  id: string;
+  cycleId: string;
+  embryoId: string;
+  strawLabel: string | null;
+  storageLocation: string | null;
+  frozenAt: string;
+  thawedAt: string | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
@@ -277,9 +335,35 @@ export default function PatientDetailClient({
   const [addCycleForm, setAddCycleForm] = useState({ cycleNumber: "", cycleType: "fresh", startDate: "", endDate: "", notes: "" });
   const [expandedCycleId, setExpandedCycleId] = useState<string | null>(null);
   const [cycleEmbryos, setCycleEmbryos] = useState<Record<string, Embryo[]>>({});
+  const [cycleOpu, setCycleOpu] = useState<Record<string, Opu[]>>({});
+  const [cycleFertilization, setCycleFertilization] = useState<Record<string, FertilizationEvent[]>>({});
+  const [showAddOpu, setShowAddOpu] = useState<string | null>(null);
+  const [addOpuForm, setAddOpuForm] = useState({ retrievalDate: "", oocytesTotal: "", oocytesMature: "", oocytesImmature: "", oocytesMii: "", oocytesGv: "", notes: "" });
+  const [addOpuLoading, setAddOpuLoading] = useState(false);
+  const [showAddFertilization, setShowAddFertilization] = useState<string | null>(null);
+  const [addFertForm, setAddFertForm] = useState({ fertilizationType: "icsi", oocytesInseminated: "", oocytesFertilized: "", zygotesNormal: "", zygotesAbnormal: "", performedAt: "", notes: "" });
+  const [addFertLoading, setAddFertLoading] = useState(false);
+  const [editingOpuId, setEditingOpuId] = useState<string | null>(null);
+  const [editOpuForm, setEditOpuForm] = useState<Partial<Opu>>({});
+  const [saveOpuLoading, setSaveOpuLoading] = useState(false);
+  const [editingFertId, setEditingFertId] = useState<string | null>(null);
+  const [editFertForm, setEditFertForm] = useState<Partial<FertilizationEvent>>({});
+  const [saveFertLoading, setSaveFertLoading] = useState(false);
   const [showAddEmbryo, setShowAddEmbryo] = useState<string | null>(null);
   const [addEmbryoForm, setAddEmbryoForm] = useState({ day: "", grade: "", status: "fresh", notes: "" });
   const [addEmbryoLoading, setAddEmbryoLoading] = useState(false);
+  const [cycleTransfers, setCycleTransfers] = useState<Record<string, Transfer[]>>({});
+  const [showAddTransfer, setShowAddTransfer] = useState<string | null>(null);
+  const [addTransferForm, setAddTransferForm] = useState({ transferDate: "", transferType: "fresh" as "fresh" | "frozen", numberEmbryosTransferred: "", numberImplanted: "", notes: "", embryoIds: [] as string[] });
+  const [addTransferLoading, setAddTransferLoading] = useState(false);
+  const [editingTransferId, setEditingTransferId] = useState<string | null>(null);
+  const [editTransferForm, setEditTransferForm] = useState<Partial<Transfer> & { embryoIds?: string[] }>({});
+  const [saveTransferLoading, setSaveTransferLoading] = useState(false);
+  const [cycleCryo, setCycleCryo] = useState<Record<string, CryoStraw[]>>({});
+  const [showAddCryo, setShowAddCryo] = useState<string | null>(null);
+  const [addCryoForm, setAddCryoForm] = useState({ embryoId: "", strawLabel: "", storageLocation: "", frozenAt: "", notes: "" });
+  const [addCryoLoading, setAddCryoLoading] = useState(false);
+  const [recordingThawStrawId, setRecordingThawStrawId] = useState<string | null>(null);
   const [expandedEmbryoId, setExpandedEmbryoId] = useState<string | null>(null);
   const [embryoGeneticResults, setEmbryoGeneticResults] = useState<Record<string, GeneticResult[]>>({});
   const [showAddGeneticResult, setShowAddGeneticResult] = useState<string | null>(null);
@@ -506,9 +590,47 @@ export default function PatientDetailClient({
     }
   }, []);
 
+  const fetchOpu = useCallback(async (cycleId: string) => {
+    const res = await fetch(`/api/app/ivf-cycles/${cycleId}/opu`);
+    if (res.ok) {
+      const list = await res.json();
+      setCycleOpu((prev) => ({ ...prev, [cycleId]: list }));
+    }
+  }, []);
+
+  const fetchFertilization = useCallback(async (cycleId: string) => {
+    const res = await fetch(`/api/app/ivf-cycles/${cycleId}/fertilization`);
+    if (res.ok) {
+      const list = await res.json();
+      setCycleFertilization((prev) => ({ ...prev, [cycleId]: list }));
+    }
+  }, []);
+
+  const fetchTransfers = useCallback(async (cycleId: string) => {
+    const res = await fetch(`/api/app/ivf-cycles/${cycleId}/transfers`);
+    if (res.ok) {
+      const list = await res.json();
+      setCycleTransfers((prev) => ({ ...prev, [cycleId]: list }));
+    }
+  }, []);
+
+  const fetchCryo = useCallback(async (cycleId: string) => {
+    const res = await fetch(`/api/app/ivf-cycles/${cycleId}/cryo`);
+    if (res.ok) {
+      const list = await res.json();
+      setCycleCryo((prev) => ({ ...prev, [cycleId]: list }));
+    }
+  }, []);
+
   useEffect(() => {
-    if (expandedCycleId) fetchEmbryos(expandedCycleId);
-  }, [expandedCycleId, fetchEmbryos]);
+    if (expandedCycleId) {
+      fetchEmbryos(expandedCycleId);
+      fetchOpu(expandedCycleId);
+      fetchFertilization(expandedCycleId);
+      fetchTransfers(expandedCycleId);
+      fetchCryo(expandedCycleId);
+    }
+  }, [expandedCycleId, fetchEmbryos, fetchOpu, fetchFertilization, fetchTransfers, fetchCryo]);
 
   const fetchGeneticResults = useCallback(async (embryoId: string) => {
     const res = await fetch(`/api/app/embryos/${embryoId}/genetic-results`);
@@ -633,6 +755,219 @@ export default function PatientDetailClient({
       fetchEmbryos(cycleId);
     } finally {
       setAddEmbryoLoading(false);
+    }
+  };
+
+  const handleAddOpu = async (cycleId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    setAddOpuLoading(true);
+    try {
+      const res = await fetch(`/api/app/ivf-cycles/${cycleId}/opu`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          retrievalDate: addOpuForm.retrievalDate || null,
+          oocytesTotal: addOpuForm.oocytesTotal !== "" ? parseInt(addOpuForm.oocytesTotal, 10) : null,
+          oocytesMature: addOpuForm.oocytesMature !== "" ? parseInt(addOpuForm.oocytesMature, 10) : null,
+          oocytesImmature: addOpuForm.oocytesImmature !== "" ? parseInt(addOpuForm.oocytesImmature, 10) : null,
+          oocytesMii: addOpuForm.oocytesMii !== "" ? parseInt(addOpuForm.oocytesMii, 10) : null,
+          oocytesGv: addOpuForm.oocytesGv !== "" ? parseInt(addOpuForm.oocytesGv, 10) : null,
+          notes: addOpuForm.notes.trim() || null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setAddNoteError(data.error || "Failed to add OPU");
+        return;
+      }
+      setShowAddOpu(null);
+      setAddOpuForm({ retrievalDate: "", oocytesTotal: "", oocytesMature: "", oocytesImmature: "", oocytesMii: "", oocytesGv: "", notes: "" });
+      fetchOpu(cycleId);
+    } finally {
+      setAddOpuLoading(false);
+    }
+  };
+
+  const handleSaveOpu = async (cycleId: string, opuId: string) => {
+    setSaveOpuLoading(true);
+    try {
+      const res = await fetch(`/api/app/ivf-cycles/${cycleId}/opu/${opuId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          retrievalDate: editOpuForm.retrievalDate ?? undefined,
+          oocytesTotal: editOpuForm.oocytesTotal,
+          oocytesMature: editOpuForm.oocytesMature,
+          oocytesImmature: editOpuForm.oocytesImmature,
+          oocytesMii: editOpuForm.oocytesMii,
+          oocytesGv: editOpuForm.oocytesGv,
+          notes: editOpuForm.notes ?? undefined,
+        }),
+      });
+      if (!res.ok) return;
+      setEditingOpuId(null);
+      setEditOpuForm({});
+      fetchOpu(cycleId);
+    } finally {
+      setSaveOpuLoading(false);
+    }
+  };
+
+  const handleAddFertilization = async (cycleId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    setAddFertLoading(true);
+    try {
+      const res = await fetch(`/api/app/ivf-cycles/${cycleId}/fertilization`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fertilizationType: addFertForm.fertilizationType,
+          oocytesInseminated: addFertForm.oocytesInseminated !== "" ? parseInt(addFertForm.oocytesInseminated, 10) : null,
+          oocytesFertilized: addFertForm.oocytesFertilized !== "" ? parseInt(addFertForm.oocytesFertilized, 10) : null,
+          zygotesNormal: addFertForm.zygotesNormal !== "" ? parseInt(addFertForm.zygotesNormal, 10) : null,
+          zygotesAbnormal: addFertForm.zygotesAbnormal !== "" ? parseInt(addFertForm.zygotesAbnormal, 10) : null,
+          performedAt: addFertForm.performedAt || null,
+          notes: addFertForm.notes.trim() || null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setAddNoteError(data.error || "Failed to add fertilization");
+        return;
+      }
+      setShowAddFertilization(null);
+      setAddFertForm({ fertilizationType: "icsi", oocytesInseminated: "", oocytesFertilized: "", zygotesNormal: "", zygotesAbnormal: "", performedAt: "", notes: "" });
+      fetchFertilization(cycleId);
+    } finally {
+      setAddFertLoading(false);
+    }
+  };
+
+  const handleSaveFertilization = async (cycleId: string, eventId: string) => {
+    setSaveFertLoading(true);
+    try {
+      const res = await fetch(`/api/app/ivf-cycles/${cycleId}/fertilization/${eventId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fertilizationType: editFertForm.fertilizationType,
+          oocytesInseminated: editFertForm.oocytesInseminated,
+          oocytesFertilized: editFertForm.oocytesFertilized,
+          zygotesNormal: editFertForm.zygotesNormal,
+          zygotesAbnormal: editFertForm.zygotesAbnormal,
+          performedAt: editFertForm.performedAt ?? undefined,
+          notes: editFertForm.notes ?? undefined,
+        }),
+      });
+      if (!res.ok) return;
+      setEditingFertId(null);
+      setEditFertForm({});
+      fetchFertilization(cycleId);
+    } finally {
+      setSaveFertLoading(false);
+    }
+  };
+
+  const handleAddTransfer = async (cycleId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addTransferForm.transferDate.trim()) return;
+    setAddTransferLoading(true);
+    try {
+      const res = await fetch(`/api/app/ivf-cycles/${cycleId}/transfers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transferDate: addTransferForm.transferDate,
+          transferType: addTransferForm.transferType,
+          numberEmbryosTransferred: addTransferForm.numberEmbryosTransferred !== "" ? parseInt(addTransferForm.numberEmbryosTransferred, 10) : null,
+          numberImplanted: addTransferForm.numberImplanted !== "" ? parseInt(addTransferForm.numberImplanted, 10) : null,
+          notes: addTransferForm.notes.trim() || null,
+          embryoIds: addTransferForm.embryoIds,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setAddNoteError(data.error || "Failed to add transfer");
+        return;
+      }
+      setShowAddTransfer(null);
+      setAddTransferForm({ transferDate: "", transferType: "fresh", numberEmbryosTransferred: "", numberImplanted: "", notes: "", embryoIds: [] });
+      fetchTransfers(cycleId);
+      fetchEmbryos(cycleId);
+    } finally {
+      setAddTransferLoading(false);
+    }
+  };
+
+  const handleSaveTransfer = async (cycleId: string, transferId: string) => {
+    const body: Record<string, unknown> = {};
+    if (editTransferForm.transferDate !== undefined) body.transferDate = editTransferForm.transferDate;
+    if (editTransferForm.transferType !== undefined) body.transferType = editTransferForm.transferType;
+    if (editTransferForm.numberEmbryosTransferred !== undefined) body.numberEmbryosTransferred = editTransferForm.numberEmbryosTransferred;
+    if (editTransferForm.numberImplanted !== undefined) body.numberImplanted = editTransferForm.numberImplanted;
+    if (editTransferForm.notes !== undefined) body.notes = editTransferForm.notes;
+    if (editTransferForm.embryoIds !== undefined) body.embryoIds = editTransferForm.embryoIds;
+    if (Object.keys(body).length === 0) return;
+    setSaveTransferLoading(true);
+    try {
+      const res = await fetch(`/api/app/ivf-cycles/${cycleId}/transfers/${transferId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) return;
+      setEditingTransferId(null);
+      setEditTransferForm({});
+      fetchTransfers(cycleId);
+      fetchEmbryos(cycleId);
+    } finally {
+      setSaveTransferLoading(false);
+    }
+  };
+
+  const handleAddCryoStraw = async (cycleId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addCryoForm.embryoId || !addCryoForm.frozenAt.trim()) return;
+    setAddCryoLoading(true);
+    try {
+      const res = await fetch(`/api/app/ivf-cycles/${cycleId}/cryo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          embryoId: addCryoForm.embryoId,
+          strawLabel: addCryoForm.strawLabel.trim() || null,
+          storageLocation: addCryoForm.storageLocation.trim() || null,
+          frozenAt: addCryoForm.frozenAt,
+          notes: addCryoForm.notes.trim() || null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setAddNoteError(data.error || "Failed to add cryo straw");
+        return;
+      }
+      setShowAddCryo(null);
+      setAddCryoForm({ embryoId: "", strawLabel: "", storageLocation: "", frozenAt: "", notes: "" });
+      fetchCryo(cycleId);
+      fetchEmbryos(cycleId);
+    } finally {
+      setAddCryoLoading(false);
+    }
+  };
+
+  const handleRecordThaw = async (cycleId: string, strawId: string) => {
+    setRecordingThawStrawId(strawId);
+    try {
+      const res = await fetch(`/api/app/ivf-cycles/${cycleId}/cryo/${strawId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ thawedAt: new Date().toISOString() }),
+      });
+      if (!res.ok) return;
+      fetchCryo(cycleId);
+      fetchEmbryos(cycleId);
+    } finally {
+      setRecordingThawStrawId(null);
     }
   };
 
@@ -1557,6 +1892,92 @@ export default function PatientDetailClient({
                           <div><dt className="text-slate-500">End</dt><dd className="text-slate-900">{cycle.endDate ? formatDate(cycle.endDate) : "—"}</dd></div>
                           {cycle.notes && <div className="col-span-2"><dt className="text-slate-500">Notes</dt><dd className="text-slate-900 whitespace-pre-wrap">{cycle.notes}</dd></div>}
                         </dl>
+                        <h4 className="font-semibold text-slate-900 mb-2">Embryology</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                          <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <h5 className="text-sm font-medium text-slate-700 mb-2">Oocyte retrieval (OPU)</h5>
+                            {(cycleOpu[cycle.id] ?? []).length === 0 && showAddOpu !== cycle.id && (
+                              <p className="text-slate-500 text-sm mb-2">No OPU recorded.</p>
+                            )}
+                            {(cycleOpu[cycle.id] ?? []).length > 0 && (cycleOpu[cycle.id] ?? []).map((opu) => (
+                              <div key={opu.id} className="text-sm mb-2">
+                                {editingOpuId === opu.id ? (
+                                  <div className="space-y-2">
+                                    <input type="date" className={inputClass + " py-1.5"} value={editOpuForm.retrievalDate ? editOpuForm.retrievalDate.toString().slice(0, 10) : ""} onChange={(e) => setEditOpuForm((f) => ({ ...f, retrievalDate: e.target.value }))} />
+                                    <div className="grid grid-cols-2 gap-1">
+                                      <div><label className="text-xs text-slate-500">Total</label><input type="number" min={0} className={inputClass + " py-1 w-16"} value={String(editOpuForm.oocytesTotal ?? opu.oocytesTotal ?? "")} onChange={(e) => setEditOpuForm((f) => ({ ...f, oocytesTotal: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div>
+                                      <div><label className="text-xs text-slate-500">Mature</label><input type="number" min={0} className={inputClass + " py-1 w-16"} value={String(editOpuForm.oocytesMature ?? opu.oocytesMature ?? "")} onChange={(e) => setEditOpuForm((f) => ({ ...f, oocytesMature: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div>
+                                      <div><label className="text-xs text-slate-500">Immature</label><input type="number" min={0} className={inputClass + " py-1 w-16"} value={String(editOpuForm.oocytesImmature ?? opu.oocytesImmature ?? "")} onChange={(e) => setEditOpuForm((f) => ({ ...f, oocytesImmature: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div>
+                                      <div><label className="text-xs text-slate-500">MII</label><input type="number" min={0} className={inputClass + " py-1 w-16"} value={String(editOpuForm.oocytesMii ?? opu.oocytesMii ?? "")} onChange={(e) => setEditOpuForm((f) => ({ ...f, oocytesMii: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div>
+                                      <div><label className="text-xs text-slate-500">GV</label><input type="number" min={0} className={inputClass + " py-1 w-16"} value={String(editOpuForm.oocytesGv ?? opu.oocytesGv ?? "")} onChange={(e) => setEditOpuForm((f) => ({ ...f, oocytesGv: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div>
+                                    </div>
+                                    <input className={inputClass + " py-1.5"} placeholder="Notes" value={editOpuForm.notes ?? opu.notes ?? ""} onChange={(e) => setEditOpuForm((f) => ({ ...f, notes: e.target.value }))} />
+                                    <div className="flex gap-2"><button type="button" onClick={() => handleSaveOpu(cycle.id, opu.id)} disabled={saveOpuLoading} className="text-sm px-2 py-1 rounded bg-blue-700 text-white">Save</button><button type="button" onClick={() => { setEditingOpuId(null); setEditOpuForm({}); }} className="text-sm px-2 py-1 rounded border border-slate-200">Cancel</button></div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <p className="text-slate-800">{opu.retrievalDate ? formatDate(opu.retrievalDate) : "—"} · Total: {opu.oocytesTotal ?? "—"} · Mature: {opu.oocytesMature ?? "—"} · MII: {opu.oocytesMii ?? "—"} · GV: {opu.oocytesGv ?? "—"}</p>
+                                    {opu.notes && <p className="text-slate-500 text-xs">{opu.notes}</p>}
+                                    <button type="button" onClick={() => { setEditingOpuId(opu.id); setEditOpuForm({ retrievalDate: opu.retrievalDate ?? "", oocytesTotal: opu.oocytesTotal ?? null, oocytesMature: opu.oocytesMature ?? null, oocytesImmature: opu.oocytesImmature ?? null, oocytesMii: opu.oocytesMii ?? null, oocytesGv: opu.oocytesGv ?? null, notes: opu.notes ?? "" }); }} className="text-blue-700 text-xs hover:underline">Edit</button>
+                                  </>
+                                )}
+                              </div>
+                            ))}
+                            {showAddOpu === cycle.id ? (
+                              <form onSubmit={(e) => handleAddOpu(cycle.id, e)} className="space-y-2">
+                                <input type="date" className={inputClass + " py-1.5 w-full"} value={addOpuForm.retrievalDate} onChange={(e) => setAddOpuForm((f) => ({ ...f, retrievalDate: e.target.value }))} />
+                                <div className="grid grid-cols-2 gap-1 text-xs">
+                                  <div><label className="text-slate-500">Total</label><input type="number" min={0} className={inputClass + " py-1"} value={addOpuForm.oocytesTotal} onChange={(e) => setAddOpuForm((f) => ({ ...f, oocytesTotal: e.target.value }))} /></div>
+                                  <div><label className="text-slate-500">Mature</label><input type="number" min={0} className={inputClass + " py-1"} value={addOpuForm.oocytesMature} onChange={(e) => setAddOpuForm((f) => ({ ...f, oocytesMature: e.target.value }))} /></div>
+                                  <div><label className="text-slate-500">Immature</label><input type="number" min={0} className={inputClass + " py-1"} value={addOpuForm.oocytesImmature} onChange={(e) => setAddOpuForm((f) => ({ ...f, oocytesImmature: e.target.value }))} /></div>
+                                  <div><label className="text-slate-500">MII</label><input type="number" min={0} className={inputClass + " py-1"} value={addOpuForm.oocytesMii} onChange={(e) => setAddOpuForm((f) => ({ ...f, oocytesMii: e.target.value }))} /></div>
+                                  <div><label className="text-slate-500">GV</label><input type="number" min={0} className={inputClass + " py-1"} value={addOpuForm.oocytesGv} onChange={(e) => setAddOpuForm((f) => ({ ...f, oocytesGv: e.target.value }))} /></div>
+                                </div>
+                                <input className={inputClass + " py-1.5"} placeholder="Notes" value={addOpuForm.notes} onChange={(e) => setAddOpuForm((f) => ({ ...f, notes: e.target.value }))} />
+                                <div className="flex gap-2"><button type="button" onClick={() => setShowAddOpu(null)} className="text-sm px-2 py-1 rounded border border-slate-200">Cancel</button><button type="submit" disabled={addOpuLoading} className="text-sm px-2 py-1 rounded bg-blue-700 text-white">Add OPU</button></div>
+                              </form>
+                            ) : (
+                              <button type="button" onClick={() => setShowAddOpu(cycle.id)} className="text-sm text-blue-700 font-medium hover:underline">Add OPU</button>
+                            )}
+                          </div>
+                          <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <h5 className="text-sm font-medium text-slate-700 mb-2">Fertilization</h5>
+                            {(cycleFertilization[cycle.id] ?? []).length === 0 && showAddFertilization !== cycle.id && (
+                              <p className="text-slate-500 text-sm mb-2">No fertilization recorded.</p>
+                            )}
+                            {(cycleFertilization[cycle.id] ?? []).length > 0 && (cycleFertilization[cycle.id] ?? []).map((fert) => (
+                              <div key={fert.id} className="text-sm mb-2">
+                                {editingFertId === fert.id ? (
+                                  <div className="space-y-2">
+                                    <select className={inputClass + " py-1.5"} value={editFertForm.fertilizationType ?? fert.fertilizationType} onChange={(e) => setEditFertForm((f) => ({ ...f, fertilizationType: e.target.value }))}><option value="ivf">IVF</option><option value="icsi">ICSI</option><option value="half_icsi">Half ICSI</option></select>
+                                    <div className="grid grid-cols-2 gap-1"><div><label className="text-xs text-slate-500">Insem.</label><input type="number" min={0} className={inputClass + " py-1 w-16"} value={editFertForm.oocytesInseminated ?? fert.oocytesInseminated ?? ""} onChange={(e) => setEditFertForm((f) => ({ ...f, oocytesInseminated: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div><div><label className="text-xs text-slate-500">Fert.</label><input type="number" min={0} className={inputClass + " py-1 w-16"} value={editFertForm.oocytesFertilized ?? fert.oocytesFertilized ?? ""} onChange={(e) => setEditFertForm((f) => ({ ...f, oocytesFertilized: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div><div><label className="text-xs text-slate-500">Zygotes N</label><input type="number" min={0} className={inputClass + " py-1 w-16"} value={editFertForm.zygotesNormal ?? fert.zygotesNormal ?? ""} onChange={(e) => setEditFertForm((f) => ({ ...f, zygotesNormal: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div><div><label className="text-xs text-slate-500">Zygotes Abn</label><input type="number" min={0} className={inputClass + " py-1 w-16"} value={editFertForm.zygotesAbnormal ?? fert.zygotesAbnormal ?? ""} onChange={(e) => setEditFertForm((f) => ({ ...f, zygotesAbnormal: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div></div>
+                                    <input type="datetime-local" className={inputClass + " py-1.5"} value={editFertForm.performedAt ? new Date(editFertForm.performedAt).toISOString().slice(0, 16) : (fert.performedAt ? new Date(fert.performedAt).toISOString().slice(0, 16) : "")} onChange={(e) => setEditFertForm((f) => ({ ...f, performedAt: e.target.value ? new Date(e.target.value).toISOString() : null }))} />
+                                    <input className={inputClass + " py-1.5"} placeholder="Notes" value={editFertForm.notes ?? fert.notes ?? ""} onChange={(e) => setEditFertForm((f) => ({ ...f, notes: e.target.value }))} />
+                                    <div className="flex gap-2"><button type="button" onClick={() => handleSaveFertilization(cycle.id, fert.id)} disabled={saveFertLoading} className="text-sm px-2 py-1 rounded bg-blue-700 text-white">Save</button><button type="button" onClick={() => { setEditingFertId(null); setEditFertForm({}); }} className="text-sm px-2 py-1 rounded border border-slate-200">Cancel</button></div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <p className="text-slate-800 capitalize">{fert.fertilizationType} · {fert.performedAt ? formatDate(fert.performedAt) : "—"}</p>
+                                    <p className="text-slate-600 text-xs">Insem: {fert.oocytesInseminated ?? "—"} · Fert: {fert.oocytesFertilized ?? "—"} · Zygotes N: {fert.zygotesNormal ?? "—"} · Abn: {fert.zygotesAbnormal ?? "—"}</p>
+                                    {fert.notes && <p className="text-slate-500 text-xs">{fert.notes}</p>}
+                                    <button type="button" onClick={() => { setEditingFertId(fert.id); setEditFertForm({ fertilizationType: fert.fertilizationType, oocytesInseminated: fert.oocytesInseminated, oocytesFertilized: fert.oocytesFertilized, zygotesNormal: fert.zygotesNormal, zygotesAbnormal: fert.zygotesAbnormal, performedAt: fert.performedAt ?? "", notes: fert.notes ?? "" }); }} className="text-blue-700 text-xs hover:underline">Edit</button>
+                                  </>
+                                )}
+                              </div>
+                            ))}
+                            {showAddFertilization === cycle.id ? (
+                              <form onSubmit={(e) => handleAddFertilization(cycle.id, e)} className="space-y-2">
+                                <select className={inputClass + " py-1.5"} value={addFertForm.fertilizationType} onChange={(e) => setAddFertForm((f) => ({ ...f, fertilizationType: e.target.value }))}><option value="ivf">IVF</option><option value="icsi">ICSI</option><option value="half_icsi">Half ICSI</option></select>
+                                <div className="grid grid-cols-2 gap-1 text-xs"><div><label className="text-slate-500">Inseminated</label><input type="number" min={0} className={inputClass + " py-1"} value={addFertForm.oocytesInseminated} onChange={(e) => setAddFertForm((f) => ({ ...f, oocytesInseminated: e.target.value }))} /></div><div><label className="text-slate-500">Fertilized</label><input type="number" min={0} className={inputClass + " py-1"} value={addFertForm.oocytesFertilized} onChange={(e) => setAddFertForm((f) => ({ ...f, oocytesFertilized: e.target.value }))} /></div><div><label className="text-slate-500">Zygotes normal</label><input type="number" min={0} className={inputClass + " py-1"} value={addFertForm.zygotesNormal} onChange={(e) => setAddFertForm((f) => ({ ...f, zygotesNormal: e.target.value }))} /></div><div><label className="text-slate-500">Zygotes abn</label><input type="number" min={0} className={inputClass + " py-1"} value={addFertForm.zygotesAbnormal} onChange={(e) => setAddFertForm((f) => ({ ...f, zygotesAbnormal: e.target.value }))} /></div></div>
+                                <input type="datetime-local" className={inputClass + " py-1.5"} value={addFertForm.performedAt} onChange={(e) => setAddFertForm((f) => ({ ...f, performedAt: e.target.value }))} />
+                                <input className={inputClass + " py-1.5"} placeholder="Notes" value={addFertForm.notes} onChange={(e) => setAddFertForm((f) => ({ ...f, notes: e.target.value }))} />
+                                <div className="flex gap-2"><button type="button" onClick={() => setShowAddFertilization(null)} className="text-sm px-2 py-1 rounded border border-slate-200">Cancel</button><button type="submit" disabled={addFertLoading} className="text-sm px-2 py-1 rounded bg-blue-700 text-white">Add fertilization</button></div>
+                              </form>
+                            ) : (
+                              <button type="button" onClick={() => setShowAddFertilization(cycle.id)} className="text-sm text-blue-700 font-medium hover:underline">Add fertilization</button>
+                            )}
+                          </div>
+                        </div>
                         <h4 className="font-semibold text-slate-900 mb-2">Embryos</h4>
                         {(cycleEmbryos[cycle.id] ?? []).length === 0 && showAddEmbryo !== cycle.id && (
                           <p className="text-slate-500 text-sm mb-2">No embryos recorded.</p>
@@ -1679,6 +2100,73 @@ export default function PatientDetailClient({
                           </form>
                         ) : (
                           <button type="button" onClick={() => setShowAddEmbryo(cycle.id)} className="text-sm text-blue-700 font-medium hover:underline">Add embryo</button>
+                        )}
+                        <h4 className="font-semibold text-slate-900 mb-2 mt-4">Transfers</h4>
+                        {(cycleTransfers[cycle.id] ?? []).length === 0 && showAddTransfer !== cycle.id && (
+                          <p className="text-slate-500 text-sm mb-2">No transfers recorded.</p>
+                        )}
+                        {(cycleTransfers[cycle.id] ?? []).length > 0 && (cycleTransfers[cycle.id] ?? []).map((tr) => (
+                          <div key={tr.id} className="text-sm mb-2 p-2 bg-slate-50 rounded border border-slate-200">
+                            {editingTransferId === tr.id ? (
+                              <div className="space-y-2">
+                                <input type="date" className={inputClass + " py-1.5"} value={editTransferForm.transferDate ? editTransferForm.transferDate.toString().slice(0, 10) : (tr.transferDate ? new Date(tr.transferDate).toISOString().slice(0, 10) : "")} onChange={(e) => setEditTransferForm((f) => ({ ...f, transferDate: e.target.value }))} />
+                                <select className={inputClass + " py-1.5"} value={editTransferForm.transferType ?? tr.transferType} onChange={(e) => setEditTransferForm((f) => ({ ...f, transferType: e.target.value }))}><option value="fresh">Fresh</option><option value="frozen">Frozen</option></select>
+                                <div className="grid grid-cols-2 gap-1"><div><label className="text-xs text-slate-500"># Transferred</label><input type="number" min={0} className={inputClass + " py-1 w-20"} value={String(editTransferForm.numberEmbryosTransferred ?? tr.numberEmbryosTransferred ?? "")} onChange={(e) => setEditTransferForm((f) => ({ ...f, numberEmbryosTransferred: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div><div><label className="text-xs text-slate-500"># Implanted</label><input type="number" min={0} className={inputClass + " py-1 w-20"} value={String(editTransferForm.numberImplanted ?? tr.numberImplanted ?? "")} onChange={(e) => setEditTransferForm((f) => ({ ...f, numberImplanted: e.target.value === "" ? null : parseInt(e.target.value, 10) }))} /></div></div>
+                                <div><label className="text-xs text-slate-500">Embryos</label><select multiple className={inputClass + " py-1.5 min-h-[80px]"} value={editTransferForm.embryoIds ?? tr.embryoIds ?? []} onChange={(e) => setEditTransferForm((f) => ({ ...f, embryoIds: Array.from(e.target.selectedOptions, (o) => o.value) }))}>{(cycleEmbryos[cycle.id] ?? []).map((emb) => (<option key={emb.id} value={emb.id}>{emb.day ?? "?"} · {emb.grade ?? "—"} ({emb.disposition ?? emb.status})</option>))}</select></div>
+                                <input className={inputClass + " py-1.5"} placeholder="Notes" value={editTransferForm.notes ?? tr.notes ?? ""} onChange={(e) => setEditTransferForm((f) => ({ ...f, notes: e.target.value }))} />
+                                <div className="flex gap-2"><button type="button" onClick={() => handleSaveTransfer(cycle.id, tr.id)} disabled={saveTransferLoading} className="text-sm px-2 py-1 rounded bg-blue-700 text-white">Save</button><button type="button" onClick={() => { setEditingTransferId(null); setEditTransferForm({}); }} className="text-sm px-2 py-1 rounded border border-slate-200">Cancel</button></div>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="text-slate-800 capitalize">{tr.transferType} · {tr.transferDate ? formatDate(tr.transferDate) : "—"}</p>
+                                <p className="text-slate-600 text-xs">Transferred: {tr.numberEmbryosTransferred ?? "—"} · Implanted: {tr.numberImplanted ?? "—"}{((tr.embryoIds ?? []).length > 0) ? ` · ${(tr.embryoIds ?? []).length} embryo(s) linked` : ""}</p>
+                                {tr.notes && <p className="text-slate-500 text-xs">{tr.notes}</p>}
+                                <button type="button" onClick={() => { setEditingTransferId(tr.id); setEditTransferForm({ transferDate: tr.transferDate, transferType: tr.transferType, numberEmbryosTransferred: tr.numberEmbryosTransferred, numberImplanted: tr.numberImplanted, notes: tr.notes ?? "", embryoIds: tr.embryoIds ?? [] }); }} className="text-blue-700 text-xs hover:underline">Edit</button>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                        {showAddTransfer === cycle.id ? (
+                          <form onSubmit={(e) => handleAddTransfer(cycle.id, e)} className="p-3 bg-slate-50 rounded-lg space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div><label className="text-xs font-medium text-slate-600">Transfer date</label><input type="date" className={inputClass + " py-1.5"} value={addTransferForm.transferDate} onChange={(e) => setAddTransferForm((f) => ({ ...f, transferDate: e.target.value }))} required /></div>
+                              <div><label className="text-xs font-medium text-slate-600">Type</label><select className={inputClass + " py-1.5"} value={addTransferForm.transferType} onChange={(e) => setAddTransferForm((f) => ({ ...f, transferType: e.target.value as "fresh" | "frozen" }))}><option value="fresh">Fresh</option><option value="frozen">Frozen</option></select></div>
+                              <div><label className="text-xs font-medium text-slate-600"># Transferred</label><input type="number" min={0} className={inputClass + " py-1.5"} value={addTransferForm.numberEmbryosTransferred} onChange={(e) => setAddTransferForm((f) => ({ ...f, numberEmbryosTransferred: e.target.value }))} /></div>
+                              <div><label className="text-xs font-medium text-slate-600"># Implanted</label><input type="number" min={0} className={inputClass + " py-1.5"} value={addTransferForm.numberImplanted} onChange={(e) => setAddTransferForm((f) => ({ ...f, numberImplanted: e.target.value }))} /></div>
+                            </div>
+                            <div><label className="text-xs font-medium text-slate-600">Link embryos (optional)</label><select multiple className={inputClass + " py-1.5 min-h-[80px] w-full"} value={addTransferForm.embryoIds} onChange={(e) => setAddTransferForm((f) => ({ ...f, embryoIds: Array.from(e.target.selectedOptions, (o) => o.value) }))}>{(cycleEmbryos[cycle.id] ?? []).map((emb) => (<option key={emb.id} value={emb.id}>{emb.day ?? "?"} · {emb.grade ?? "—"} ({emb.disposition ?? emb.status})</option>))}</select></div>
+                            <input className={inputClass + " py-1.5"} placeholder="Notes" value={addTransferForm.notes} onChange={(e) => setAddTransferForm((f) => ({ ...f, notes: e.target.value }))} />
+                            <div className="flex gap-2"><button type="button" onClick={() => setShowAddTransfer(null)} className="text-sm px-2 py-1 rounded border border-slate-200">Cancel</button><button type="submit" disabled={addTransferLoading} className="text-sm px-2 py-1 rounded bg-blue-700 text-white">Add transfer</button></div>
+                          </form>
+                        ) : (
+                          <button type="button" onClick={() => setShowAddTransfer(cycle.id)} className="text-sm text-blue-700 font-medium hover:underline">Add transfer</button>
+                        )}
+                        <h4 className="font-semibold text-slate-900 mb-2 mt-4">Cryopreservation</h4>
+                        {(cycleCryo[cycle.id] ?? []).length === 0 && showAddCryo !== cycle.id && (
+                          <p className="text-slate-500 text-sm mb-2">No cryo straws recorded.</p>
+                        )}
+                        {(cycleCryo[cycle.id] ?? []).length > 0 && (cycleCryo[cycle.id] ?? []).map((straw) => {
+                          const emb = (cycleEmbryos[cycle.id] ?? []).find((e) => e.id === straw.embryoId);
+                          return (
+                            <div key={straw.id} className="text-sm mb-2 p-2 bg-slate-50 rounded border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-slate-800">{straw.strawLabel || "Straw"} · Embryo: {emb ? `${emb.day ?? "?"} · ${emb.grade ?? "—"}` : straw.embryoId.slice(0, 8)} · {straw.storageLocation || "—"}</span>
+                              <span className="text-slate-600 text-xs">Frozen: {straw.frozenAt ? formatDate(straw.frozenAt) : "—"}{straw.thawedAt ? ` · Thawed: ${formatDate(straw.thawedAt)}` : ""}</span>
+                              {!straw.thawedAt && (
+                                <button type="button" onClick={() => handleRecordThaw(cycle.id, straw.id)} disabled={recordingThawStrawId === straw.id} className="text-xs px-2 py-1 rounded bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50">Record thaw</button>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {showAddCryo === cycle.id ? (
+                          <form onSubmit={(e) => handleAddCryoStraw(cycle.id, e)} className="p-3 bg-slate-50 rounded-lg space-y-2">
+                            <div><label className="text-xs font-medium text-slate-600">Embryo</label><select className={inputClass + " py-1.5 w-full"} value={addCryoForm.embryoId} onChange={(e) => setAddCryoForm((f) => ({ ...f, embryoId: e.target.value }))} required>{(cycleEmbryos[cycle.id] ?? []).map((emb) => (<option key={emb.id} value={emb.id}>{emb.day ?? "?"} · {emb.grade ?? "—"} ({emb.disposition ?? emb.status})</option>))}</select></div>
+                            <div className="grid grid-cols-2 gap-2"><div><label className="text-xs font-medium text-slate-600">Straw label</label><input className={inputClass + " py-1.5"} value={addCryoForm.strawLabel} onChange={(e) => setAddCryoForm((f) => ({ ...f, strawLabel: e.target.value }))} placeholder="e.g. A1" /></div><div><label className="text-xs font-medium text-slate-600">Storage location</label><input className={inputClass + " py-1.5"} value={addCryoForm.storageLocation} onChange={(e) => setAddCryoForm((f) => ({ ...f, storageLocation: e.target.value }))} placeholder="Tank/cane" /></div></div>
+                            <div><label className="text-xs font-medium text-slate-600">Frozen at</label><input type="datetime-local" className={inputClass + " py-1.5 w-full"} value={addCryoForm.frozenAt} onChange={(e) => setAddCryoForm((f) => ({ ...f, frozenAt: e.target.value }))} required /></div>
+                            <input className={inputClass + " py-1.5"} placeholder="Notes" value={addCryoForm.notes} onChange={(e) => setAddCryoForm((f) => ({ ...f, notes: e.target.value }))} />
+                            <div className="flex gap-2"><button type="button" onClick={() => setShowAddCryo(null)} className="text-sm px-2 py-1 rounded border border-slate-200">Cancel</button><button type="submit" disabled={addCryoLoading} className="text-sm px-2 py-1 rounded bg-blue-700 text-white">Add straw</button></div>
+                          </form>
+                        ) : (
+                          <button type="button" onClick={() => setShowAddCryo(cycle.id)} className="text-sm text-blue-700 font-medium hover:underline">Add cryo straw</button>
                         )}
                       </div>
                     )}

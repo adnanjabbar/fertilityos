@@ -1,19 +1,17 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { embryos, ivfCycles } from "@/db/schema";
+import { ivfCycles, oocyteRetrievals } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
-const createEmbryoSchema = z.object({
-  fertilizationEventId: z.string().uuid().optional().nullable(),
-  day: z.string().max(16).optional().nullable(),
-  dayCreated: z.number().int().min(0).optional().nullable(),
-  grade: z.string().max(64).optional().nullable(),
-  gradeDetail: z.string().max(64).optional().nullable(),
-  status: z.string().max(32).optional(),
-  source: z.enum(["fresh", "frozen", "donor"]).optional(),
-  disposition: z.enum(["culture", "transferred", "frozen", "discarded", "biopsied"]).optional(),
+const createOpuSchema = z.object({
+  retrievalDate: z.string().optional().nullable(),
+  oocytesTotal: z.number().int().min(0).optional().nullable(),
+  oocytesMature: z.number().int().min(0).optional().nullable(),
+  oocytesImmature: z.number().int().min(0).optional().nullable(),
+  oocytesMii: z.number().int().min(0).optional().nullable(),
+  oocytesGv: z.number().int().min(0).optional().nullable(),
   notes: z.string().optional().nullable(),
 });
 
@@ -44,11 +42,11 @@ export async function GET(
 
   const list = await db
     .select()
-    .from(embryos)
+    .from(oocyteRetrievals)
     .where(
       and(
-        eq(embryos.cycleId, cycleId),
-        eq(embryos.tenantId, session.user.tenantId)
+        eq(oocyteRetrievals.cycleId, cycleId),
+        eq(oocyteRetrievals.tenantId, session.user.tenantId)
       )
     );
 
@@ -87,7 +85,7 @@ export async function POST(
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = createEmbryoSchema.safeParse(body);
+  const parsed = createOpuSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
@@ -98,18 +96,17 @@ export async function POST(
   const data = parsed.data;
 
   const [created] = await db
-    .insert(embryos)
+    .insert(oocyteRetrievals)
     .values({
       tenantId: session.user.tenantId,
       cycleId,
-      fertilizationEventId: data.fertilizationEventId || null,
-      day: data.day?.trim() || null,
-      dayCreated: data.dayCreated ?? null,
-      grade: data.grade?.trim() || null,
-      gradeDetail: data.gradeDetail?.trim() || null,
-      status: (data.status?.trim() || "fresh").toLowerCase(),
-      source: data.source ?? "fresh",
-      disposition: data.disposition ?? "culture",
+      retrievalDate: data.retrievalDate ? new Date(data.retrievalDate) : null,
+      performedById: session.user.id,
+      oocytesTotal: data.oocytesTotal ?? null,
+      oocytesMature: data.oocytesMature ?? null,
+      oocytesImmature: data.oocytesImmature ?? null,
+      oocytesMii: data.oocytesMii ?? null,
+      oocytesGv: data.oocytesGv ?? null,
       notes: data.notes?.trim() || null,
     })
     .returning();
