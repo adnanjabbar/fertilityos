@@ -32,9 +32,9 @@ Other sensitive actions (e.g. export, bulk operations) should be wired to `logAu
 
 - **Retention:** Clinical and operational data are retained according to tenant and jurisdictional requirements. FertilityOS does not auto-delete patient or audit data by default.
 - **Deletion:** Admins can delete patients (and related data) from the app; this should be done in line with clinic policy and legal obligations. Audit logs may be retained for compliance even after related entity deletion.
-- **GDPR-style rights (optional):**
-  - **Export my data:** Can be implemented for the patient portal by aggregating the patient’s own profile, appointments, invoices, and documents into a downloadable package (e.g. JSON or PDF).
-  - **Delete my data:** Can be implemented as a request flow (e.g. request form + admin approval and execution) that deletes or anonymizes the patient record and linked PII, again subject to retention of audit or legally required data.
+- **GDPR-style rights (implemented):**
+  - **Export my data:** Implemented in the patient portal. Patients can request a download of their data (profile, appointments, invoices, prescriptions) via "Export my data"; API `GET /api/portal/export-my-data` returns a JSON attachment. Exports can optionally be audit-logged.
+  - **Delete my data:** Implemented as a request flow. The patient can submit "Request account deletion" in the portal; this creates a record in `patient_data_requests` (type: delete, status: pending). Clinic staff see pending requests in the app (e.g. Settings > Data requests) and can mark them completed. Actual deletion or anonymization is done by staff per clinic policy (see admin patient deletion in the app).
 
 ## Outbound Email and Branding
 

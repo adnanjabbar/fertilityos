@@ -105,6 +105,7 @@ export default async function AppLayout({
             { href: "/app/settings/locations", labelKey: "locations", iconKey: "locations" },
             { href: "/app/settings/integrations", labelKey: "integrations", iconKey: "integrations" },
             { href: "/app/settings/lab-integration", labelKey: "labIntegration", iconKey: "labIntegration" },
+            { href: "/app/settings/data-requests", labelKey: "dataRequests", iconKey: "compliance" },
           ],
         },
       ]
@@ -172,6 +173,7 @@ export default async function AppLayout({
     locations: t("locations"),
     integrations: t("integrations"),
     labIntegration: t("labIntegration"),
+    dataRequests: t("dataRequests"),
     securityReport: t("securityReport"),
     superDashboard: t("superDashboard"),
     settings: t("settings"),

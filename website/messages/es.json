@@ -336,6 +336,7 @@
       "locations": "Ubicaciones",
       "integrations": "Integraciones",
       "labIntegration": "Integración de laboratorio",
+      "dataRequests": "Solicitudes de datos",
       "settings": "Configuración",
       "securityReport": "Informe de seguridad",
       "superDashboard": "Super panel",

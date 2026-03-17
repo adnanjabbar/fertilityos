@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { patients } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import DataPrivacyBlock from "./DataPrivacyBlock";
+import SetPasswordBlock from "./SetPasswordBlock";
 
 function formatDate(d: Date | null) {
   if (!d) return "—";
@@ -57,6 +59,8 @@ export default async function PortalProfilePage() {
         </dl>
       </div>
       <p className="text-sm text-slate-500 mt-4">To update your details, please contact your clinic.</p>
+      <SetPasswordBlock />
+      <DataPrivacyBlock />
     </div>
   );
 }

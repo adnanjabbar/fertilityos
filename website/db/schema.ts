@@ -214,6 +214,7 @@ export const patients = pgTable(
     nationalIdType: varchar("national_id_type", { length: 32 }),
     nationalIdValue: varchar("national_id_value", { length: 255 }),
     phoneVerifiedAt: timestamp("phone_verified_at", { withTimezone: true }),
+    passwordHash: text("password_hash"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -569,6 +570,52 @@ export const patientPortalTokens = pgTable("patient_portal_tokens", {
   usedAt: timestamp("used_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const patientPasswordTokens = pgTable(
+  "patient_password_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => patients.id, { onDelete: "cascade" }),
+    token: varchar("token", { length: 64 }).notNull(),
+    type: varchar("type", { length: 16 }).notNull().default("set"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("patient_password_tokens_token_idx").on(table.token),
+    index("patient_password_tokens_patient_idx").on(table.patientId),
+    index("patient_password_tokens_expires_idx").on(table.expiresAt),
+  ]
+);
+
+export const patientDataRequests = pgTable(
+  "patient_data_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => patients.id, { onDelete: "cascade" }),
+    type: varchar("type", { length: 16 }).notNull(),
+    status: varchar("status", { length: 32 }).notNull().default("pending"),
+    requestedAt: timestamp("requested_at", { withTimezone: true }).defaultNow().notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    completedByUserId: uuid("completed_by_user_id").references(() => users.id, { onDelete: "set null" }),
+  },
+  (table) => [
+    index("patient_data_requests_tenant_idx").on(table.tenantId),
+    index("patient_data_requests_patient_idx").on(table.patientId),
+    index("patient_data_requests_status_idx").on(table.status),
+  ]
+);
 
 export const patientOtpCodes = pgTable(
   "patient_otp_codes",

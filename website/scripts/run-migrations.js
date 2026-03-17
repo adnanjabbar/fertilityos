@@ -68,6 +68,8 @@ const migrations = [
   "0038_embryos_transfers.sql",
   "0039_cryo_straws.sql",
   "0040_whitelabel_branding.sql",
+  "0041_patient_password.sql",
+  "0042_patient_data_requests.sql",
 ];
 
 async function main() {

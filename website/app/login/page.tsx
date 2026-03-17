@@ -96,7 +96,7 @@ function LoginForm() {
               id="email"
               type="text"
               autoComplete="username"
-              placeholder="you@yourclinic.com or demo"
+              placeholder="e.g. demo@example.com (password: demo)"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={inputClass}

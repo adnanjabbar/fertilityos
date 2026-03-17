@@ -11,9 +11,9 @@ FertilityOS can be installed as a Progressive Web App (PWA) on mobile and deskto
 
 ## Icons
 
-The manifest references `/icon-192.png` and `/icon-512.png` in the site’s `public` folder. Add these PNGs (192×192 and 512×512) for installability and app switcher icons. Until they exist, some browsers may still allow install with a generic icon or skip icons.
+The manifest references `/icon-192.png` and `/icon-512.png` in the site’s `public` folder. Icons are included in `public/` (icon-512.png is used for both sizes; browsers scale for 192). Replace with your own 192×192 and 512×512 PNGs for custom branding.
 
-Suggested content: FertilityOS logo or “F” mark on a blue–teal gradient background, with safe padding for maskable icons.
+Suggested content (if replacing): FertilityOS logo or “F” mark on a blue–teal gradient background, with safe padding for maskable icons.
 
 ## Responsive and Touch
 

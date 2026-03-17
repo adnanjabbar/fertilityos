@@ -116,7 +116,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const email = String(credentials.email).trim().toLowerCase();
+        let email = String(credentials.email).trim().toLowerCase();
+        if (email === "demo") email = "demo@example.com";
         const password = String(credentials.password);
 
         const hdrs = await headers();
@@ -124,6 +125,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const { allowed } = rateLimitAuth(`${ip}:${email}`);
         if (!allowed) {
           throw new Error("Too many sign-in attempts. Try again in 15 minutes.");
+        }
+
+        const tenantSlug = hdrs.get("x-tenant-slug");
+        const conditions = [eq(users.email, email)];
+        if (tenantSlug) {
+          const [tenant] = await db
+            .select({ id: tenants.id })
+            .from(tenants)
+            .where(eq(tenants.slug, tenantSlug))
+            .limit(1);
+          if (tenant) conditions.push(eq(users.tenantId, tenant.id));
         }
 
         const [row] = await db
@@ -138,7 +150,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           })
           .from(users)
           .innerJoin(tenants, eq(users.tenantId, tenants.id))
-          .where(eq(users.email, email))
+          .where(and(...conditions))
           .limit(1);
 
         if (!row || !row.passwordHash) return null;
@@ -210,6 +222,53 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           tenantId: row.tenantId,
           roleSlug: "patient",
           patientId: row.patientId,
+        };
+      },
+    }),
+    Credentials({
+      id: "portal-password",
+      name: "Portal email + password",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        const email = String(credentials.email).trim().toLowerCase();
+        const password = String(credentials.password);
+
+        const hdrs = await headers();
+        const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";
+        const { allowed } = rateLimitAuth(`${ip}:${email}`);
+        if (!allowed) {
+          throw new Error("Too many sign-in attempts. Try again in 15 minutes.");
+        }
+
+        const [row] = await db
+          .select({
+            id: patients.id,
+            email: patients.email,
+            firstName: patients.firstName,
+            lastName: patients.lastName,
+            tenantId: patients.tenantId,
+            passwordHash: patients.passwordHash,
+          })
+          .from(patients)
+          .where(eq(patients.email, email))
+          .limit(1);
+
+        if (!row || !row.passwordHash) return null;
+        const ok = await bcrypt.compare(password, row.passwordHash);
+        if (!ok) return null;
+
+        const name = [row.firstName, row.lastName].filter(Boolean).join(" ") || "Patient";
+        return {
+          id: row.id,
+          email: row.email ?? "",
+          name,
+          tenantId: row.tenantId,
+          roleSlug: "patient",
+          patientId: row.id,
         };
       },
     }),

@@ -31,7 +31,7 @@ if (!DATABASE_URL) {
   process.exit(1);
 }
 
-const DEMO_EMAIL = "demo";
+const DEMO_EMAIL = "demo@example.com";
 const DEMO_PASSWORD = "demo";
 const DEMO_TENANT_SLUG = "demo-clinic";
 const DEMO_TENANT_NAME = "Demo Clinic";
@@ -63,7 +63,7 @@ async function main() {
     }
 
     const userRes = await client.query(
-      "SELECT id FROM users WHERE tenant_id = $1 AND email = $2 LIMIT 1",
+      "SELECT id FROM users WHERE tenant_id = $1 AND (email = $2 OR email = 'demo') LIMIT 1",
       [tenantId, DEMO_EMAIL]
     );
     const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
@@ -76,13 +76,13 @@ async function main() {
       console.log("Created demo user:", DEMO_EMAIL);
     } else {
       await client.query(
-        "UPDATE users SET password_hash = $1, full_name = $2 WHERE tenant_id = $3 AND email = $4",
-        [passwordHash, "Demo User", tenantId, DEMO_EMAIL]
+        "UPDATE users SET email = $1, password_hash = $2, full_name = $3 WHERE id = $4",
+        [DEMO_EMAIL, passwordHash, "Demo User", userRes.rows[0].id]
       );
-      console.log("Updated demo user password:", DEMO_EMAIL);
+      console.log("Updated demo user:", DEMO_EMAIL);
     }
 
-    console.log("\nDemo login: " + DEMO_EMAIL + " / " + DEMO_PASSWORD + "\n(Sign in at /login)");
+    console.log("\nDemo login: " + DEMO_EMAIL + " / " + DEMO_PASSWORD + "\n(Sign in at /login or demo-clinic subdomain)");
   } catch (e) {
     console.error("Seed failed:", e.message);
     process.exit(1);

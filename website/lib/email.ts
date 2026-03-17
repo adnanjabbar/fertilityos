@@ -89,3 +89,41 @@ export function patientPortalMagicLinkContent(params: {
   `.trim();
   return { subject, html, text };
 }
+
+export function patientPortalPasswordResetContent(params: {
+  resetUrl: string;
+  patientFirstName?: string;
+}): { subject: string; html: string; text: string } {
+  const { resetUrl, patientFirstName } = params;
+  const name = patientFirstName ?? "there";
+  const subject = "Reset your patient portal password";
+  const text = `Hi ${name},\n\nClick the link below to set a new password for your patient portal:\n\n${resetUrl}\n\nThis link expires in 1 hour. If you didn't request it, you can ignore this email.\n\n— FertilityOS`;
+  const html = `
+    <p>Hi ${name},</p>
+    <p>Click the link below to set a new password for your patient portal:</p>
+    <p><a href="${resetUrl}" style="color: #2563eb;">Set new password</a></p>
+    <p>Or copy and paste: ${resetUrl}</p>
+    <p style="color: #64748b; font-size: 14px;">This link expires in 1 hour. If you didn't request it, you can ignore this email.</p>
+    <p>— FertilityOS</p>
+  `.trim();
+  return { subject, html, text };
+}
+
+export function patientPortalSetPasswordContent(params: {
+  setPasswordUrl: string;
+  patientFirstName?: string;
+}): { subject: string; html: string; text: string } {
+  const { setPasswordUrl, patientFirstName } = params;
+  const name = patientFirstName ?? "there";
+  const subject = "Set your patient portal password";
+  const text = `Hi ${name},\n\nClick the link below to set a password for your patient portal. You can then sign in with your email and password anytime:\n\n${setPasswordUrl}\n\nThis link expires in 24 hours.\n\n— FertilityOS`;
+  const html = `
+    <p>Hi ${name},</p>
+    <p>Click the link below to set a password for your patient portal. You can then sign in with your email and password anytime:</p>
+    <p><a href="${setPasswordUrl}" style="color: #2563eb;">Set password</a></p>
+    <p>Or copy and paste: ${setPasswordUrl}</p>
+    <p style="color: #64748b; font-size: 14px;">This link expires in 24 hours.</p>
+    <p>— FertilityOS</p>
+  `.trim();
+  return { subject, html, text };
+}

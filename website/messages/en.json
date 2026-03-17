@@ -337,6 +337,7 @@
       "locations": "Locations",
       "integrations": "Integrations",
       "labIntegration": "Lab integration",
+      "dataRequests": "Data requests",
       "settings": "Settings",
       "superDashboard": "Super Dashboard",
       "logOut": "Log out",

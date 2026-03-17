@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
 const authPagePaths = ["/login", "/register"];
-const portalPublicPaths = ["/portal/login", "/portal/verify"];
+const portalPublicPaths = ["/portal/login", "/portal/verify", "/portal/set-password", "/portal/reset-password"];
 const ROOT_DOMAIN = "thefertilityos.com";
 
 function getSubdomainSlug(hostname: string): string | null {

@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/db";
 import { tenants, users } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
-const DEMO_EMAIL = "demo";
+const DEMO_EMAIL = "demo@example.com";
 const DEMO_PASSWORD = "demo";
 const DEMO_TENANT_SLUG = "demo-clinic";
 const DEMO_TENANT_NAME = "Demo Clinic";
@@ -40,7 +40,12 @@ async function runSeed() {
   const [existingUser] = await db
     .select({ id: users.id })
     .from(users)
-    .where(and(eq(users.tenantId, tenantId), eq(users.email, DEMO_EMAIL)))
+    .where(
+      and(
+        eq(users.tenantId, tenantId),
+        inArray(users.email, [DEMO_EMAIL, "demo"])
+      )
+    )
     .limit(1);
 
   if (!existingUser) {
@@ -54,7 +59,7 @@ async function runSeed() {
   } else {
     await db
       .update(users)
-      .set({ passwordHash, fullName: "Demo User" })
+      .set({ email: DEMO_EMAIL, passwordHash, fullName: "Demo User" })
       .where(eq(users.id, existingUser.id));
   }
 }
@@ -83,7 +88,7 @@ export async function GET(request: Request) {
       ? `${request.headers.get("x-forwarded-proto")}://${request.headers.get("host")}`
       : "https://www.thefertilityos.com";
     return new NextResponse(
-      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Demo ready</title></head><body style="font-family:sans-serif;max-width:480px;margin:3rem auto;padding:1rem;"><h1>Demo account ready</h1><p>You can now sign in with:</p><p><strong>Username:</strong> demo<br><strong>Password:</strong> demo</p><p><a href="${base}/login" style="display:inline-block;background:#2563eb;color:white;padding:0.5rem 1rem;text-decoration:none;border-radius:0.5rem;">Go to Sign in</a></p></body></html>`,
+      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Demo ready</title></head><body style="font-family:sans-serif;max-width:480px;margin:3rem auto;padding:1rem;"><h1>Demo account ready</h1><p>You can now sign in with:</p><p><strong>Email:</strong> demo@example.com<br><strong>Password:</strong> demo</p><p><a href="${base}/login" style="display:inline-block;background:#2563eb;color:white;padding:0.5rem 1rem;text-decoration:none;border-radius:0.5rem;">Go to Sign in</a></p></body></html>`,
       { headers: { "Content-Type": "text/html" } }
     );
   } catch (e) {
@@ -109,7 +114,7 @@ export async function POST(request: Request) {
     await runSeed();
     return NextResponse.json({
       success: true,
-      message: "Demo account ready. Login: demo / demo",
+      message: "Demo account ready. Login: demo@example.com / demo",
     });
   } catch (e) {
     console.error("seed-demo error:", e);
