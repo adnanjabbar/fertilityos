@@ -32,7 +32,7 @@ function LoginForm() {
         redirect: false,
       });
       if (res?.error) {
-        setError("Invalid email or password.");
+        setError(res.error === "Too many sign-in attempts. Try again in 15 minutes." ? res.error : "Invalid email or password.");
         return;
       }
       router.push(callbackUrl);
@@ -159,7 +159,11 @@ function LoginForm() {
           )}
         </form>
 
-        <p className="text-center text-slate-600 mt-6">
+        <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center text-sm text-slate-600">
+          <span className="font-medium text-slate-700">Demo:</span> demo@example.com / demo
+          <span className="block mt-1 text-xs text-slate-500">(Run npm run db:seed-demo if this account does not exist.)</span>
+        </div>
+        <p className="text-center text-slate-600 mt-4">
           Don’t have an account?{" "}
           <Link href="/register" className="font-semibold text-blue-700 hover:underline">
             Register your clinic

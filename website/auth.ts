@@ -117,7 +117,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
         let email = String(credentials.email).trim().toLowerCase();
-        if (email === "demo") email = "demo@example.com";
+        if (email === "demo" || email === "demo@example") {
+          email = "demo@example.com";
+        }
         const password = String(credentials.password);
 
         const hdrs = await headers();
@@ -127,7 +129,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("Too many sign-in attempts. Try again in 15 minutes.");
         }
 
-        const tenantSlug = hdrs.get("x-tenant-slug");
+        let tenantSlug = hdrs.get("x-tenant-slug");
+        if (!tenantSlug && email === "demo@example.com") {
+          tenantSlug = "demo-clinic";
+        }
         const conditions = [eq(users.email, email)];
         if (tenantSlug) {
           const [tenant] = await db
