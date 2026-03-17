@@ -52,10 +52,10 @@ Add `AUTH_TRUST_HOST=true` and `AUTH_URL=https://www.thefertilityos.com` (or you
   See **`Infrastructure/digitalocean-database-setup.md`** for full step-by-step instructions (Option A or B).
 - **Demo account (optional):**  
   - **CLI:** From `website/` run `npm run db:seed-demo` (with `DATABASE_URL` set).  
-  - **API (e.g. production):** Set `SEED_DEMO_SECRET` in env, then `POST /api/admin/seed-demo?secret=YOUR_SEED_DEMO_SECRET` (or header `x-seed-secret`).  
+  - **API (e.g. production):** Set `SEED_DEMO_SECRET` in env, then open **GET** `https://www.thefertilityos.com/api/admin/seed-demo?secret=YOUR_SEED_DEMO_SECRET` in the browser (or `POST` with the same query or header `x-seed-secret`). This creates the demo user in the **production** database so login at www.thefertilityos.com works.  
   **Login:** `demo@thefertilityos.com` / `demo`.
 
-- **Super Admin (platform owner dashboard):** Run migrations including `0003_super_admin.sql`, then from `website/` run `npm run db:seed-super-admin`. Login: `super@thefertilityos.com` / `superadmin` (or set `SUPER_ADMIN_PASSWORD` in .env). Access **Super Dashboard** at `/app/super` for platform-wide stats (clinics, users, invitations, module status).
+- **Super Admin (platform owner dashboard):** Run migrations including `0003_super_admin.sql`, then from `website/` run `npm run db:seed-super-admin` (with `DATABASE_URL` set; use production URL to seed production). Login: `super@thefertilityos.com` / `superadmin` (or set `SUPER_ADMIN_PASSWORD` in .env). Access **Super Dashboard** at `/app/super`.
 
 ## For development and agents
 
