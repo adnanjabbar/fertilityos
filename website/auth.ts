@@ -120,7 +120,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (email === "demo" || email === "demo@example" || email === "demo@example.com") {
           email = "thefertilityos@gmail.com";
         }
-        const password = String(credentials.password);
+        const password = String(credentials.password ?? "").trim();
 
         const hdrs = await headers();
         const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";

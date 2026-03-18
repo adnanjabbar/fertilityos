@@ -66,9 +66,36 @@ async function runSeed() {
   });
 }
 
+/** Check if demo user exists and password matches (read-only). Same secret. */
+async function checkDemoUserExists(): Promise<{
+  exists: boolean;
+  tenantSlug?: string;
+  passwordOk: boolean;
+}> {
+  const [row] = await db
+    .select({
+      tenantSlug: tenants.slug,
+      passwordHash: users.passwordHash,
+    })
+    .from(users)
+    .innerJoin(tenants, eq(users.tenantId, tenants.id))
+    .where(eq(users.email, DEMO_EMAIL))
+    .limit(1);
+  if (!row?.passwordHash) {
+    return { exists: false, passwordOk: false };
+  }
+  const passwordOk = await bcrypt.compare(DEMO_PASSWORD, row.passwordHash);
+  return {
+    exists: true,
+    tenantSlug: row.tenantSlug ?? undefined,
+    passwordOk,
+  };
+}
+
 /**
  * GET /api/admin/seed-demo?secret=YOUR_SECRET
  * Run the demo seed by opening this URL in your browser. No terminal or PuTTY needed.
+ * Add &check=1 to only verify if demo user exists (does not run seed).
  */
 export async function GET(request: Request) {
   if (!process.env.SEED_DEMO_SECRET) {
@@ -83,6 +110,25 @@ export async function GET(request: Request) {
       "<!DOCTYPE html><html><body><h1>Forbidden</h1><p>Wrong or missing secret. Use: ?secret=YOUR_SEED_DEMO_SECRET</p></body></html>",
       { status: 403, headers: { "Content-Type": "text/html" } }
     );
+  }
+  const url = new URL(request.url);
+  if (url.searchParams.get("check") === "1") {
+    try {
+      const { exists, tenantSlug, passwordOk } = await checkDemoUserExists();
+      const lines = [
+        `<strong>Demo user (${DEMO_EMAIL}) in database:</strong> ${exists ? "YES" : "NO"}`,
+        exists && tenantSlug ? `Tenant: ${tenantSlug}` : "",
+        exists ? `<strong>Password "demo" matches hash:</strong> ${passwordOk ? "YES" : "NO"}` : "",
+      ].filter(Boolean);
+      const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Demo check</title></head><body style="font-family:sans-serif;max-width:480px;margin:3rem auto;padding:1rem;"><h1>Demo user check</h1><p>${lines.join("</p><p>")}</p><p>${!exists ? "Run the seed without &check=1 to create the user." : !passwordOk ? "Re-run the seed (without &check=1) to reset the password." : "You can try signing in at /login."}</p></body></html>`;
+      return new NextResponse(html, { headers: { "Content-Type": "text/html" } });
+    } catch (e) {
+      console.error("seed-demo check error:", e);
+      return new NextResponse(
+        `<!DOCTYPE html><html><body><h1>Error</h1><p>${e instanceof Error ? e.message : "Check failed"}</p></body></html>`,
+        { status: 500, headers: { "Content-Type": "text/html" } }
+      );
+    }
   }
   try {
     await runSeed();
