@@ -40,6 +40,16 @@ After the app has finished redeploying:
 
 ---
 
+## If login still says "Invalid email or password"
+
+1. Open the seed URL again: `https://www.thefertilityos.com/api/admin/seed-demo?secret=YOUR_SECRET`
+2. You **must** see the page titled **"Demo account ready"** (with Email: thefertilityos@gmail.com, Password: demo).  
+   - If you see **"Seed not configured"** → `SEED_DEMO_SECRET` is not set in DigitalOcean. Add it and redeploy, then try the URL again.  
+   - If you see **"Forbidden"** → the `?secret=` value does not match `SEED_DEMO_SECRET`. Copy the value from DigitalOcean and try again.  
+3. After you see "Demo account ready", try signing in again with **thefertilityos@gmail.com** / **demo**.
+
+---
+
 ## Summary
 
 - **No PuTTY** – not needed.

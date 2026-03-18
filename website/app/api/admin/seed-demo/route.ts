@@ -90,7 +90,7 @@ export async function GET(request: Request) {
       ? `${request.headers.get("x-forwarded-proto")}://${request.headers.get("host")}`
       : "https://www.thefertilityos.com";
     return new NextResponse(
-      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Demo ready</title></head><body style="font-family:sans-serif;max-width:480px;margin:3rem auto;padding:1rem;"><h1>Demo account ready</h1><p>You can now sign in with:</p><p><strong>Email:</strong> demo@thefertilityos.com<br><strong>Password:</strong> demo</p><p><a href="${base}/login" style="display:inline-block;background:#2563eb;color:white;padding:0.5rem 1rem;text-decoration:none;border-radius:0.5rem;">Go to Sign in</a></p></body></html>`,
+      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Demo ready</title></head><body style="font-family:sans-serif;max-width:480px;margin:3rem auto;padding:1rem;"><h1>Demo account ready</h1><p>You can now sign in with:</p><p><strong>Email:</strong> thefertilityos@gmail.com<br><strong>Password:</strong> demo</p><p><a href="${base}/login" style="display:inline-block;background:#2563eb;color:white;padding:0.5rem 1rem;text-decoration:none;border-radius:0.5rem;">Go to Sign in</a></p></body></html>`,
       { headers: { "Content-Type": "text/html" } }
     );
   } catch (e) {
