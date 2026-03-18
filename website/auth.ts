@@ -109,6 +109,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         ]
       : []),
     Credentials({
+      id: "credentials",
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
@@ -178,6 +179,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!row || !row.passwordHash) return null;
         const ok = await bcrypt.compare(password, row.passwordHash);
+        if (isDemoEmail) {
+          console.log("[auth] demo login", { hasRow: true, passwordLen: password.length, passwordOk: ok });
+        }
         if (!ok) {
           void logAudit({
             tenantId: row.tenantId,
