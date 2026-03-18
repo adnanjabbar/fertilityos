@@ -129,60 +129,52 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("Too many sign-in attempts. Try again in 15 minutes.");
         }
 
-        const conditions = [eq(users.email, email)];
         const tenantSlug = hdrs.get("x-tenant-slug");
         const isDemoEmail = email === "thefertilityos@gmail.com";
-        if (!isDemoEmail && tenantSlug) {
-          const [tenant] = await db
-            .select({ id: tenants.id })
-            .from(tenants)
-            .where(eq(tenants.slug, tenantSlug))
-            .limit(1);
-          if (tenant) conditions.push(eq(users.tenantId, tenant.id));
-        } else if (isDemoEmail) {
-          // Prefer demo-clinic tenant so correct clinic loads; fall back to any tenant
-          const [demoTenant] = await db
-            .select({ id: tenants.id })
-            .from(tenants)
-            .where(eq(tenants.slug, "demo-clinic"))
-            .limit(1);
-          if (demoTenant) conditions.push(eq(users.tenantId, demoTenant.id));
-        }
 
-        let row = await db
-          .select({
-            id: users.id,
-            email: users.email,
-            fullName: users.fullName,
-            passwordHash: users.passwordHash,
-            tenantId: users.tenantId,
-            roleSlug: users.roleSlug,
-            tenantName: tenants.name,
-          })
-          .from(users)
-          .innerJoin(tenants, eq(users.tenantId, tenants.id))
-          .where(and(...conditions))
-          .limit(1)
-          .then((rows) => rows[0]);
-
-        // Demo user: if not found in demo-clinic, try any tenant (handles seed in different tenant)
-        if (isDemoEmail && !row) {
-          row = await db
-            .select({
-              id: users.id,
-              email: users.email,
-              fullName: users.fullName,
-              passwordHash: users.passwordHash,
-              tenantId: users.tenantId,
-              roleSlug: users.roleSlug,
-              tenantName: tenants.name,
-            })
-            .from(users)
-            .innerJoin(tenants, eq(users.tenantId, tenants.id))
-            .where(eq(users.email, email))
-            .limit(1)
-            .then((rows) => rows[0]);
-        }
+        // Demo user: single lookup by email only (same as seed-demo check) so login always finds them
+        const row = isDemoEmail
+          ? await db
+              .select({
+                id: users.id,
+                email: users.email,
+                fullName: users.fullName,
+                passwordHash: users.passwordHash,
+                tenantId: users.tenantId,
+                roleSlug: users.roleSlug,
+                tenantName: tenants.name,
+              })
+              .from(users)
+              .innerJoin(tenants, eq(users.tenantId, tenants.id))
+              .where(eq(users.email, email))
+              .limit(1)
+              .then((rows) => rows[0])
+          : await (async () => {
+              const conditions = [eq(users.email, email)];
+              if (tenantSlug) {
+                const [tenant] = await db
+                  .select({ id: tenants.id })
+                  .from(tenants)
+                  .where(eq(tenants.slug, tenantSlug))
+                  .limit(1);
+                if (tenant) conditions.push(eq(users.tenantId, tenant.id));
+              }
+              return db
+                .select({
+                  id: users.id,
+                  email: users.email,
+                  fullName: users.fullName,
+                  passwordHash: users.passwordHash,
+                  tenantId: users.tenantId,
+                  roleSlug: users.roleSlug,
+                  tenantName: tenants.name,
+                })
+                .from(users)
+                .innerJoin(tenants, eq(users.tenantId, tenants.id))
+                .where(and(...conditions))
+                .limit(1)
+                .then((rows) => rows[0]);
+            })();
 
         if (!row || !row.passwordHash) return null;
         const ok = await bcrypt.compare(password, row.passwordHash);
