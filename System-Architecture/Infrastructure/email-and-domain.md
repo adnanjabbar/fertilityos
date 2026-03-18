@@ -56,11 +56,14 @@ The app already uses **[Resend](https://resend.com)**. To send from `noreply@the
 ### Steps
 
 1. **Sign up** at [resend.com](https://resend.com) and create an API key (e.g. under **API Keys**).
-2. **Add your domain** in Resend: **Domains → Add domain** → enter `thefertilityos.com`.
-3. **Add the DNS records** Resend shows (SPF, DKIM, etc.) at **wherever your DNS is managed** (e.g. Cloudflare, Namecheap, DigitalOcean DNS — this is the same place you pointed `www` to the app). Resend will show something like:
-   - **SPF:** `TXT` on `thefertilityos.com` (or `@`)
-   - **DKIM:** `TXT` on a subdomain Resend gives you (e.g. `resend._domainkey.thefertilityos.com`)
-4. In Resend, **verify** the domain once DNS has propagated (often a few minutes).
+2. **Add your domain** in Resend: open the **[Resend Dashboard](https://resend.com/domains)** → in the left sidebar click **Domains** → click **Add Domain** → enter `thefertilityos.com` (or your root domain) → click **Add**.
+3. **Where to find SPF and DKIM:** After adding the domain, Resend shows the domain in the list. **Click the domain name** (e.g. `thefertilityos.com`) to open its detail page. There you will see:
+   - **DKIM:** a **TXT** record — Resend shows the **Name** (e.g. `resend._domainkey.thefertilityos.com` or a similar subdomain) and the **Value** (a long string starting with something like `p=MIGfMA0GCS...`). Copy both.
+   - **SPF:** a **TXT** record — usually for `send.thefertilityos.com` or your domain, with a value like `v=spf1 include:amazonses.com ~all`.
+   - **Return-path (optional):** sometimes an **MX** record for the `send` subdomain for bounces.
+   If you don’t see a “Verify” or “DNS records” section, click the domain row or the **Verify** / **View DNS records** button on that domain’s card. The exact label can be “DNS records”, “Records to add”, or “Verify domain”.
+4. **Add those records** at your DNS provider (Cloudflare, Namecheap, DigitalOcean DNS, etc.): create **TXT** (and MX if shown) with the **exact** Name and Value Resend gives you.
+5. Back in Resend, click **Verify** (or “Verify DNS records”) once DNS has propagated (often 5–15 minutes). The domain status should change to **Verified**.
 5. In **DigitalOcean** → your app → **Settings → Environment variables**, add:
    - **`RESEND_API_KEY`** = your Resend API key (e.g. `re_...`).
    - Optional: **`REMINDER_FROM_EMAIL`** = `FertilityOS <noreply@thefertilityos.com>` (this is the default in code).
