@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -13,15 +13,18 @@ const labelClass = "block text-sm font-semibold text-slate-700 mb-2";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/app/dashboard";
-  const registered = searchParams.get("registered") === "1";
-
+  const [callbackUrl, setCallbackUrl] = useState("/app/dashboard");
+  const [registered, setRegistered] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setCallbackUrl(searchParams.get("callbackUrl") || "/app/dashboard");
+    setRegistered(searchParams.get("registered") === "1");
+  }, [searchParams]);
   useEffect(() => setMounted(true), []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -178,13 +181,5 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-600">Loading…</div>
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
-  );
+  return <LoginForm />;
 }
