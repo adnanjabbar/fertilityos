@@ -70,7 +70,11 @@ After a successful clean deploy, all `_next/static/chunks/*.js` files from that 
   - **API (e.g. production):** Set `SEED_DEMO_SECRET` in env, then open **GET** `https://www.thefertilityos.com/api/admin/seed-demo?secret=YOUR_SEED_DEMO_SECRET` in the browser (or `POST` with the same query or header `x-seed-secret`). This creates the demo user in the **production** database so login at www.thefertilityos.com works.  
   **Login:** `thefertilityos@gmail.com` / `demo`.
 
-- **Super Admin (platform owner dashboard):** Run migrations including `0003_super_admin.sql`, then from `website/` run `npm run db:seed-super-admin` (with `DATABASE_URL` set; use production URL to seed production). Login: `dradnanjabbar@gmail.com` / `superadmin` (or set `SUPER_ADMIN_PASSWORD` in .env). Access **Super Dashboard** at `/app/super`.
+- **Super Admin (platform owner dashboard):** There is no API to create the super-admin; use the script from your machine:
+  1. Ensure migrations have run (including `0003_super_admin.sql`), which creates the `system` tenant and `super_admin` role.
+  2. In `website/.env`, set **`DATABASE_URL`** to your **production** PostgreSQL URL (same as in DigitalOcean).
+  3. From the repo root run: `cd website && node scripts/seed-super-admin.js`
+  4. Log in at **https://www.thefertilityos.com/login** with **dradnanjabbar@gmail.com** / **superadmin** (or the password you set in `SUPER_ADMIN_PASSWORD` in .env). Then open **Super Dashboard** at **https://www.thefertilityos.com/app/super**.
 
 - **Remove seeded accounts to register fresh:** Open **GET** `https://www.thefertilityos.com/api/admin/reset-seeded-accounts?secret=YOUR_SEED_DEMO_SECRET`. This deletes the demo user (thefertilityos@gmail.com) and super-admin user (dradnanjabbar@gmail.com) and their sessions. Then use **Register** at `/register` with your email. Requires **RESEND_API_KEY** (and domain verification in Resend) for the 6-digit email verification code to be sent.
 

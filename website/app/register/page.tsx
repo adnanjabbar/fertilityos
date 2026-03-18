@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Activity, ArrowRight, ArrowLeft } from "lucide-react";
 
 type Step = "email" | "clinic" | "admin";
@@ -233,7 +234,18 @@ export default function RegisterPage() {
         setError(data.error || "Registration failed. Please try again.");
         return;
       }
-      router.push("/login?registered=1");
+      // Auto sign-in so they don't have to type password again
+      const signInRes = await signIn("credentials", {
+        email: admin.email.trim().toLowerCase(),
+        password: admin.password,
+        redirect: false,
+      });
+      if (signInRes?.ok && !signInRes?.error) {
+        router.push("/app/dashboard");
+        router.refresh();
+      } else {
+        router.push("/login?registered=1");
+      }
     } finally {
       setLoading(false);
     }
