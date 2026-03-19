@@ -3,7 +3,7 @@
  * Caches app shell and dashboard for offline use. Update cache version when deploying.
  */
 // Bump cache version whenever we change sw.js behavior.
-const CACHE_NAME = "fertilityos-v6";
+const CACHE_NAME = "fertilityos-v7";
 const OFFLINE_URL = "/app/dashboard";
 
 const PRECACHE_URLS = [
@@ -35,8 +35,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
-  // IMPORTANT: never handle auth APIs via the service worker cache layer.
-  // next-auth relies on fresh responses/cookies for session establishment.
+  // Do not intercept auth at all — let the browser talk to the server directly.
+  // Avoids SW turning slow/timeout responses into 504 and keeps login/session reliable.
+  if (url.pathname.startsWith("/api/auth")) return;
+
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
       fetch(event.request).catch(() => new Response("Network error", { status: 504 }))

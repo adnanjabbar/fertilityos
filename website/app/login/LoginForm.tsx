@@ -56,6 +56,12 @@ export default function LoginForm({
         );
         return;
       }
+      if (res?.status === 504) {
+        setError(
+          "Request timed out. The server may be starting up or overloaded — wait a moment and try again, or check your connection."
+        );
+        return;
+      }
       if (res?.error) {
         setError(
           res.error === "Too many sign-in attempts. Try again in 15 minutes."
