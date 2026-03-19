@@ -153,6 +153,21 @@ export default function LoginForm({
             {loading ? "Signing in…" : "Sign in"}
           </button>
 
+          <div className="flex items-center justify-between pt-1">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-semibold text-blue-700 hover:underline"
+            >
+              Forgot password?
+            </Link>
+            <Link
+              href="/register"
+              className="text-sm font-semibold text-slate-700 hover:text-blue-700 hover:underline"
+            >
+              Create account
+            </Link>
+          </div>
+
           {(process.env.NEXT_PUBLIC_OAUTH_GOOGLE === "1" ||
             process.env.NEXT_PUBLIC_OAUTH_MICROSOFT === "1") && (
             <>
