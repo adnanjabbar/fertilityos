@@ -3,13 +3,11 @@
  * Caches app shell and dashboard for offline use. Update cache version when deploying.
  */
 // Bump cache version whenever we change sw.js behavior.
-const CACHE_NAME = "fertilityos-v2";
+const CACHE_NAME = "fertilityos-v3";
 const OFFLINE_URL = "/app/dashboard";
 
 const PRECACHE_URLS = [
   "/",
-  "/app/dashboard",
-  "/login",
   "/offline",
 ];
 
@@ -36,6 +34,24 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET" || event.request.url.startsWith("chrome-extension")) return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+
+  // IMPORTANT: never handle auth APIs via the service worker cache layer.
+  // next-auth relies on fresh responses/cookies for session establishment.
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(
+      fetch(event.request).catch(() => new Response("Network error", { status: 504 }))
+    );
+    return;
+  }
+
+  // Never serve cached /login HTML; it can cause React hydration mismatch (#418)
+  // if the browser has an older cached HTML shell.
+  if (url.pathname === "/login") {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request) ?? new Response("Offline", { status: 503 }))
+    );
+    return;
+  }
 
   // Always return a real Response from respondWith.
   // Previously, some failures returned `null`, which causes:
