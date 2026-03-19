@@ -45,10 +45,17 @@ const SUPER_ADMIN_EMAIL = "dradnanjabbar@gmail.com";
 async function upsertUserSessionFromToken(token: import("@auth/core/jwt").JWT) {
   if (!token.id || !token.tenantId || !token.sessionId) return;
 
-  const hdrs = await headers();
-  const userAgent = hdrs.get("user-agent") ?? undefined;
-  const forwardedFor = hdrs.get("x-forwarded-for");
-  const ipAddress = forwardedFor?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || undefined;
+  let userAgent: string | undefined;
+  let ipAddress: string | undefined;
+  try {
+    const hdrs = await headers();
+    userAgent = hdrs.get("user-agent") ?? undefined;
+    const forwardedFor = hdrs.get("x-forwarded-for");
+    ipAddress = forwardedFor?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || undefined;
+  } catch {
+    // Some runtimes (e.g. middleware/edge execution paths) may not expose next/headers.
+    // Session tracking should never block authentication.
+  }
 
   const now = new Date();
 
@@ -346,7 +353,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             details: { email: resolved.email, roleSlug: resolved.roleSlug, provider: account.provider },
           }).catch(() => {});
         }
-        await upsertUserSessionFromToken(token as any);
+        try {
+          await upsertUserSessionFromToken(token as import("@auth/core/jwt").JWT);
+        } catch (e) {
+          console.error("[auth] session upsert failed (oauth):", (e as Error).message);
+        }
         return token;
       }
       // Credentials / portal-token sign-in
@@ -368,12 +379,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           details: { email: user.email, roleSlug: user.roleSlug },
         }).catch(() => {});
       }
-      await upsertUserSessionFromToken(token as any);
+      try {
+        await upsertUserSessionFromToken(token as import("@auth/core/jwt").JWT);
+      } catch (e) {
+        console.error("[auth] session upsert failed:", (e as Error).message);
+      }
       return token;
     },
     async session({ session, token }) {
       if (!token.id) {
-        return null as any;
+        return null;
       }
       if (session.user) {
         session.user.id = token.id ?? "";

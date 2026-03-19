@@ -112,44 +112,47 @@ export default async function AppLayout({
       ]
     : [];
 
-  const navGroups: NavGroup[] = [
-    {
-      labelKey: "groupMain",
-      items: [
-        { href: "/app/dashboard", labelKey: "dashboard", iconKey: "dashboard" },
-        ...(session.user.roleSlug !== "patient"
-          ? [{ href: "/app/account/security", labelKey: "accountSecurity", iconKey: "compliance" as const }]
-          : []),
-      ],
-    },
-    {
-      labelKey: "groupClinical",
-      items: [
-        ...(showPatients ? [{ href: "/app/patients", labelKey: "patients", iconKey: "patients" as const }] : []),
-        ...(showAppointments
-          ? [{ href: "/app/appointments", labelKey: "appointments", iconKey: "appointments" as const }]
-          : []),
-      ].filter(Boolean) as NavGroup["items"],
-    },
-    {
-      labelKey: "groupBilling",
-      items: [
-        ...(showInvoices ? [{ href: "/app/invoices", labelKey: "invoices", iconKey: "invoices" as const }] : []),
-        { href: "/app/reports", labelKey: "reports", iconKey: "reports" },
-        ...(isAdmin ? [{ href: "/app/billing", labelKey: "billing", iconKey: "billing" as const }] : []),
-      ].filter(Boolean) as NavGroup["items"],
-    },
-    ...(labItems.length > 0 ? [{ labelKey: "groupLab" as const, items: labItems }] : []),
-    ...(adminItems.length > 0 ? [{ labelKey: "groupAdmin" as const, items: adminItems }] : []),
-    ...(isSuperAdmin
-      ? [
-          {
-            labelKey: "groupPlatform" as const,
-            items: [{ href: "/app/super", labelKey: "superDashboard", iconKey: "superDashboard" }],
-          },
-        ]
-      : []),
-  ].filter((g) => g.items.length > 0);
+  const navGroups: NavGroup[] = isSuperAdmin
+    ? [
+        {
+          labelKey: "groupPlatform",
+          items: [
+            { href: "/app/super", labelKey: "superDashboard", iconKey: "superDashboard" },
+            { href: "/app/super/email-templates", labelKey: "emailTemplates", iconKey: "emailCampaigns" },
+            { href: "/app/account/security", labelKey: "accountSecurity", iconKey: "compliance" },
+          ],
+        },
+      ]
+    : [
+        {
+          labelKey: "groupMain",
+          items: [
+            { href: "/app/dashboard", labelKey: "dashboard", iconKey: "dashboard" },
+            ...(session.user.roleSlug !== "patient"
+              ? [{ href: "/app/account/security", labelKey: "accountSecurity", iconKey: "compliance" as const }]
+              : []),
+          ],
+        },
+        {
+          labelKey: "groupClinical",
+          items: [
+            ...(showPatients ? [{ href: "/app/patients", labelKey: "patients", iconKey: "patients" as const }] : []),
+            ...(showAppointments
+              ? [{ href: "/app/appointments", labelKey: "appointments", iconKey: "appointments" as const }]
+              : []),
+          ].filter(Boolean) as NavGroup["items"],
+        },
+        {
+          labelKey: "groupBilling",
+          items: [
+            ...(showInvoices ? [{ href: "/app/invoices", labelKey: "invoices", iconKey: "invoices" as const }] : []),
+            { href: "/app/reports", labelKey: "reports", iconKey: "reports" },
+            ...(isAdmin ? [{ href: "/app/billing", labelKey: "billing", iconKey: "billing" as const }] : []),
+          ].filter(Boolean) as NavGroup["items"],
+        },
+        ...(labItems.length > 0 ? [{ labelKey: "groupLab" as const, items: labItems }] : []),
+        ...(adminItems.length > 0 ? [{ labelKey: "groupAdmin" as const, items: adminItems }] : []),
+      ].filter((g) => g.items.length > 0);
 
   const labels: Record<string, string> = {
     dashboard: t("dashboard"),
@@ -195,7 +198,7 @@ export default async function AppLayout({
           navGroups={navGroups}
           labels={labels}
           userName={session.user.name ?? "User"}
-          tenantName={session.user.tenantName ?? null}
+          tenantName={isSuperAdmin ? "TheFertilityOS" : session.user.tenantName ?? null}
           brandingLogoUrl={branding.logoUrl}
           brandingPrimaryColor={branding.primaryColor}
           showPoweredBy={branding.showPoweredBy}

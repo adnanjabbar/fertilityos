@@ -298,7 +298,7 @@ export default function AppSidebar({
           <p className="px-3 py-1 text-xs text-slate-500">
             Powered by{" "}
             <a href="https://www.thefertilityos.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-300">
-              FertilityOS
+              TheFertilityOS
             </a>
           </p>
         )}
@@ -355,7 +355,7 @@ export default function AppSidebar({
       {/* Left sidebar — always visible on desktop (lg), slide-in on mobile */}
       <aside
         className={[
-          "fixed top-0 left-0 z-40 h-full w-64 flex flex-col bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-slate-200 shadow-xl",
+          "fixed top-0 left-0 z-40 h-full min-h-screen w-64 flex flex-col bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-slate-200 shadow-xl",
           "lg:sticky lg:top-0 lg:z-20 lg:shrink-0 lg:flex",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           "transition-transform duration-200 ease-out",

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Activity } from "lucide-react";
 
@@ -19,7 +18,6 @@ export default function LoginForm({
   initialCallbackUrl,
   initialRegistered,
 }: LoginFormProps) {
-  const router = useRouter();
   const [callbackUrl] = useState(initialCallbackUrl);
   const [registered] = useState(initialRegistered);
   const [mounted, setMounted] = useState(false);
@@ -88,29 +86,60 @@ export default function LoginForm({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center py-12 px-4">
-      <Link
-        href="/"
-        className="flex items-center gap-2 absolute top-6 left-6 text-slate-600 hover:text-blue-700 transition-colors"
-      >
-        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-700">
-          <Activity className="w-5 h-5 text-white" strokeWidth={2.5} />
-        </div>
-        <span className="font-bold text-xl text-slate-900">
-          Fertility<span className="text-teal-600">OS</span>
-        </span>
-      </Link>
+    <div className="min-h-screen bg-slate-50 grid grid-cols-1 lg:grid-cols-4">
+      <section className="lg:col-span-3 relative bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white p-8 lg:p-14 flex flex-col justify-between">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-3 text-white/90 hover:text-white transition-colors"
+        >
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 border border-white/20">
+            <Activity className="w-5 h-5 text-white" strokeWidth={2.5} />
+          </div>
+          <span className="font-bold text-xl">
+            TheFertility<span className="text-teal-300">OS</span>
+          </span>
+        </Link>
 
-      <div className="w-full max-w-md">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold uppercase tracking-wider mb-6">
-          Sign in to your clinic
+        <div className="max-w-3xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/90 text-xs font-semibold uppercase tracking-wider mb-6">
+            Digital IVF Clinic OS
+          </div>
+          <h1 className="text-3xl lg:text-5xl font-extrabold leading-tight">
+            Run your fertility clinic with one secure, compliant operating system.
+          </h1>
+          <p className="mt-5 text-base lg:text-lg text-white/80 max-w-2xl">
+            Manage the complete treatment lifecycle from consultation to outcome, streamline operations, and deliver better patient experience with an affordable clinic platform.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-3 mt-8 text-sm">
+            <div className="rounded-xl bg-white/10 border border-white/20 p-4">
+              <p className="font-semibold">Compliance-ready</p>
+              <p className="text-white/75 mt-1">Built for healthcare workflows, auditability, and data security.</p>
+            </div>
+            <div className="rounded-xl bg-white/10 border border-white/20 p-4">
+              <p className="font-semibold">End-to-end IVF cycle</p>
+              <p className="text-white/75 mt-1">Track clinical, lab, billing, and communication in one platform.</p>
+            </div>
+            <div className="rounded-xl bg-white/10 border border-white/20 p-4">
+              <p className="font-semibold">Affordable scale</p>
+              <p className="text-white/75 mt-1">Designed for growing clinics without enterprise overhead.</p>
+            </div>
+          </div>
         </div>
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">
-          Welcome back
-        </h1>
-        <p className="text-slate-600 mb-8">
-          Sign in with your FertilityOS admin account.
-        </p>
+
+        <p className="text-xs text-white/60">Powered by TheFertilityOS</p>
+      </section>
+
+      <section className="lg:col-span-1 flex items-center justify-center p-6 lg:p-8">
+        <div className="w-full max-w-md">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold uppercase tracking-wider mb-6">
+            Sign in to your clinic
+          </div>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-2">
+            Welcome back
+          </h2>
+          <p className="text-slate-600 mb-8">
+            Sign in with your TheFertilityOS admin account.
+          </p>
 
         {registered && (
           <div className="mb-6 p-4 rounded-xl bg-teal-50 border border-teal-200 text-teal-800 text-sm">
@@ -172,12 +201,7 @@ export default function LoginForm({
             >
               Forgot password?
             </Link>
-            <Link
-              href="/register"
-              className="text-sm font-semibold text-slate-700 hover:text-blue-700 hover:underline"
-            >
-              Create account
-            </Link>
+            <span className="text-xs text-slate-500">14-day free trial</span>
           </div>
 
           {(process.env.NEXT_PUBLIC_OAUTH_GOOGLE === "1" ||
@@ -217,24 +241,17 @@ export default function LoginForm({
           )}
         </form>
 
-        <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center text-sm text-slate-600">
-          <span className="font-medium text-slate-700">Demo:</span>{" "}
-          thefertilityos@gmail.com / demo
-          <span className="block mt-1 text-xs text-slate-500">
-            (Run seed-demo API or npm run db:seed-demo if this account does not
-            exist.)
-          </span>
+          <p className="text-center text-slate-600 mt-6 text-sm">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="font-semibold text-blue-700 hover:underline"
+            >
+              Sign up and digitalize your clinic today.
+            </Link>
+          </p>
         </div>
-        <p className="text-center text-slate-600 mt-4">
-          Don’t have an account?{" "}
-          <Link
-            href="/register"
-            className="font-semibold text-blue-700 hover:underline"
-          >
-            Register your clinic
-          </Link>
-        </p>
-      </div>
+      </section>
     </div>
   );
 }
