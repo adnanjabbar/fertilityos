@@ -112,6 +112,25 @@ export function patientPortalPasswordResetContent(params: {
   return { subject, html, text };
 }
 
+export function staffPasswordResetContent(params: {
+  resetUrl: string;
+  staffName?: string;
+}): { subject: string; html: string; text: string } {
+  const { resetUrl, staffName } = params;
+  const name = staffName ?? "there";
+  const subject = "Reset your FertilityOS password";
+  const text = `Hi ${name},\n\nClick the link below to set a new password for your FertilityOS account:\n\n${resetUrl}\n\nThis link expires in 1 hour. If you didn't request it, you can ignore this email.\n\n— FertilityOS`;
+  const html = `
+    <p>Hi ${name},</p>
+    <p>Click the link below to set a new password for your FertilityOS account:</p>
+    <p><a href="${resetUrl}" style="color: #2563eb;">Set new password</a></p>
+    <p>Or copy and paste: ${resetUrl}</p>
+    <p style="color: #64748b; font-size: 14px;">This link expires in 1 hour. If you didn't request it, you can ignore this email.</p>
+    <p>— FertilityOS</p>
+  `.trim();
+  return { subject, html, text };
+}
+
 export function patientPortalSetPasswordContent(params: {
   setPasswordUrl: string;
   patientFirstName?: string;
