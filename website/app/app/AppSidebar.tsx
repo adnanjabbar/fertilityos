@@ -90,6 +90,9 @@ export default function AppSidebar({
   labels,
   userName,
   tenantName,
+  brandingLogoUrl,
+  brandingPrimaryColor,
+  showPoweredBy = true,
 }: AppSidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
