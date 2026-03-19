@@ -40,6 +40,7 @@ declare module "@auth/core/jwt" {
 }
 
 const OAUTH_PROVIDERS = ["google", "azure-ad"] as const;
+const SUPER_ADMIN_EMAIL = "dradnanjabbar@gmail.com";
 
 async function upsertUserSessionFromToken(token: import("@auth/core/jwt").JWT) {
   if (!token.id || !token.tenantId || !token.sessionId) return;
@@ -127,9 +128,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const hdrs = await headers();
         const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";
-        const { allowed } = rateLimitAuth(`${ip}:${email}`);
-        if (!allowed) {
-          throw new Error("Too many sign-in attempts. Try again in 15 minutes.");
+        // Keep the platform owner account reachable even when in-memory auth
+        // rate limiting gets out of sync across instances.
+        if (email !== SUPER_ADMIN_EMAIL) {
+          const { allowed } = rateLimitAuth(`${ip}:${email}`);
+          if (!allowed) {
+            throw new Error("Too many sign-in attempts. Try again in 15 minutes.");
+          }
         }
 
         const tenantSlug = hdrs.get("x-tenant-slug");
