@@ -11,8 +11,12 @@ function loadEnv() {
   try {
     const path = join(__dirname, "..", ".env");
     const content = readFileSync(path, "utf8");
-    for (const line of content.split("\n")) {
-      const m = line.match(/^([^#=]+)=(.*)$/);
+    const cleaned = content.replace(/^\uFEFF/, ""); // strip BOM if present
+    for (const rawLine of cleaned.split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith("#")) continue;
+      const normalized = line.startsWith("export ") ? line.slice("export ".length) : line;
+      const m = normalized.match(/^([^=]+)=(.*)$/);
       if (m) process.env[m[1].trim()] = m[2].trim().replace(/^["']|["']$/g, "");
     }
   } catch (_) {}
@@ -24,6 +28,14 @@ const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
   console.error("Missing DATABASE_URL. Add it to website/.env and run again.");
   process.exit(1);
+}
+
+function stripSslmode(url) {
+  // Some hosted Postgres URLs include sslmode=require which newer parsers treat as verify-full.
+  // We enforce ssl via the `ssl` option below and remove sslmode to avoid cert-chain failures.
+  return url
+    .replace(/([?&])sslmode=[^&]+&?/i, "$1")
+    .replace(/[?&]$/, "");
 }
 
 const migrations = [
@@ -77,7 +89,7 @@ const migrations = [
 
 async function main() {
   const client = new Client({
-    connectionString: DATABASE_URL,
+    connectionString: stripSslmode(DATABASE_URL),
     ssl: { rejectUnauthorized: false },
   });
   const dir = join(__dirname, "..", "db", "migrations");
