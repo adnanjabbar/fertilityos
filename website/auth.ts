@@ -134,7 +134,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const isDemoEmail = email === "thefertilityos@gmail.com";
 
         // Demo user: single lookup by email only (same as seed-demo check) so login always finds them
-        const row = isDemoEmail
+        const candidates = isDemoEmail
           ? await db
               .select({
                 id: users.id,
@@ -149,18 +149,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               .innerJoin(tenants, eq(users.tenantId, tenants.id))
               .where(eq(users.email, email))
               .limit(1)
-              .then((rows) => rows[0])
-          : await (async () => {
-              const conditions = [eq(users.email, email)];
-              if (tenantSlug) {
+          : tenantSlug
+            ? await (async () => {
                 const [tenant] = await db
                   .select({ id: tenants.id })
                   .from(tenants)
                   .where(eq(tenants.slug, tenantSlug))
                   .limit(1);
-                if (tenant) conditions.push(eq(users.tenantId, tenant.id));
-              }
-              return db
+                if (!tenant) return [];
+                return db
+                  .select({
+                    id: users.id,
+                    email: users.email,
+                    fullName: users.fullName,
+                    passwordHash: users.passwordHash,
+                    tenantId: users.tenantId,
+                    roleSlug: users.roleSlug,
+                    tenantName: tenants.name,
+                  })
+                  .from(users)
+                  .innerJoin(tenants, eq(users.tenantId, tenants.id))
+                  .where(and(eq(users.email, email), eq(users.tenantId, tenant.id)))
+                  .limit(1);
+              })()
+            : await db
                 .select({
                   id: users.id,
                   email: users.email,
@@ -172,35 +184,61 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 })
                 .from(users)
                 .innerJoin(tenants, eq(users.tenantId, tenants.id))
-                .where(and(...conditions))
-                .limit(1)
-                .then((rows) => rows[0]);
-            })();
+                .where(eq(users.email, email))
+                // If the same email exists across multiple clinic tenants, we need to
+                // try password compare against all candidates when x-tenant-slug is absent.
+                .limit(20);
 
-        if (!row || !row.passwordHash) return null;
-        const ok = await bcrypt.compare(password, row.passwordHash);
-        if (isDemoEmail) {
-          console.log("[auth] demo login", { hasRow: true, passwordLen: password.length, passwordOk: ok });
+        const candidateRows = candidates as Array<{
+          id: string;
+          email: string;
+          fullName: string;
+          passwordHash: string | null;
+          tenantId: string;
+          roleSlug: string;
+          tenantName: string | null;
+        }>;
+
+        let matched: (typeof candidateRows)[number] | null = null;
+        for (const c of candidateRows) {
+          if (!c.passwordHash) continue;
+          const ok = await bcrypt.compare(password, c.passwordHash);
+          if (isDemoEmail) {
+            // Avoid logging password itself; only useful for diagnosing password mismatch.
+            console.log("[auth] demo login", { hasRow: true, passwordLen: password.length, passwordOk: ok });
+          }
+          if (ok) {
+            matched = c;
+            break;
+          }
         }
-        if (!ok) {
-          void logAudit({
-            tenantId: row.tenantId,
-            userId: row.id,
-            action: "auth.sign_in_failed",
-            entityType: "user",
-            entityId: row.id,
-            details: { email: row.email },
-          }).catch(() => {});
+
+        if (!matched) {
+          // When tenantSlug is present (or this is the single demo candidate), we can record a precise failure.
+          // When tenantSlug is absent (multi-tenant candidates), logging the "wrong" tenant would be misleading.
+          if (tenantSlug || isDemoEmail) {
+            const first = candidateRows[0];
+            if (first?.tenantId) {
+              void logAudit({
+                tenantId: first.tenantId,
+                userId: first.id,
+                action: "auth.sign_in_failed",
+                entityType: "user",
+                entityId: first.id,
+                details: { email: first.email },
+              }).catch(() => {});
+            }
+          }
           return null;
         }
 
         return {
-          id: row.id,
-          email: row.email,
-          name: row.fullName,
-          tenantId: row.tenantId,
-          roleSlug: row.roleSlug,
-          tenantName: row.tenantName ?? undefined,
+          id: matched.id,
+          email: matched.email,
+          name: matched.fullName,
+          tenantId: matched.tenantId,
+          roleSlug: matched.roleSlug,
+          tenantName: matched.tenantName ?? undefined,
         };
       },
     }),
