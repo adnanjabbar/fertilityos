@@ -48,8 +48,13 @@ export default function LoginForm({
         );
         return;
       }
-      router.push(callbackUrl);
-      router.refresh();
+      if (res?.ok === false) {
+        setError("Invalid email or password.");
+        return;
+      }
+      // Use a full navigation so auth cookies are definitely applied.
+      // This avoids hydration issues and middleware redirect races.
+      window.location.assign(callbackUrl);
     } finally {
       setLoading(false);
     }
