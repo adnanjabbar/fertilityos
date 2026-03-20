@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import SuperTenantControls from "./SuperTenantControls";
 import {
   ArrowLeft,
   Building2,
@@ -24,13 +25,14 @@ type DeepDive = {
     createdAt: string;
   };
   subscription: {
+    billingPlan: string;
     status: string;
     stripeSubscriptionId: string | null;
     stripeCustomerId: string | null;
     currentPeriodEnd: string | null;
     stripePriceId: string | null;
     updatedAt: string;
-  } | null;
+  };
   counts: {
     users: number;
     patients: number;
@@ -54,7 +56,9 @@ export default function TenantDeepDiveClient({ tenantId }: { tenantId: string })
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
+    setLoading(true);
+    setError(null);
     fetch(`/api/app/super/tenants/${tenantId}`)
       .then((res) => {
         if (res.status === 404) throw new Error("Clinic not found");
@@ -65,6 +69,10 @@ export default function TenantDeepDiveClient({ tenantId }: { tenantId: string })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [tenantId]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   if (loading) {
     return (
@@ -129,32 +137,38 @@ export default function TenantDeepDiveClient({ tenantId }: { tenantId: string })
         ))}
       </div>
 
+      <SuperTenantControls
+        tenantId={tenantId}
+        initialBillingPlan={subscription.billingPlan}
+        initialStatus={subscription.status}
+        initialEnabledModules={tenant.enabledModules}
+        onRefresh={loadData}
+      />
+
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-900 mb-3">Subscription</h2>
-        {subscription ? (
-          <dl className="grid sm:grid-cols-2 gap-2 text-sm">
-            <div>
-              <dt className="text-slate-500">Status</dt>
-              <dd className="font-semibold text-slate-900">{subscription.status}</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Current period end</dt>
-              <dd className="font-medium text-slate-800">
-                {subscription.currentPeriodEnd
-                  ? new Date(subscription.currentPeriodEnd).toLocaleString()
-                  : "—"}
-              </dd>
-            </div>
-            <div className="sm:col-span-2">
-              <dt className="text-slate-500">Stripe subscription</dt>
-              <dd className="font-mono text-xs text-slate-600 break-all">
-                {subscription.stripeSubscriptionId ?? "—"}
-              </dd>
-            </div>
-          </dl>
-        ) : (
-          <p className="text-slate-500 text-sm">No subscription row for this clinic yet.</p>
-        )}
+        <h2 className="text-lg font-bold text-slate-900 mb-3">Stripe linkage (read-only)</h2>
+        <dl className="grid sm:grid-cols-2 gap-2 text-sm">
+          <div>
+            <dt className="text-slate-500">Current period end</dt>
+            <dd className="font-medium text-slate-800">
+              {subscription.currentPeriodEnd
+                ? new Date(subscription.currentPeriodEnd).toLocaleString()
+                : "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Stripe customer</dt>
+            <dd className="font-mono text-xs text-slate-600 break-all">
+              {subscription.stripeCustomerId ?? "—"}
+            </dd>
+          </div>
+          <div className="sm:col-span-2">
+            <dt className="text-slate-500">Stripe subscription</dt>
+            <dd className="font-mono text-xs text-slate-600 break-all">
+              {subscription.stripeSubscriptionId ?? "—"}
+            </dd>
+          </div>
+        </dl>
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

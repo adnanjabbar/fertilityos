@@ -31,21 +31,31 @@ export async function GET(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
     }
 
+    const subscriptionOut = data.subscription
+      ? {
+          ...data.subscription,
+          currentPeriodEnd: data.subscription.currentPeriodEnd
+            ? data.subscription.currentPeriodEnd.toISOString()
+            : null,
+          updatedAt: data.subscription.updatedAt.toISOString(),
+        }
+      : {
+          billingPlan: "free",
+          status: "incomplete",
+          stripeSubscriptionId: null as string | null,
+          stripeCustomerId: null as string | null,
+          currentPeriodEnd: null as string | null,
+          stripePriceId: null as string | null,
+          updatedAt: new Date().toISOString(),
+        };
+
     return NextResponse.json({
       ...data,
       tenant: {
         ...data.tenant,
         createdAt: data.tenant.createdAt.toISOString(),
       },
-      subscription: data.subscription
-        ? {
-            ...data.subscription,
-            currentPeriodEnd: data.subscription.currentPeriodEnd
-              ? data.subscription.currentPeriodEnd.toISOString()
-              : null,
-            updatedAt: data.subscription.updatedAt.toISOString(),
-          }
-        : null,
+      subscription: subscriptionOut,
     });
   } catch (e) {
     console.error("super/tenants/[tenantId] error:", e);

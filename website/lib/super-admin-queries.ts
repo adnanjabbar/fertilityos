@@ -171,6 +171,7 @@ export type TenantListRow = {
   state: string | null;
   createdAt: Date;
   subscriptionStatus: string | null;
+  billingPlan: string | null;
 };
 
 /** Paginated clinic tenants for super admin tables. */
@@ -206,6 +207,7 @@ export async function listClinicTenants(params: {
       state: tenants.state,
       createdAt: tenants.createdAt,
       subscriptionStatus: tenantSubscriptions.status,
+      billingPlan: tenantSubscriptions.billingPlan,
     })
     .from(tenants)
     .leftJoin(
@@ -227,6 +229,7 @@ export async function listClinicTenants(params: {
       state: r.state,
       createdAt: r.createdAt,
       subscriptionStatus: r.subscriptionStatus,
+      billingPlan: r.billingPlan,
     })),
     total: countRow?.count ?? 0,
   };
@@ -246,6 +249,7 @@ export type TenantDeepDive = {
   };
   subscription: {
     status: string;
+    billingPlan: string;
     stripeSubscriptionId: string | null;
     stripeCustomerId: string | null;
     currentPeriodEnd: Date | null;
@@ -289,6 +293,7 @@ export async function getTenantDeepDive(
   const [sub] = await db
     .select({
       status: tenantSubscriptions.status,
+      billingPlan: tenantSubscriptions.billingPlan,
       stripeSubscriptionId: tenantSubscriptions.stripeSubscriptionId,
       stripeCustomerId: tenantSubscriptions.stripeCustomerId,
       currentPeriodEnd: tenantSubscriptions.currentPeriodEnd,
@@ -402,6 +407,7 @@ export async function getTenantDeepDive(
     subscription: sub
       ? {
           status: sub.status,
+          billingPlan: sub.billingPlan ?? "free",
           stripeSubscriptionId: sub.stripeSubscriptionId,
           stripeCustomerId: sub.stripeCustomerId,
           currentPeriodEnd: sub.currentPeriodEnd,

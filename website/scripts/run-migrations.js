@@ -85,6 +85,7 @@ const migrations = [
   "0043_user_password_reset.sql",
   "0044_platform_email_templates.sql",
   "0045_tenant_email_templates.sql",
+  "0046_platform_subscription_audit.sql",
 ];
 
 async function main() {

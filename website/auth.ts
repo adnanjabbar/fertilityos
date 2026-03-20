@@ -36,6 +36,8 @@ declare module "@auth/core/jwt" {
     tenantName?: string;
     patientId?: string;
     sessionId?: string;
+    /** Unix ms; used to throttle DB reads for server-side session revocation checks */
+    sessionRevokeCheckAt?: number;
   }
 }
 
@@ -95,6 +97,23 @@ async function upsertUserSessionFromToken(token: import("@auth/core/jwt").JWT) {
     createdAt: now,
     lastUsedAt: now,
   });
+}
+
+const SESSION_REVOKE_CHECK_MS = 5 * 60 * 1000;
+
+/** Single SELECT; throttled by caller. Clears token if this server-side session was revoked. */
+async function applyRevocationIfNeeded(token: import("@auth/core/jwt").JWT) {
+  if (!token.sessionId || !token.id) return;
+  const [row] = await db
+    .select({ revokedAt: userSessions.revokedAt })
+    .from(userSessions)
+    .where(eq(userSessions.sessionId, token.sessionId))
+    .limit(1);
+  if (row?.revokedAt) {
+    token.id = "";
+    token.tenantId = "";
+    token.roleSlug = "";
+  }
 }
 
 // Production (e.g. DigitalOcean): set AUTH_TRUST_HOST=true and AUTH_URL in env to avoid 503 UntrustedHost.
@@ -352,11 +371,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             entityId: resolved.id,
             details: { email: resolved.email, roleSlug: resolved.roleSlug, provider: account.provider },
           }).catch(() => {});
-        }
-        try {
-          await upsertUserSessionFromToken(token as import("@auth/core/jwt").JWT);
-        } catch (e) {
-          console.error("[auth] session upsert failed (oauth):", (e as Error).message);
+          // Persist session row only at sign-in. Running upsert on every JWT refresh (e.g. each
+          // middleware / auth() touch) caused 2+ DB round-trips per navigation and severe latency.
+          try {
+            await upsertUserSessionFromToken(token as import("@auth/core/jwt").JWT);
+          } catch (e) {
+            console.error("[auth] session upsert failed (oauth):", (e as Error).message);
+          }
         }
         return token;
       }
@@ -378,11 +399,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           entityId: user.id,
           details: { email: user.email, roleSlug: user.roleSlug },
         }).catch(() => {});
-      }
-      try {
-        await upsertUserSessionFromToken(token as import("@auth/core/jwt").JWT);
-      } catch (e) {
-        console.error("[auth] session upsert failed:", (e as Error).message);
+        try {
+          await upsertUserSessionFromToken(token as import("@auth/core/jwt").JWT);
+        } catch (e) {
+          console.error("[auth] session upsert failed:", (e as Error).message);
+        }
+      } else {
+        // Existing session: check server-side revocation occasionally (not every request).
+        const t = token as import("@auth/core/jwt").JWT;
+        const now = Date.now();
+        const last =
+          typeof t.sessionRevokeCheckAt === "number" ? t.sessionRevokeCheckAt : 0;
+        if (now - last >= SESSION_REVOKE_CHECK_MS) {
+          t.sessionRevokeCheckAt = now;
+          try {
+            await applyRevocationIfNeeded(t);
+          } catch (e) {
+            console.error("[auth] session revoke check failed:", (e as Error).message);
+          }
+        }
       }
       return token;
     },

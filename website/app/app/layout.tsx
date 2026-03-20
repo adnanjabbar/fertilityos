@@ -119,6 +119,7 @@ export default async function AppLayout({
           items: [
             { href: "/app/super", labelKey: "superOverview", iconKey: "superDashboard" },
             { href: "/app/super/clinics", labelKey: "superClinics", iconKey: "superClinics" },
+            { href: "/app/super/audit", labelKey: "superComplianceLog", iconKey: "auditLog" },
             { href: "/app/super/email-templates", labelKey: "emailTemplates", iconKey: "emailCampaigns" },
             { href: "/app/account/security", labelKey: "accountSecurity", iconKey: "compliance" },
           ],
@@ -184,6 +185,7 @@ export default async function AppLayout({
     superDashboard: t("superDashboard"),
     superOverview: t("superOverview"),
     superClinics: t("superClinics"),
+    superComplianceLog: t("superComplianceLog"),
     settings: t("settings"),
     logOut: t("logOut"),
     groupMain: t("groupMain"),

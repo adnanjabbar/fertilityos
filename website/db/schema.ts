@@ -76,6 +76,10 @@ export const MODULE_SLUGS = [
 ] as const;
 export type ModuleSlug = (typeof MODULE_SLUGS)[number];
 
+/** Clinic billing tier (super-admin controlled; Stripe may also update status). */
+export const BILLING_PLANS = ["free", "basic", "pro", "enterprise"] as const;
+export type BillingPlan = (typeof BILLING_PLANS)[number];
+
 export const tenants = pgTable("tenants", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -535,10 +539,44 @@ export const tenantSubscriptions = pgTable(
     status: varchar("status", { length: 32 }).notNull().default("incomplete"),
     currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
     stripePriceId: varchar("stripe_price_id", { length: 255 }),
+    billingPlan: varchar("billing_plan", { length: 32 }).notNull().default("free"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [uniqueIndex("tenant_subscriptions_tenant_idx").on(table.tenantId)]
+);
+
+/**
+ * Immutable audit trail for super-admin changes (subscription plan, modules, etc.).
+ * Tagged for GDPR / HIPAA accountability and HL7 interoperability governance.
+ */
+export const platformAdminAuditLog = pgTable(
+  "platform_admin_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    actorUserId: uuid("actor_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    eventType: varchar("event_type", { length: 64 }).notNull(),
+    previousState: jsonb("previous_state").$type<Record<string, unknown> | null>(),
+    newState: jsonb("new_state").$type<Record<string, unknown> | null>(),
+    complianceTags: varchar("compliance_tags", { length: 256 })
+      .notNull()
+      .default("GDPR,HIPAA,HL7"),
+    ipAddress: varchar("ip_address", { length: 45 }),
+    userAgent: text("user_agent"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("platform_admin_audit_log_tenant_idx").on(table.tenantId),
+    index("platform_admin_audit_log_created_idx").on(table.createdAt),
+    index("platform_admin_audit_log_actor_idx").on(table.actorUserId),
+    index("platform_admin_audit_log_event_idx").on(table.eventType),
+  ]
 );
 
 export const inventoryItems = pgTable(

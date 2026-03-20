@@ -61,12 +61,14 @@ After a successful clean deploy, all `_next/static/chunks/*.js` files from that 
 
 - **Create/attach:** Use App Platform **Add Resource → Database → Create and attach**. Prefer PostgreSQL 18; set **database name** (e.g. `fertilityos`).
 - **Connection:** Ensure the web service has **`DATABASE_URL`** set to the DB connection string (DO often injects it under a component name; alias or copy it to `DATABASE_URL`).
-- **Migrations (required):** The app expects **all** tables from `website/db/migrations/` (0000 through 0029). If you see **`relation "inventory_items" does not exist`** (or any other "relation does not exist") at runtime, the production database has not had migrations run or is missing later migrations. Run them **once** in order from your machine against the production `DATABASE_URL`:
+- **Migrations (required):** The app expects **all** migrations in `website/db/migrations/` through the latest (e.g. **`0046_platform_subscription_audit.sql`**: `tenant_subscriptions.billing_plan`, `platform_admin_audit_log` for super-admin subscription/module changes). If you see **`relation "inventory_items" does not exist`** (or any other "relation does not exist") at runtime, the production database has not had migrations run or is missing later migrations. Run them **once** in order from your machine against the production `DATABASE_URL`:
   ```bash
   cd website
   # Set DATABASE_URL in .env to your production DB URL (from DO dashboard)
-  node scripts/run-migrations.js
+  npm run db:run-sql-migrations
+  # or: node scripts/run-migrations.js
   ```
+  The script applies any pending files in `db/migrations/` in order (including **0046**). Confirm in DB: column `tenant_subscriptions.billing_plan` and table `platform_admin_audit_log` exist.
   See **`Infrastructure/digitalocean-database-setup.md`** for full step-by-step instructions (Option A or B).
 - **Demo account (optional):**  
   - **CLI:** From `website/` run `npm run db:seed-demo` (with `DATABASE_URL` set).  
@@ -80,6 +82,8 @@ After a successful clean deploy, all `_next/static/chunks/*.js` files from that 
   4. Log in at **https://www.thefertilityos.com/login** with **dradnanjabbar@gmail.com** / **@AdnanJabbar007** (or the password you set in `SUPER_ADMIN_PASSWORD` in .env). Then open **Super Dashboard** at **https://www.thefertilityos.com/app/super**.
 
 - **Super Admin Phase 1 (platform data):** The app exposes `GET /api/app/super/stats` (includes `platformKpis`: countries, admins, subscriptions, invoice rollups by currency), `GET /api/app/super/tenants?page=&limit=&q=` (paginated clinic list), and `GET /api/app/super/tenants/:tenantId` (clinic snapshot: counts, subscription, IVF by status, invoice rollups — no patient PII). UI: **All clinics** at `/app/super/clinics`, clinic detail at `/app/super/tenants/[tenantId]`. Optional App Platform env: **`SUPER_ADMIN_ESTIMATED_MRR_USD_PER_ACTIVE_SUB`** (e.g. `99`) for a rough MRR line on the super overview until Stripe amounts are stored in DB.
+
+- **Super Admin subscription & compliance audit (after migration 0046):** Super admins can set each clinic’s **billing plan** (`free` / `basic` / `pro` / `enterprise`) and **Stripe subscription status** via `PATCH /api/app/super/tenants/:tenantId/subscription`, and toggle **enabled modules** via `PATCH /api/app/super/tenants/:tenantId/modules`. Changes are written to **`platform_admin_audit_log`** (and mirrored to tenant audit as `platform.*` events) for GDPR accountability, HIPAA security/configuration trails, and HL7 interoperability governance — **no patient PHI** in these payloads. UI: controls and per-tenant history on `/app/super/tenants/[tenantId]`; platform-wide log at **`/app/super/audit`** (`GET /api/app/super/audit-log`).
 
 - **Full reset (delete all users and tenants, recreate only Super Admin):** From `website/` run `npm run db:reset-users-and-tenants` (or `node scripts/reset-users-and-tenants.js`) with `DATABASE_URL` set. This removes all tenants except `system`, deletes all users, and creates only the Super Admin above. Admin/clinic accounts are then created via **Register** at `/register`; Super Admin approves them (when the approval flow is in place).
 

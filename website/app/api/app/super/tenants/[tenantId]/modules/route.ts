@@ -5,6 +5,7 @@ import { tenants } from "@/db/schema";
 import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 import { MODULE_SLUGS } from "@/db/schema";
+import { logPlatformAdminChange } from "@/lib/platform-admin-audit";
 
 const updateModulesSchema = z.object({
   enabledModules: z.array(z.string()).optional().nullable(),
@@ -41,7 +42,7 @@ export async function PATCH(
   }
 
   const [tenant] = await db
-    .select({ id: tenants.id })
+    .select({ id: tenants.id, enabledModules: tenants.enabledModules })
     .from(tenants)
     .where(and(eq(tenants.id, tenantId), ne(tenants.slug, "system")))
     .limit(1);
@@ -49,6 +50,8 @@ export async function PATCH(
   if (!tenant) {
     return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
   }
+
+  const previousModules = tenant.enabledModules;
 
   const raw = parsed.data.enabledModules;
   const valid =
@@ -62,6 +65,31 @@ export async function PATCH(
     .update(tenants)
     .set({ enabledModules: value, updatedAt: new Date() })
     .where(eq(tenants.id, tenantId));
+
+  if (previousModules !== value) {
+    const safeParse = (s: string | null) => {
+      if (!s) return null;
+      try {
+        return JSON.parse(s) as unknown;
+      } catch {
+        return { invalidJson: true, raw: s };
+      }
+    };
+    await logPlatformAdminChange({
+      tenantId,
+      actorUserId: session.user.id,
+      eventType: "tenant_modules_changed",
+      previousState: {
+        enabledModules: previousModules,
+        enabledModulesList: safeParse(previousModules),
+      },
+      newState: {
+        enabledModules: value,
+        enabledModulesList: safeParse(value),
+      },
+      request,
+    });
+  }
 
   return NextResponse.json({ ok: true, enabledModules: value });
 }

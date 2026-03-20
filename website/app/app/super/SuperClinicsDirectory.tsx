@@ -13,6 +13,7 @@ type TenantRow = {
   state: string | null;
   createdAt: string;
   subscriptionStatus: string | null;
+  billingPlan: string | null;
 };
 
 export default function SuperClinicsDirectory() {
@@ -93,6 +94,7 @@ export default function SuperClinicsDirectory() {
               <th className="px-4 py-3">Clinic</th>
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Location</th>
+              <th className="px-4 py-3">Plan</th>
               <th className="px-4 py-3">Subscription</th>
               <th className="px-4 py-3">Joined</th>
               <th className="px-4 py-3 text-right">Actions</th>
@@ -101,13 +103,13 @@ export default function SuperClinicsDirectory() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-10 text-center text-slate-500">
                   Loading…
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-10 text-center text-slate-500">
                   No clinics match your search.
                 </td>
               </tr>
@@ -118,6 +120,11 @@ export default function SuperClinicsDirectory() {
                   <td className="px-4 py-3 text-slate-600">{t.slug}</td>
                   <td className="px-4 py-3 text-slate-600">
                     {[t.city, t.state, t.country].filter(Boolean).join(", ") || t.country}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs font-semibold uppercase text-slate-700">
+                      {t.billingPlan ?? "free"}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <span
