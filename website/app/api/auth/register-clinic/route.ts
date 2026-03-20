@@ -6,6 +6,8 @@ import { tenants, users, referralCodes, referralSignups } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { consumeVerifiedEmail } from "@/lib/email-verification";
 import { validateStaffPassword } from "@/lib/password-policy";
+import { getClientIp, logAudit } from "@/lib/audit";
+import { rateLimitRegister } from "@/lib/rate-limit";
 
 const registerSchema = z.object({
   ref: z.string().max(64).optional(),
@@ -24,6 +26,9 @@ const registerSchema = z.object({
     postalCode: z.string().max(32).optional(),
     specialty: z.string().max(255).optional(),
     licenseInfo: z.string().optional(),
+    /** Optional GPS pin (decimal degrees as string). */
+    latitude: z.string().max(32).optional(),
+    longitude: z.string().max(32).optional(),
   }),
   admin: z.object({
     email: z.string().email("Invalid email"),
@@ -35,6 +40,14 @@ const registerSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request) ?? "unknown";
+    if (!rateLimitRegister(ip).allowed) {
+      return NextResponse.json(
+        { error: "Too many registration attempts from this network. Try again in an hour." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
@@ -135,6 +148,8 @@ export async function POST(request: Request) {
         postalCode: clinic.postalCode ?? null,
         specialty: clinic.specialty ?? null,
         licenseInfo: clinic.licenseInfo ?? null,
+        latitude: clinic.latitude?.trim() || null,
+        longitude: clinic.longitude?.trim() || null,
       })
       .returning({ id: tenants.id, slug: tenants.slug });
 
@@ -175,6 +190,16 @@ export async function POST(request: Request) {
         email: admin.email.trim().toLowerCase(),
       });
     }
+
+    await logAudit({
+      tenantId: newTenant.id,
+      userId: newUser.id,
+      action: "clinic_self_registered",
+      entityType: "tenant",
+      entityId: newTenant.id,
+      details: { slug: newTenant.slug, country: clinic.country },
+      ipAddress: ip,
+    });
 
     return NextResponse.json(
       {

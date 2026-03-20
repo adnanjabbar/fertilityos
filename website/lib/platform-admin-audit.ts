@@ -9,7 +9,9 @@ export type PlatformAdminEventType =
   | "subscription_status_changed"
   | "tenant_modules_changed"
   | "tenant_permanently_deleted"
-  | "stripe_subscription_sync";
+  | "stripe_subscription_sync"
+  | "platform_promotion_code_created"
+  | "platform_promotion_code_deactivated";
 
 /**
  * Append-only platform audit row + mirror summary on tenant audit_logs for clinic visibility.

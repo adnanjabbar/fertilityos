@@ -18,6 +18,17 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Documentation (ops & integrations)
+
+- [Security & compliance](./SECURITY-AND-COMPLIANCE.md) — rate limits, headers, audit, data handling.
+- [Public / integration API catalog](./PUBLIC-API.md) — public routes, webhooks, cron patterns.
+- [Locales (EN / ES / AR)](./I18N-LOCALES.md) — Arabic RTL, Spanish, merge behavior.
+- [Translation workflow](./TRANSLATIONS-WORKFLOW.md) — public JSON files, review, `NEXT_PUBLIC_APPROVED_LOCALES`.
+- [Adding locales](./ADDING-LOCALES.md) — French, German, Portuguese, … (config + JSON + picker).
+- [messages/README.md](./messages/README.md) — translator notes next to JSON files.
+- [SSO / OAuth (Google & Microsoft)](./SSO-OAUTH.md) — env vars, callbacks, account linking.
+- [API marketplace / integrations](./API-MARKETPLACE.md) — product catalog at `/integrations`.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

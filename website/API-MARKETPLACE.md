@@ -40,3 +40,5 @@ Phase 9.2 does not implement per-tenant enable/disable for each integration. To 
 
 - [Phase 9 handoff](../System-Architecture/Planning/phase-9-handoff.md)
 - [Platform integrations](./PLATFORM-INTEGRATIONS.md)
+- [Public & integration API catalog](./PUBLIC-API.md)
+- [SSO / OAuth](./SSO-OAUTH.md)

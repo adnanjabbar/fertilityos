@@ -4,7 +4,22 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Activity, ArrowRight, ArrowLeft } from "lucide-react";
+import {
+  Activity,
+  ArrowRight,
+  ArrowLeft,
+  Building2,
+  Mail,
+  MapPin,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
+import { SearchableGeoSelect, type GeoOption } from "@/app/components/SearchableGeoSelect";
+import { PhoneInputWithCountry } from "@/app/components/PhoneInputWithCountry";
+
+const GEO_PUBLIC = "/api/public/geo";
+const showSsoHint =
+  process.env.NEXT_PUBLIC_OAUTH_GOOGLE === "1" || process.env.NEXT_PUBLIC_OAUTH_MICROSOFT === "1";
 
 type Step = "email" | "clinic" | "admin";
 
@@ -61,11 +76,63 @@ export default function RegisterPage() {
     address: "",
     city: "",
     state: "",
+    stateCode: "",
     country: "",
+    countryCode: "",
     postalCode: "",
     specialty: "",
     licenseInfo: "",
+    latitude: "",
+    longitude: "",
   });
+  const [countryOptions, setCountryOptions] = useState<GeoOption[]>([]);
+  const [stateOptions, setStateOptions] = useState<GeoOption[]>([]);
+  const [cityOptions, setCityOptions] = useState<GeoOption[]>([]);
+  const [geoLoading, setGeoLoading] = useState({
+    countries: false,
+    states: false,
+    cities: false,
+    gps: false,
+  });
+  const manualRegion =
+    Boolean(clinic.countryCode) && !geoLoading.states && stateOptions.length === 0;
+
+  useEffect(() => {
+    if (step !== "clinic") return;
+    setGeoLoading((g) => ({ ...g, countries: true }));
+    fetch(`${GEO_PUBLIC}/countries`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr) => setCountryOptions(Array.isArray(arr) ? arr : []))
+      .finally(() => setGeoLoading((g) => ({ ...g, countries: false })));
+  }, [step]);
+
+  useEffect(() => {
+    if (!clinic.countryCode) {
+      setStateOptions([]);
+      setCityOptions([]);
+      return;
+    }
+    setGeoLoading((g) => ({ ...g, states: true }));
+    fetch(`${GEO_PUBLIC}/states?country=${encodeURIComponent(clinic.countryCode)}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr) => setStateOptions(Array.isArray(arr) ? arr : []))
+      .finally(() => setGeoLoading((g) => ({ ...g, states: false })));
+    setCityOptions([]);
+  }, [clinic.countryCode]);
+
+  useEffect(() => {
+    if (!clinic.countryCode || !clinic.stateCode || manualRegion) {
+      setCityOptions([]);
+      return;
+    }
+    setGeoLoading((g) => ({ ...g, cities: true }));
+    fetch(
+      `${GEO_PUBLIC}/cities?country=${encodeURIComponent(clinic.countryCode)}&state=${encodeURIComponent(clinic.stateCode)}`
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr) => setCityOptions(Array.isArray(arr) ? arr : []))
+      .finally(() => setGeoLoading((g) => ({ ...g, cities: false })));
+  }, [clinic.countryCode, clinic.stateCode, manualRegion]);
   const [admin, setAdmin] = useState({
     email: "",
     password: "",
@@ -185,14 +252,90 @@ export default function RegisterPage() {
     }
   };
 
+  const handlePinWithGps = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setError("Your browser does not support location sharing.");
+      return;
+    }
+    setError(null);
+    setGeoLoading((g) => ({ ...g, gps: true }));
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lon = pos.coords.longitude.toFixed(6);
+        setClinic((c) => ({ ...c, latitude: lat, longitude: lon }));
+        try {
+          const r = await fetch(
+            `/api/public/reverse-geocode?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`
+          );
+          const d = (await r.json().catch(() => ({}))) as {
+            road?: string;
+            city?: string;
+            state?: string;
+            countryCode?: string;
+            postcode?: string;
+          };
+          if (!r.ok) {
+            setGeoLoading((g) => ({ ...g, gps: false }));
+            return;
+          }
+          setClinic((c) => {
+            const cc = (d.countryCode ?? "").toUpperCase();
+            const match =
+              cc.length === 2 && countryOptions.length > 0
+                ? countryOptions.find((o) => o.code?.toUpperCase() === cc)
+                : undefined;
+            const countryChanged = Boolean(match?.code && match.code !== c.countryCode);
+            return {
+              ...c,
+              latitude: lat,
+              longitude: lon,
+              address: d.road && !c.address.trim() ? d.road : c.address,
+              city: countryChanged ? (d.city ?? "") : d.city || c.city,
+              state: countryChanged ? (d.state ?? "") : d.state || c.state,
+              stateCode: countryChanged ? "" : c.stateCode,
+              postalCode: d.postcode || c.postalCode,
+              country: match?.name ?? c.country,
+              countryCode: match?.code ?? c.countryCode,
+            };
+          });
+        } catch {
+          /* keep coordinates only */
+        } finally {
+          setGeoLoading((g) => ({ ...g, gps: false }));
+        }
+      },
+      () => {
+        setError("Could not read your location. Allow location access or enter your address manually.");
+        setGeoLoading((g) => ({ ...g, gps: false }));
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+  };
+
   const handleClinicNext = () => {
     if (!clinic.name.trim()) {
       setError("Clinic name is required.");
       return;
     }
-    if (!clinic.country.trim() || clinic.country.length !== 2) {
-      setError("Country must be a 2-letter code (e.g. US, PK).");
+    if (!clinic.countryCode.trim() || clinic.countryCode.length !== 2) {
+      setError("Choose your country from the searchable list (flag and full name).");
       return;
+    }
+    if (manualRegion) {
+      if (!clinic.state.trim() || !clinic.city.trim()) {
+        setError("Enter region and city for your location.");
+        return;
+      }
+    } else {
+      if (!clinic.state.trim() || !clinic.stateCode.trim()) {
+        setError("Select a state or province from the list.");
+        return;
+      }
+      if (!clinic.city.trim()) {
+        setError("Select a city from the list.");
+        return;
+      }
     }
     setError(null);
     setClinic((c) => ({ ...c, slug: c.slug || slugFromName(c.name) }));
@@ -216,10 +359,12 @@ export default function RegisterPage() {
             address: clinic.address.trim() || undefined,
             city: clinic.city.trim() || undefined,
             state: clinic.state.trim() || undefined,
-            country: clinic.country.trim().toUpperCase(),
+            country: clinic.countryCode.trim().toUpperCase(),
             postalCode: clinic.postalCode.trim() || undefined,
             specialty: clinic.specialty.trim() || undefined,
             licenseInfo: clinic.licenseInfo.trim() || undefined,
+            latitude: clinic.latitude.trim() || undefined,
+            longitude: clinic.longitude.trim() || undefined,
           },
           admin: {
             email: admin.email.trim().toLowerCase(),
@@ -251,70 +396,120 @@ export default function RegisterPage() {
     }
   };
 
+  const stepIndex = step === "email" ? 0 : step === "clinic" ? 1 : 2;
+  const progressPct = ((stepIndex + 1) / 3) * 100;
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center py-12 px-4">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-teal-900">
+      <div className="pointer-events-none absolute inset-0 register-aurora opacity-50" aria-hidden />
+
       <Link
         href="/"
-        className="flex items-center gap-2 absolute top-6 left-6 text-slate-600 hover:text-blue-700 transition-colors"
+        className="flex items-center gap-2 absolute top-5 left-5 z-20 text-white/90 hover:text-white transition-colors"
       >
-        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-700">
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm">
           <Activity className="w-5 h-5 text-white" strokeWidth={2.5} />
         </div>
-        <span className="font-bold text-xl text-slate-900">
-          Fertility<span className="text-teal-600">OS</span>
+        <span className="font-bold text-lg sm:text-xl">
+          TheFertility<span className="text-teal-300">OS</span>
         </span>
       </Link>
 
-      <div className="w-full max-w-lg">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold uppercase tracking-wider mb-6">
-          Create your clinic account
-        </div>
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">
-          Register your clinic
-        </h1>
-        <p className="text-slate-600 mb-4">
-          {stepDescription(step)}
-        </p>
+      <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
+        <aside className="hidden lg:flex lg:w-[42%] xl:w-[40%] flex-col justify-center px-10 xl:px-14 py-24 text-white border-r border-white/10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/95 text-xs font-bold uppercase tracking-wider mb-6">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            Clinic onboarding
+          </div>
+          <h2 className="text-3xl xl:text-4xl font-extrabold leading-tight">
+            A calmer way to bring your center online.
+          </h2>
+          <p className="mt-4 text-base text-white/80 max-w-md leading-relaxed">
+            Verify your email, pin your location, and create your admin space — guided steps, clear copy,
+            built for busy clinical teams.
+          </p>
+          <ul className="mt-8 space-y-4 text-sm text-white/85">
+            <li className="flex gap-3 items-start">
+              <Mail className="w-5 h-5 text-cyan-300 shrink-0 mt-0.5" />
+              <span>Work email verification keeps signups trustworthy.</span>
+            </li>
+            <li className="flex gap-3 items-start">
+              <Building2 className="w-5 h-5 text-pink-300 shrink-0 mt-0.5" />
+              <span>Full country &amp; region lists with flags — no cryptic codes.</span>
+            </li>
+            <li className="flex gap-3 items-start">
+              <MapPin className="w-5 h-5 text-teal-300 shrink-0 mt-0.5" />
+              <span>Optional GPS pin refines your address when you want it.</span>
+            </li>
+            <li className="flex gap-3 items-start">
+              <ShieldCheck className="w-5 h-5 text-emerald-300 shrink-0 mt-0.5" />
+              <span>Strong password + optional phone OTP for your admin account.</span>
+            </li>
+          </ul>
+        </aside>
 
-        <nav aria-label="Registration steps" className="mb-8">
-          <ol className="flex flex-wrap gap-2">
-            {(
-              [
-                { id: "email" as const, label: "Verify email", n: 1 },
-                { id: "clinic" as const, label: "Clinic details", n: 2 },
-                { id: "admin" as const, label: "Admin account", n: 3 },
-              ] as const
-            ).map(({ id, label, n }) => {
-              const active = step === id;
-              const done =
-                (id === "email" && (step === "clinic" || step === "admin")) ||
-                (id === "clinic" && step === "admin");
-              return (
-                <li
-                  key={id}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-colors ${
-                    active
-                      ? "border-blue-600 bg-blue-50 text-blue-900"
-                      : done
-                        ? "border-teal-300 bg-teal-50 text-teal-800"
-                        : "border-slate-200 bg-white text-slate-500"
-                  }`}
-                >
-                  <span className="opacity-70 tabular-nums">{n}.</span> {label}
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
+        <div className="flex-1 flex items-center justify-center px-4 pt-24 pb-12 lg:pt-12 lg:pb-12">
+          <div className="w-full max-w-lg xl:max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-xs font-bold uppercase tracking-wider mb-4 lg:hidden backdrop-blur-sm">
+              Create your clinic
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 drop-shadow-sm">
+              Register your clinic
+            </h1>
+            <p className="text-white/85 text-sm sm:text-base mb-6">{stepDescription(step)}</p>
+
+            <div className="mb-6">
+              <div className="h-2 rounded-full bg-white/15 overflow-hidden border border-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-teal-400 to-pink-400 transition-all duration-700 ease-out"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <p className="text-xs text-white/70 mt-2 font-medium">
+                Step {stepIndex + 1} of 3 — you&apos;re doing great.
+              </p>
+            </div>
+
+            <nav aria-label="Registration steps" className="mb-8">
+              <ol className="flex flex-wrap gap-2">
+                {(
+                  [
+                    { id: "email" as const, label: "Email", n: 1, Icon: Mail },
+                    { id: "clinic" as const, label: "Clinic", n: 2, Icon: Building2 },
+                    { id: "admin" as const, label: "Admin", n: 3, Icon: ShieldCheck },
+                  ] as const
+                ).map(({ id, label, n, Icon }) => {
+                  const active = step === id;
+                  const done =
+                    (id === "email" && (step === "clinic" || step === "admin")) ||
+                    (id === "clinic" && step === "admin");
+                  return (
+                    <li
+                      key={id}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 backdrop-blur-sm ${
+                        active
+                          ? "border-cyan-300 bg-white/20 text-white shadow-lg"
+                          : done
+                            ? "border-teal-400/60 bg-teal-500/20 text-teal-50"
+                            : "border-white/20 bg-white/5 text-white/60"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 opacity-90" aria-hidden />
+                      <span className="opacity-80 tabular-nums">{n}.</span> {label}
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
 
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm">
+          <div className="mb-6 p-4 rounded-xl bg-red-500/15 border border-red-400/40 text-red-50 text-sm backdrop-blur-sm">
             {error}
           </div>
         )}
 
         {step === "email" ? (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="register-card-animate bg-white/95 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl shadow-black/20 p-6 sm:p-8 space-y-4">
             <div>
               <label htmlFor="register-email" className={labelClass}>Work email <span className="text-red-500">*</span></label>
               <input
@@ -372,7 +567,7 @@ export default function RegisterPage() {
             )}
           </div>
         ) : step === "clinic" ? (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="register-card-animate bg-white/95 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl shadow-black/20 p-6 sm:p-8 space-y-4">
             <div>
               <label htmlFor="clinic-name" className={labelClass}>
                 Clinic / Center name <span className="text-red-500">*</span>
@@ -410,56 +605,138 @@ export default function RegisterPage() {
                 Your clinic URL will be: <strong>{clinic.slug || "..."}.thefertilityos.com</strong>
               </p>
             </div>
-            <div>
-              <label htmlFor="country" className={labelClass}>
-                Country (2-letter code) <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="country"
-                type="text"
-                placeholder="e.g. US, PK, GB"
-                maxLength={2}
-                value={clinic.country}
-                onChange={(e) =>
-                  setClinic((c) => ({ ...c, country: e.target.value.toUpperCase() }))
-                }
-                className={inputClass}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="city" className={labelClass}>City</label>
-                <input
-                  id="city"
-                  type="text"
-                  placeholder="City"
-                  value={clinic.city}
-                  onChange={(e) => setClinic((c) => ({ ...c, city: e.target.value }))}
-                  className={inputClass}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label htmlFor="country" className={labelClass}>
+                  Country <span className="text-red-500">*</span>
+                </label>
+                <SearchableGeoSelect
+                  id="country"
+                  placeholder="Search by country name or flag…"
+                  value={clinic.country}
+                  onChange={(name, code) =>
+                    setClinic((c) => ({
+                      ...c,
+                      country: name,
+                      countryCode: code ?? "",
+                      state: "",
+                      stateCode: "",
+                      city: "",
+                    }))
+                  }
+                  options={countryOptions}
+                  loading={geoLoading.countries}
+                  getDisplayLabel={(c) => (c.flag ? `${c.flag} ${c.name}` : c.name)}
                 />
               </div>
               <div>
-                <label htmlFor="state" className={labelClass}>State / Region</label>
+                <label htmlFor="state" className={labelClass}>
+                  State / province <span className="text-red-500">*</span>
+                </label>
+                {manualRegion ? (
+                  <>
+                    <p className="text-xs text-slate-500 mb-2">
+                      No subdivisions in our directory for this country — type region and city.
+                    </p>
+                    <input
+                      id="state"
+                      type="text"
+                      placeholder="Region / province"
+                      value={clinic.state}
+                      onChange={(e) => setClinic((c) => ({ ...c, state: e.target.value, stateCode: "" }))}
+                      className={inputClass}
+                    />
+                  </>
+                ) : (
+                  <SearchableGeoSelect
+                    id="state"
+                    placeholder="Search state…"
+                    value={clinic.state}
+                    onChange={(name, code) =>
+                      setClinic((c) => ({ ...c, state: name, stateCode: code ?? "", city: "" }))
+                    }
+                    options={stateOptions}
+                    loading={geoLoading.states}
+                    disabled={!clinic.countryCode}
+                    getDisplayLabel={(s) => s.name}
+                  />
+                )}
+              </div>
+              <div>
+                <label htmlFor="city" className={labelClass}>
+                  City <span className="text-red-500">*</span>
+                </label>
+                {manualRegion ? (
+                  <input
+                    id="city"
+                    type="text"
+                    placeholder="City"
+                    value={clinic.city}
+                    onChange={(e) => setClinic((c) => ({ ...c, city: e.target.value }))}
+                    className={inputClass}
+                  />
+                ) : (
+                  <SearchableGeoSelect
+                    id="city"
+                    placeholder="Search city…"
+                    value={clinic.city}
+                    onChange={(name) => setClinic((c) => ({ ...c, city: name }))}
+                    options={cityOptions}
+                    loading={geoLoading.cities}
+                    disabled={!clinic.stateCode}
+                    getDisplayLabel={(c) => c.name}
+                  />
+                )}
+              </div>
+              <div>
+                <label htmlFor="postal" className={labelClass}>Postal code</label>
                 <input
-                  id="state"
+                  id="postal"
                   type="text"
-                  placeholder="State"
-                  value={clinic.state}
-                  onChange={(e) => setClinic((c) => ({ ...c, state: e.target.value }))}
+                  placeholder="Postal / ZIP"
+                  value={clinic.postalCode}
+                  onChange={(e) => setClinic((c) => ({ ...c, postalCode: e.target.value }))}
                   className={inputClass}
                 />
               </div>
             </div>
             <div>
-              <label htmlFor="address" className={labelClass}>Address</label>
+              <label htmlFor="address" className={labelClass}>Street address</label>
               <input
                 id="address"
                 type="text"
-                placeholder="Street address"
+                placeholder="Building, street, suite…"
                 value={clinic.address}
                 onChange={(e) => setClinic((c) => ({ ...c, address: e.target.value }))}
                 className={inputClass}
               />
+            </div>
+            <div className="rounded-xl border border-dashed border-blue-200 bg-gradient-to-br from-blue-50/80 to-teal-50/40 p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-white shadow-md">
+                  <MapPin className="w-5 h-5" aria-hidden />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-slate-900">Pin with GPS (optional)</p>
+                  <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                    Adds coordinates for an approximate map location. We&apos;ll suggest address fields when
+                    possible — you can always edit them.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handlePinWithGps}
+                disabled={geoLoading.gps}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 disabled:opacity-60 transition-colors"
+              >
+                {geoLoading.gps ? "Locating…" : "Use my current location"}
+              </button>
+              {(clinic.latitude || clinic.longitude) && (
+                <p className="text-xs font-mono text-slate-600 break-all">
+                  Saved pin: {clinic.latitude || "—"}, {clinic.longitude || "—"}
+                </p>
+              )}
             </div>
             <div>
               <label htmlFor="specialty" className={labelClass}>Specialty</label>
@@ -475,7 +752,7 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={handleClinicNext}
-              className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 hover:-translate-y-0.5"
+              className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-blue-700 to-teal-600 text-white font-bold hover:from-blue-800 hover:to-teal-700 transition-all shadow-lg shadow-blue-900/20 hover:-translate-y-0.5"
             >
               Next: Admin account
               <ArrowRight className="w-5 h-5" />
@@ -484,7 +761,7 @@ export default function RegisterPage() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4"
+            className="register-card-animate bg-white/95 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl shadow-black/20 p-6 sm:p-8 space-y-4"
           >
             <div>
               <label htmlFor="fullName" className={labelClass}>
@@ -515,18 +792,16 @@ export default function RegisterPage() {
             </div>
             <div>
               <label htmlFor="admin-phone" className={labelClass}>
-                Phone (optional)
+                Phone (optional) — country code &amp; flag
               </label>
-              <input
+              <PhoneInputWithCountry
                 id="admin-phone"
-                type="tel"
-                placeholder="+1 234 567 8900"
-                value={admin.phone}
-                onChange={(e) => {
-                  setAdmin((a) => ({ ...a, phone: e.target.value }));
+                value={admin.phone || undefined}
+                onChange={(v) => {
+                  setAdmin((a) => ({ ...a, phone: v ?? "" }));
                   setPhoneVerified(false);
                 }}
-                className={inputClass}
+                placeholder="e.g. 234 567 8900"
                 disabled={phoneCodeSent}
               />
               {admin.phone.trim() && !phoneVerified && !phoneCodeSent && (
@@ -573,6 +848,17 @@ export default function RegisterPage() {
                 <p className="mt-1 text-sm text-green-600 font-medium">Phone verified</p>
               )}
             </div>
+            {showSsoHint && (
+              <div className="rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-3 text-sm text-slate-700">
+                <p className="font-semibold text-blue-900">Single sign-on (SSO)</p>
+                <p className="mt-1">
+                  After your clinic is created, staff can use{" "}
+                  <strong>Google</strong> or <strong>Microsoft</strong> on the login page when your
+                  organization enables it — same verified identity, no extra password for day-to-day
+                  sign-in. Two-factor authentication (2FA) is planned after SSO rollout.
+                </p>
+              </div>
+            )}
             <div>
               <label htmlFor="password" className={labelClass}>
                 Password <span className="text-red-500">*</span>
@@ -609,12 +895,17 @@ export default function RegisterPage() {
           </form>
         )}
 
-        <p className="text-center text-slate-600 mt-6">
-          Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-blue-700 hover:underline">
-            Sign in
-          </Link>
-        </p>
+            <div className="mt-8 space-y-2">
+              <p className="text-center text-white/80 text-sm">Already have an account?</p>
+              <Link
+                href="/login"
+                className="flex w-full items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-white/40 bg-white/10 text-white font-bold text-sm hover:bg-white/20 transition-colors backdrop-blur-sm"
+              >
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -86,6 +86,8 @@ const migrations = [
   "0044_platform_email_templates.sql",
   "0045_tenant_email_templates.sql",
   "0046_platform_subscription_audit.sql",
+  "0047_platform_settings_tenant_geo.sql",
+  "0048_platform_promotion_codes.sql",
 ];
 
 async function main() {

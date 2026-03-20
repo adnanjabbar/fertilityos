@@ -154,7 +154,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     notes: "Super admin deleted clinic from All clinics",
   });
 
-  const stripe = getStripe();
+  const stripe = await getStripe();
   const [subRow] = await db
     .select({
       stripeSubscriptionId: tenantSubscriptions.stripeSubscriptionId,

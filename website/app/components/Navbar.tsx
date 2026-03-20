@@ -6,6 +6,7 @@ import { Menu, X, Activity } from "lucide-react";
 import type { Session } from "next-auth";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./LanguageSwitcher";
+import RegionalLanguagePicker from "./RegionalLanguagePicker";
 
 const navLinkKeys = [
   { key: "features", href: "#features" },
@@ -48,6 +49,7 @@ export default function Navbar({ session }: { session: Session | null }) {
 
           {/* Desktop CTAs + Language */}
           <div className="hidden md:flex items-center gap-3">
+            <RegionalLanguagePicker />
             <LanguageSwitcher variant="buttons" className="shrink-0" />
             {session ? (
               <>
@@ -95,9 +97,12 @@ export default function Navbar({ session }: { session: Session | null }) {
         {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden border-t border-slate-100 py-4 space-y-3">
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm font-medium text-slate-500">Language</span>
-              <LanguageSwitcher variant="buttons" />
+            <div className="space-y-2 py-2">
+              <RegionalLanguagePicker className="w-full justify-center" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-500">Quick</span>
+                <LanguageSwitcher variant="buttons" />
+              </div>
             </div>
             {navLinkKeys.map((link) => (
               <a

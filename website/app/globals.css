@@ -44,3 +44,157 @@ html {
   height: 100%;
   object-fit: cover;
 }
+
+/* Registration hero */
+.register-aurora {
+  background:
+    radial-gradient(ellipse 90% 60% at 15% 30%, rgba(56, 189, 248, 0.45), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 85% 70%, rgba(236, 72, 153, 0.25), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 90%, rgba(45, 212, 191, 0.2), transparent 45%);
+}
+
+@keyframes register-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-card-animate {
+  animation: register-pop-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 9:16 marketing reel (screen-record or export from browser at high zoom for 2K+) */
+@keyframes reel-pan {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2%) scale(1.02);
+  }
+}
+
+.reel-bg-drift {
+  animation: reel-pan 14s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reel-bg-drift,
+  .reel-tagline-shimmer {
+    animation: none !important;
+  }
+  .reel-chapters {
+    position: relative !important;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 6%;
+    overflow-y: auto;
+  }
+  .reel-chapters .reel-chapter {
+    position: relative !important;
+    inset: auto !important;
+    opacity: 1 !important;
+    animation: none !important;
+    padding: 0 !important;
+  }
+}
+
+@keyframes reel-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reel-logo-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+    filter: blur(6px);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.05);
+    filter: blur(0);
+  }
+  75% {
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes reel-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/* FertilityOSStoryReel: ~9s loop, 3 chapters */
+.reel-chapter {
+  position: absolute;
+  inset: 6%;
+  opacity: 0;
+  animation: reel-chapter 9s ease-in-out infinite;
+}
+.reel-chapter:nth-child(1) {
+  animation-delay: 0s;
+}
+.reel-chapter:nth-child(2) {
+  animation-delay: 3s;
+}
+.reel-chapter:nth-child(3) {
+  animation-delay: 6s;
+}
+
+@keyframes reel-chapter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  4% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  28% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  33% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+.reel-tagline-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(255, 255, 255, 0.25) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: reel-shimmer 3.5s linear infinite;
+}

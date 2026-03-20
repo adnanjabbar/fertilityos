@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { tenantSubscriptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { createBillingPortalSession, isStripeConfigured } from "@/lib/stripe";
+import { createBillingPortalSession, isStripeSecretConfigured } from "@/lib/stripe";
 
 /**
  * POST /api/app/billing/portal
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!isStripeConfigured()) {
+  if (!(await isStripeSecretConfigured())) {
     return NextResponse.json(
       { error: "Billing is not configured. Contact support." },
       { status: 503 }

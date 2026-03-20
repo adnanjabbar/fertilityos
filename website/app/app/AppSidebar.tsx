@@ -37,6 +37,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import RegionalLanguagePicker from "../components/RegionalLanguagePicker";
 
 const iconMap: Record<string, IconDefinition> = {
   dashboard: faChartLine,
@@ -289,7 +290,8 @@ export default function AppSidebar({
 
       {/* User & sign out */}
       <div className="p-3 border-t border-slate-700/50 space-y-2">
-        <div className="lg:hidden px-3 pb-2">
+        <div className="lg:hidden px-3 pb-2 space-y-2">
+          <RegionalLanguagePicker className="w-full justify-center" />
           <LanguageSwitcher variant="dropdown" className="w-full" />
         </div>
         <div className="px-3 py-2 rounded-lg bg-slate-800/60 text-slate-300 text-xs">

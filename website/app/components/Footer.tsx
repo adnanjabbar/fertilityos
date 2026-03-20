@@ -5,7 +5,7 @@ const footerLinkConfig = {
   Product: ["features", "modules", "integrations", "pricing", "howItWorks", "roadmap"] as const,
   Company: ["about", "blog", "careers", "contact"] as const,
   Legal: ["privacyPolicy", "termsOfService", "hipaaPolicy", "cookiePolicy"] as const,
-  Support: ["documentation", "apiReference", "statusPage", "helpCenter"] as const,
+  Support: ["documentation", "apiReference", "statusPage", "helpCenter", "translateProject"] as const,
 };
 
 const hrefByKey: Record<string, string> = {
@@ -27,6 +27,7 @@ const hrefByKey: Record<string, string> = {
   apiReference: "#",
   statusPage: "#",
   helpCenter: "#",
+  translateProject: "/translate",
 };
 
 export default async function Footer() {

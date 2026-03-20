@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
+import { resolvePaymentGatewayConfig } from "@/lib/payment-gateway-config";
 import { db } from "@/db";
 import { tenantSubscriptions, tenants } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { logStripeSubscriptionSync } from "@/lib/platform-admin-audit";
 
 export async function POST(request: Request) {
-  const stripe = getStripe();
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const cfg = await resolvePaymentGatewayConfig();
+  const stripe = await getStripe();
+  const webhookSecret = cfg.stripe.webhookSecret;
 
   if (!stripe || !webhookSecret) {
-    console.error("[stripe webhook] Missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET");
+    console.error("[stripe webhook] Missing Stripe secret key or webhook signing secret (env or Super Admin)");
     return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
   }
 

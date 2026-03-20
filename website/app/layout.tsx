@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Noto_Sans_Arabic } from "next/font/google";
 import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import RootProviders from "./components/RootProviders";
 import "./globals.css";
+import type { Locale } from "@/i18n/request";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-geist-sans" });
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
+const notoArabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic" });
 
 export const metadata: Metadata = {
   title: "FertilityOS — The Operating System for Fertility Care",
@@ -36,12 +38,18 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
+  const locale = (await getLocale()) as Locale;
   const messages = await getMessages();
+  const isRtl = locale === "ar";
+  const bodyFont = isRtl ? notoArabic.className : inter.className;
 
   return (
-    <html lang={locale} className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="antialiased">
+    <html
+      lang={locale}
+      dir={isRtl ? "rtl" : "ltr"}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${notoArabic.variable}`}
+    >
+      <body className={`antialiased ${bodyFont}`}>
         <RootProviders>
           <NextIntlClientProvider messages={messages} locale={locale}>
             {children}

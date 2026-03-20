@@ -1,6 +1,7 @@
 "use client";
 
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import RegionalLanguagePicker from "../components/RegionalLanguagePicker";
 
 type AppTopBarProps = {
   userName: string;
@@ -10,6 +11,7 @@ type AppTopBarProps = {
 export default function AppTopBar({ userName, tenantName }: AppTopBarProps) {
   return (
     <div className="hidden lg:flex absolute top-4 right-6 items-center gap-3 z-10">
+      <RegionalLanguagePicker />
       <LanguageSwitcher variant="dropdown" className="shrink-0" />
       <span className="text-sm text-slate-500">
         <span className="font-medium text-slate-700">{tenantName ?? "Clinic"}</span>

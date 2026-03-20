@@ -34,6 +34,7 @@ export default function BillingClient({ isAdmin = false }: { isAdmin?: boolean }
   const [settingsCurrency, setSettingsCurrency] = useState<string>("USD");
   const [reminderChannel, setReminderChannel] = useState<"email" | "sms" | "both" | "whatsapp">("email");
   const [reminderSaveLoading, setReminderSaveLoading] = useState(false);
+  const [promotionCode, setPromotionCode] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -67,7 +68,13 @@ export default function BillingClient({ isAdmin = false }: { isAdmin?: boolean }
     setActionLoading("checkout");
     setMessage(null);
     try {
-      const res = await fetch("/api/app/billing/checkout", { method: "POST" });
+      const res = await fetch("/api/app/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          promotionCode: promotionCode.trim() || undefined,
+        }),
+      });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setMessage({ type: "error", text: data.error ?? "Could not start checkout." });
@@ -192,6 +199,26 @@ export default function BillingClient({ isAdmin = false }: { isAdmin?: boolean }
             Current period ends on <strong>{periodEnd}</strong>.
           </p>
         )}
+
+        {!sub?.hasCustomer || !isActive ? (
+          <div className="mb-4">
+            <label htmlFor="promo-code" className="block text-sm font-medium text-slate-700 mb-1">
+              Promotion code (optional)
+            </label>
+            <input
+              id="promo-code"
+              type="text"
+              autoComplete="off"
+              placeholder="e.g. EARLY2026"
+              value={promotionCode}
+              onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
+              className="w-full max-w-sm px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm font-mono uppercase placeholder:normal-case placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              If you have a marketing code from FertilityOS, enter it before subscribing. Discount applies in Stripe Checkout.
+            </p>
+          </div>
+        ) : null}
 
         <div className="flex flex-wrap gap-3">
           {!sub?.hasCustomer || !isActive ? (

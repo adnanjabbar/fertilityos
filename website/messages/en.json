@@ -69,7 +69,8 @@
         "documentation": "Documentation",
         "apiReference": "API Reference",
         "statusPage": "Status Page",
-        "helpCenter": "Help Center"
+        "helpCenter": "Help Center",
+        "translateProject": "Translate the project"
       },
       "badges": ["HIPAA Ready", "GDPR Compliant", "SSL Secured", "SOC 2 (Planned)"],
       "copyright": "© {year} FertilityOS. All rights reserved.",
@@ -310,7 +311,47 @@
       "joinWaitlist": "Join the Waitlist",
       "disclaimer": "No credit card required. 14-day free trial. No spam.",
       "socialProof": "{count} clinics already on the waitlist"
+    },
+    "languagePicker": {
+      "openAria": "Choose region and language",
+      "trigger": "Region & language",
+      "title": "Choose region and language",
+      "subtitle": "Pick your area, country, and preferred language. New languages are enabled after we review professional translations.",
+      "continent": "Continent / region",
+      "country": "Country",
+      "language": "Language",
+      "selectCountry": "Select country…",
+      "selectLanguage": "Select language…",
+      "apply": "Continue",
+      "cancel": "Cancel",
+      "quick": "Quick switch (approved languages)",
+      "defaultCurrency": "Currency",
+      "noCountriesForLocale": "No countries in this region match the languages currently enabled for the site.",
+      "continents": {
+        "americas": "Americas",
+        "europe": "Europe",
+        "africa": "Africa",
+        "asia": "Asia",
+        "oceania": "Oceania",
+        "mena": "Middle East & North Africa"
+      }
     }
+  },
+  "translatePage": {
+    "title": "Translate FertilityOS",
+    "lead": "Our interface strings live in public JSON files in the repository. Professional translators can propose updates; we enable a locale in production only after review.",
+    "whereFiles": "Where the files are",
+    "whereFilesBody": "Folder: website/messages/ — one file per locale (e.g. en.json, es.json, ar.json). English is the base; other files are merged on top so partial translations are fine.",
+    "workflowTitle": "Suggested workflow",
+    "workflowSteps": [
+      "Fork the repository (or receive a translator branch from your team).",
+      "Edit or add messages/{locale}.json following the same JSON structure as en.json.",
+      "Open a pull request with a short note (language, scope, reviewer).",
+      "Maintainers review for accuracy and clinical tone, then set NEXT_PUBLIC_APPROVED_LOCALES to include the new code when ready to ship."
+    ],
+    "deployTitle": "Deploy gate",
+    "deployBody": "Even if a language file exists, it is not shown to users until its code is listed in NEXT_PUBLIC_APPROVED_LOCALES (see website/.env.example). This lets you accept translator PRs early and turn languages on when quality is approved.",
+    "readmeLink": "See messages/README.md in the repo for contributor details."
   },
   "app": {
     "nav": {
@@ -345,6 +386,9 @@
       "superClinics": "All clinics",
       "superComplianceLog": "Platform compliance log",
       "superPatientSearch": "Cross-clinic patient search",
+      "superPromotionCodes": "Checkout promo codes",
+      "superLocaleSettings": "Languages (public site)",
+      "superPaymentSettings": "Payment gateways",
       "logOut": "Log out",
       "brand": "FertilityOS",
       "clinic": "Clinic",
@@ -368,6 +412,8 @@
   },
   "locale": {
     "en": "English",
-    "es": "Español"
+    "es": "Español",
+    "ar": "العربية",
+    "fr": "Français"
   }
 }

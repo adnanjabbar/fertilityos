@@ -69,7 +69,8 @@
         "documentation": "Documentación",
         "apiReference": "Referencia API",
         "statusPage": "Estado del servicio",
-        "helpCenter": "Centro de ayuda"
+        "helpCenter": "Centro de ayuda",
+        "translateProject": "Traducir el proyecto"
       },
       "badges": ["Listo para HIPAA", "Conforme GDPR", "SSL asegurado", "SOC 2 (Planificado)"],
       "copyright": "© {year} FertilityOS. Todos los derechos reservados.",
@@ -310,7 +311,47 @@
       "joinWaitlist": "Unirse a la lista",
       "disclaimer": "Sin tarjeta de crédito. Prueba gratuita de 14 días. Sin spam.",
       "socialProof": "{count} clínicas ya en la lista"
+    },
+    "languagePicker": {
+      "openAria": "Elegir región e idioma",
+      "trigger": "Región e idioma",
+      "title": "Elige región e idioma",
+      "subtitle": "Selecciona tu zona, país e idioma preferido. Los idiomas nuevos se activan tras revisar traducciones profesionales.",
+      "continent": "Continente / región",
+      "country": "País",
+      "language": "Idioma",
+      "selectCountry": "Selecciona país…",
+      "selectLanguage": "Selecciona idioma…",
+      "apply": "Continuar",
+      "cancel": "Cancelar",
+      "quick": "Cambio rápido (idiomas aprobados)",
+      "defaultCurrency": "Moneda",
+      "noCountriesForLocale": "Ningún país de esta región coincide con los idiomas activados en el sitio.",
+      "continents": {
+        "americas": "Américas",
+        "europe": "Europa",
+        "africa": "África",
+        "asia": "Asia",
+        "oceania": "Oceanía",
+        "mena": "Oriente Medio y Norte de África"
+      }
     }
+  },
+  "translatePage": {
+    "title": "Traducir FertilityOS",
+    "lead": "Los textos de la interfaz están en archivos JSON públicos en el repositorio. Los traductores profesionales pueden proponer cambios; solo activamos un idioma en producción tras la revisión.",
+    "whereFiles": "Ubicación de los archivos",
+    "whereFilesBody": "Carpeta: website/messages/ — un archivo por idioma (p. ej. en.json, es.json, ar.json). El inglés es la base; los demás se fusionan encima, así que las traducciones parciales son válidas.",
+    "workflowTitle": "Flujo recomendado",
+    "workflowSteps": [
+      "Haz un fork del repositorio (o usa una rama de traducción).",
+      "Edita o añade messages/{idioma}.json respetando la misma estructura que en.json.",
+      "Abre un pull request con una nota breve (idioma, alcance, revisor).",
+      "Los mantenedores revisan tono clínico y calidad; cuando esté listo, se añade el código a NEXT_PUBLIC_APPROVED_LOCALES para publicarlo."
+    ],
+    "deployTitle": "Control de despliegue",
+    "deployBody": "Aunque exista un archivo de idioma, no se muestra a los usuarios hasta que su código figure en NEXT_PUBLIC_APPROVED_LOCALES (ver website/.env.example). Así puedes aceptar PRs de traductores antes de activar el idioma.",
+    "readmeLink": "Consulta messages/README.md en el repositorio para más detalles para colaboradores."
   },
   "app": {
     "nav": {
@@ -345,6 +386,9 @@
       "superClinics": "Todas las clínicas",
       "superComplianceLog": "Registro de cumplimiento (plataforma)",
       "superPatientSearch": "Búsqueda de pacientes (todas las clínicas)",
+      "superPromotionCodes": "Códigos promocionales (checkout)",
+      "superLocaleSettings": "Idiomas (sitio público)",
+      "superPaymentSettings": "Pasarelas de pago",
       "logOut": "Cerrar sesión",
       "brand": "FertilityOS",
       "clinic": "Clínica",
@@ -368,6 +412,8 @@
   },
   "locale": {
     "en": "English",
-    "es": "Español"
+    "es": "Español",
+    "ar": "العربية",
+    "fr": "Français"
   }
 }

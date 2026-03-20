@@ -83,31 +83,19 @@ Use `t.raw("key")` to get the raw value (e.g. an array) for mapping.
 
 ## Adding a new locale
 
-1. **Add the locale in `i18n/request.ts`:**
+See **`ADDING-LOCALES.md`** for the full checklist. Summary:
 
-   ```ts
-   export const locales = ["en", "es", "ar"] as const;  // add "ar"
-   ```
-
-2. **Create `messages/ar.json`** (copy from `en.json` and translate).
-
-3. **Add the locale label for the switcher** in both `en.json` and `es.json` (and the new file) under `locale`:
-
-   ```json
-   "locale": {
-     "en": "English",
-     "es": "Español",
-     "ar": "العربية"
-   }
-   ```
-
-4. **Update `app/components/LanguageSwitcher.tsx`** so the `locales` array includes the new locale (e.g. `{ value: "ar", label: t("ar") }`), and ensure the `locale` namespace in each message file has the new label (e.g. `"ar": "العربية"`).
+1. Add **`messages/{code}.json`** (can start as `{}` or partial overrides; English fills the rest).
+2. Register the code in **`lib/i18n-config.ts`**: `KNOWN_LOCALE_CODES` + **`LOCALE_DISPLAY`** (native label). `i18n/request.ts` picks this up via `locales` export.
+3. Update **`lib/language-picker-data.ts`** for countries that should offer the new language.
+4. Optionally add **`locale.{code}`** in other JSON files for consistency; the switcher reads **`LOCALE_DISPLAY`**, not `locale.*`.
+5. Control rollout with **`NEXT_PUBLIC_APPROVED_LOCALES`**.
 
 ## Adding or editing messages
 
 - **Landing:** keys live under `landing.*` (e.g. `landing.hero`, `landing.nav`, `landing.footer`, `landing.features`, `landing.modules`, `landing.howItWorks`, `landing.pricing`, `landing.faq`, `landing.waitlist`).
 - **App shell:** keys under `app.nav` and `app.common` (e.g. Save, Cancel).
-- **Locale names:** under `locale` for the language switcher.
+- **Locale names:** switcher uses **`LOCALE_DISPLAY`** in `lib/i18n-config.ts`; optional `locale.*` keys in JSON for other UI.
 
 Add or update the key in **all** locale files (`en.json`, `es.json`, etc.) to avoid missing translation warnings.
 

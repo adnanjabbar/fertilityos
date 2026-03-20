@@ -1,0 +1,393 @@
+{
+  "locale": {
+    "en": "English",
+    "es": "Español",
+    "ar": "العربية",
+    "fr": "Français"
+  },
+  "landing": {
+    "hero": {
+      "badge": "نقبل الآن طلبات الوصول المبكر",
+      "title": "نظام التشغيل",
+      "titleHighlight": "لرعاية الخصوبة",
+      "subheadline": "FertilityOS هي أول منصة شاملة في العالم مبنية خصيصًا لعيادات الخصوبة ومراكز الصحة الإنجابية. أدِر كل خطوة — من استقبال المريض إلى نقل الأجنة — في مكان واحد.",
+      "highlights": {
+        "purposeBuilt": "مصمم لعيادات الخصوبة",
+        "ivfLab": "سير عمل مختبر أطفال الأنابيب وعلم الأجنة",
+        "multiTenant": "متعدد المستأجرين، جاهز للعلامة البيضاء",
+        "hipaa": "بنية متوافقة مع HIPAA"
+      },
+      "cta": {
+        "getEarlyAccess": "احصل على وصول مبكر",
+        "signIn": "تسجيل الدخول",
+        "exploreModules": "استكشف الوحدات"
+      },
+      "trustBar": "موثوق به من أخصائيي الخصوبة حول العالم",
+      "clinicNames": ["Advanced Fertility Center", "ReproMed Institute", "IVF Solutions", "BabyHope Clinic", "FertileLife Center"],
+      "dashboardMockup": {
+        "url": "app.thefertilityos.com/dashboard",
+        "activePatients": "المرضى النشطون",
+        "ivfCyclesToday": "دورات أطفال الأنابيب اليوم",
+        "embryosInCulture": "أجنة في المزرعة",
+        "appointmentsToday": "المواعيد اليوم",
+        "ivfCycleOverview": "نظرة على دورة أطفال الأنابيب — مارس 2026",
+        "todaysSchedule": "جدول اليوم",
+        "retrieval": "السحب",
+        "consultation": "استشارة",
+        "transfer": "النقل"
+      }
+    },
+    "nav": {
+      "features": "الميزات",
+      "modules": "الوحدات",
+      "pricing": "الأسعار",
+      "howItWorks": "كيف يعمل",
+      "about": "من نحن",
+      "dashboard": "لوحة التحكم",
+      "logOut": "تسجيل الخروج",
+      "signIn": "تسجيل الدخول",
+      "getEarlyAccess": "وصول مبكر",
+      "toggleMenu": "فتح/إغلاق القائمة",
+      "brand": "FertilityOS"
+    },
+    "footer": {
+      "Product": "المنتج",
+      "Company": "الشركة",
+      "Legal": "قانوني",
+      "Support": "الدعم",
+      "tagline": "أول نظام تشغيل في العالم لعيادات الخصوبة ومراكز الصحة الإنجابية.",
+      "builtBy": "من إنشاء أخصائي خصوبة.",
+      "links": {
+        "features": "الميزات",
+        "modules": "الوحدات",
+        "integrations": "التكاملات",
+        "pricing": "الأسعار",
+        "howItWorks": "كيف يعمل",
+        "roadmap": "خارطة الطريق",
+        "about": "من نحن",
+        "blog": "المدونة",
+        "careers": "الوظائف",
+        "contact": "اتصل بنا",
+        "privacyPolicy": "سياسة الخصوصية",
+        "termsOfService": "شروط الخدمة",
+        "hipaaPolicy": "سياسة HIPAA",
+        "cookiePolicy": "سياسة ملفات تعريف الارتباط",
+        "documentation": "التوثيق",
+        "apiReference": "مرجع API",
+        "statusPage": "حالة الخدمة",
+        "helpCenter": "مركز المساعدة",
+        "translateProject": "ترجمة المشروع"
+      },
+      "badges": ["جاهز لـ HIPAA", "متوافق GDPR", "SSL آمن", "SOC 2 (مخطط)"],
+      "copyright": "© {year} FertilityOS. جميع الحقوق محفوظة.",
+      "taglineBottom": "مصمم للأطباء. مبني للتوسع. يعمل على السحابة."
+    },
+    "features": {
+      "badge": "قدرات المنصة",
+      "title": "منصة بمستوى المؤسسات.",
+      "titleHighlight": "بساطة مناسبة للعيادة.",
+      "subtitle": "يجمع FertilityOS بين أمان وقابلية توسع البرمجيات المؤسسية وسهولة الاستخدام التي تحتاجها الفرق السريرية.",
+      "items": {
+        "whiteLabel": {
+          "title": "جاهز للعلامة البيضاء",
+          "description": "استخدم نطاقك وشعارك وألوان علامتك. يرى المرضى والموظفون علامتك، مع FertilityOS في الخلفية."
+        },
+        "hipaa": {
+          "title": "بنية متوافقة مع HIPAA",
+          "description": "تشفير شامل، سجلات تدقيق، وصول قائم على الأدوار، واتفاقيات BAA متاحة في خطط Scale وEnterprise."
+        },
+        "ivfWorkflows": {
+          "title": "مبني لسير عمل أطفال الأنابيب",
+          "description": "صممه أخصائي خصوبة. كل سير عمل وحقل وتقرير يعكس الممارسة السريرية الحقيقية."
+        },
+        "multiRole": {
+          "title": "إدارة فريق متعدد الأدوار",
+          "description": "أطباء، أخصائيو أجنة، ممرضات، استقبال، وفنيو مختبر — لكل منهم واجهة وصلاحيات مناسبة."
+        },
+        "dataSovereignty": {
+          "title": "سيادة البيانات",
+          "description": "تُخزَّن بيانات عيادتك في بيئات معزولة ومشفرة. فصل المستأجرين يمنع تسرب البيانات بين الحسابات."
+        },
+        "alwaysUpdated": {
+          "title": "دائمًا محدث",
+          "description": "SaaS سحابي أصلي — بلا تثبيت أو تحديثات يدوية. تُنشر الميزات والتحديثات التنظيمية تلقائيًا."
+        }
+      },
+      "stats": {
+        "specialtyModules": "وحدات تخصصية",
+        "uptimeSla": "اتفاقية وقت التشغيل",
+        "compliant": "متوافق",
+        "support": "دعم (Scale+)"
+      }
+    },
+    "integrations": {
+      "title": "التكاملات والشركاء",
+      "subtitle": "اربط FertilityOS بأدواتك الحالية. اضبط كل تكامل من لوحة التحكم أو اتبع وثائق المزود.",
+      "configureInDashboard": "الإعداد في لوحة التحكم",
+      "docs": "الوثائق",
+      "footer": "المزيد من التكاملات (محاسبة، سجل طبي، HL7) قريبًا. تواصل معنا للشراكة.",
+      "items": {
+        "twilio": "Twilio",
+        "twilioDesc": "رسائل SMS ومكالمات لرمز OTP وتذكير المواعيد.",
+        "daily": "Daily.co",
+        "dailyDesc": "فيديو متوافق مع HIPAA للطب عن بُعد.",
+        "whatsapp": "WhatsApp Business",
+        "whatsappDesc": "واجهة WhatsApp Business المملوكة للمستأجر للرسائل والإشعارات.",
+        "stripe": "Stripe",
+        "stripeDesc": "الاشتراكات والمدفوعات. بوابة العميل وCheckout؛ الويب هوكات تزامن الحالة.",
+        "resend": "Resend",
+        "resendDesc": "بريد معاملاتي وحملات. الوضع المنصة يستخدم Resend مع تذييل FertilityOS.",
+        "lis": "LIS / موصلات المختبر",
+        "lisDesc": "الاتصال بأنظمة معلومات المختبر وLIMS.",
+        "google": "تسجيل الدخول عبر Google",
+        "googleDesc": "OAuth للموظفين. SSO اختياري مع Microsoft وApple.",
+        "api": "مفاتيح API",
+        "apiDesc": "وصول REST API للأنظمة الخارجية. أنشئ وألغِ المفاتيح في المطورين."
+      }
+    },
+    "modules": {
+      "badge": "معياري بالتصميم",
+      "title": "كل وحدة تحتاجها عيادتك.",
+      "titleHighlight": "ادفع فقط مقابل ما تستخدمه.",
+      "subtitle": "FertilityOS مبني على بنية معيارية. المنصة الأساسية تمنحك حسابات متعددة المستأجرين وRBAC وإدارة مرضى أساسية. أضف وحدات التخصص مع نمو عيادتك.",
+      "comingSoon": "قريبًا",
+      "core": "الأساس",
+      "specialty": "تخصص",
+      "addon": "إضافة",
+      "legend": {
+        "core": "الأساس — مضمن في جميع الخطط",
+        "specialty": "تخصص — وحدة تركز على أطفال الأنابيب",
+        "addon": "إضافة — تفعيل لكل عيادة"
+      }
+    },
+    "howItWorks": {
+      "badge": "البدء",
+      "title": "جاهز للعمل خلال",
+      "titleHighlight": "دقائق لا أشهر.",
+      "subtitle": "FertilityOS مصمم للفرق السريرية لا لقسم تقنية المعلومات. ابدأ عيادتك في أربع خطوات.",
+      "cta": "ابدأ اليوم",
+      "steps": {
+        "step": "الخطوة",
+        "register": {
+          "title": "سجّل عيادتك",
+          "description": "سجّل باسم العيادة والتخصص وبيانات الاتصال. اختر نطاق FertilityOS الفرعي أو اربط نطاقك الخاص.",
+          "details": ["ملف العيادة والترخيص", "نطاق فرعي أو نطاق خاص", "شعار وألوان العلامة", "دعم مواقع متعددة"]
+        },
+        "setupTeam": {
+          "title": "أعد فريقك",
+          "description": "أنشئ حسابات لجميع الموظفين وخصص الصلاحيات حسب الدور.",
+          "details": ["حسابات فرعية غير محدودة", "قوالب أدوار جاهزة", "صلاحيات على مستوى الوحدة", "مصادقة ثنائية العامل"]
+        },
+        "enableModules": {
+          "title": "فعّل وحداتك",
+          "description": "فعّل الوحدات التي تحتاجها من لوحة الفوترة.",
+          "details": ["وحدات أساسية في كل الخطط", "إضافات فورية", "إعداد لكل عيادة", "تغيير أو إلغاء في أي وقت"]
+        },
+        "startCare": {
+          "title": "ابدأ إدارة الرعاية",
+          "description": "سجّل المرضى، جدول المواعيد، وثّق الملاحظات والدورات في منصة واحدة.",
+          "details": ["استيراد سجلات", "قائمة تهيئة موجهة", "دعم أثناء الإطلاق", "تدريب ووثائق"]
+        }
+      }
+    },
+    "pricing": {
+      "badge": "أسعار شفافة",
+      "title": "أسعار بسيطة.",
+      "titleHighlight": "بلا رسوم خفية.",
+      "subtitle": "ابدأ بالمنصة الأساسة وأضف الوحدات مع نموك. تشمل جميع الخطط تجربة مجانية 14 يومًا.",
+      "monthly": "شهري",
+      "quarterly": "ربع سنوي",
+      "yearly": "سنوي",
+      "save5": "وفر 5%",
+      "save20": "وفر 20%",
+      "perMonth": "/شهر",
+      "billed": "الفوترة",
+      "save": "وفر",
+      "mostPopular": "الأكثر شعبية",
+      "startFreeTrial": "ابدأ التجربة المجانية",
+      "contactSales": "اتصل بالمبيعات",
+      "moduleAddons": "وحدات إضافية",
+      "addonsSubtitle": "فعّل وحدات إضافية في أي وقت من لوحة الفوترة.",
+      "enterpriseTitle": "مجموعة متعددة المواقع أو عيادة كبيرة؟",
+      "enterpriseSubtitle": "احصل على عرض سعر مخصص مع بنية تحتية مخصصة وSLA ممتاز وتكاملات مخصصة.",
+      "talkToSales": "تحدث إلى المبيعات",
+      "plans": {
+        "starter": { "name": "Starter", "tagline": "مثالي للعيادات الصغيرة" },
+        "growth": { "name": "Growth", "tagline": "لمراكز الخصوبة الراسخة" },
+        "scale": { "name": "Scale", "tagline": "لمجموعات عيادات متعددة المواقع" }
+      },
+      "features": {
+        "providers3": "حتى 3 مقدمي رعاية",
+        "patients200": "حتى 200 مريض",
+        "patientMgmt": "إدارة المرضى (الأساس)",
+        "scheduling": "الجدولة والمواعيد",
+        "basicEmr": "سجل طبي أساسي",
+        "ivfLab": "مختبر أطفال الأنابيب وعلم الأجنة",
+        "financialMgmt": "الإدارة المالية",
+        "staffMgmt": "الموظفون والأدوار",
+        "subdomain": "نطاق فرعي fertilityo.com",
+        "emailSupport": "دعم بالبريد",
+        "providers15": "حتى 15 مقدم رعاية",
+        "unlimitedPatients": "مرضى غير محدودين",
+        "everythingStarter": "كل ما في Starter",
+        "customDomain": "نطاق خاص (BYO)",
+        "whiteLabel": "علامة بيضاء",
+        "advancedReporting": "تقارير متقدمة",
+        "prioritySupport": "دعم أولوية بالبريد والدردشة",
+        "addonsIncluded2": "وحدتان إضافيتان مضمنتان",
+        "apiAccess": "وصول API",
+        "dataExport": "تصدير البيانات (CSV/PDF)",
+        "unlimitedProviders": "مقدمو رعاية غير محدودين",
+        "everythingGrowth": "كل ما في Growth",
+        "multiLocation": "دعم مواقع متعددة",
+        "allAddons": "جميع الوحدات الإضافية مضمنة",
+        "dedicatedManager": "مدير حساب مخصص",
+        "phoneSupport": "هاتف ودعم أولوية",
+        "customIntegrations": "تكاملات مخصصة",
+        "sla": "ضمان SLA (99.9%)",
+        "hipaaBaa": "BAA HIPAA مضمن"
+      },
+      "addons": {
+        "telemedicine": "الطب عن بُعد",
+        "patientPortal": "بوابة المريض",
+        "donorManagement": "إدارة المتبرعين",
+        "inventoryManagement": "إدارة المخزون",
+        "analyticsReporting": "التحليلات والتقارير",
+        "complianceAudit": "الامتثال والتدقيق"
+      }
+    },
+    "faq": {
+      "badge": "أسئلة شائعة",
+      "title": "الأسئلة الشائعة",
+      "subtitle": "كل ما تحتاج معرفته عن FertilityOS. لم تجد إجابتك؟",
+      "talkToTeam": "تحدث إلى فريقنا.",
+      "items": {
+        "install": { "q": "هل أحتاج تثبيت شيء لاستخدام FertilityOS؟", "a": "لا. FertilityOS منصة SaaS سحابية بالكامل. تُفتح من أي متصفح حديث. التحديثات تُنشر تلقائيًا." },
+        "domain": { "q": "هل يمكنني استخدام نطاقي الخاص؟", "a": "نعم. في خطط Growth وScale يمكنك ربط نطاقك أو نطاقك الفرعي. يرى المرضى علامتك فقط." },
+        "modules": { "q": "كيف تعمل الوحدات الإضافية؟", "a": "المنصة الأساسية مضمنة في كل الخطط. وحدات مثل الطب عن بُعد أو بوابة المريض تُفعّل من الفوترة برسوم شهرية لكل عيادة." },
+        "hipaa": { "q": "هل FertilityOS متوافق مع HIPAA؟", "a": "صُمم ليكون متوافقًا مع HIPAA. بيانات مشفرة، وصول مضبوط، ونشاط مسجّل. BAA متاحة في Scale وEnterprise." },
+        "multiTenant": { "q": "كيف يعمل عزل البيانات متعدد المستأجرين؟", "a": "بيانات كل عيادة في بيئة معزولة منطقيًا. لا يمكن لعيادات أخرى الوصول إلى بياناتك." },
+        "migrate": { "q": "هل يمكنني نقل بيانات مرضاي؟", "a": "نعم. ندعم استيراد CSV ويمكن المساعدة في الهجرة من منصات أخرى." },
+        "roles": { "q": "ما أدوار الموظفين المدعومة؟", "a": "مسؤول، طبيب، أخصائي أجنة، ممرضة، فني مختبر، استقبال، أشعة، وأدوار مخصصة بصلاحيات دقيقة." },
+        "trial": { "q": "هل توجد تجربة مجانية؟", "a": "نعم — 14 يومًا لجميع الخطط. لا حاجة لبطاقة ائتمان للبدء." }
+      }
+    },
+    "waitlist": {
+      "badge": "وصول مبكر محدود مفتوح",
+      "title": "كن من أوائل العيادات على",
+      "titleBrand": "FertilityOS",
+      "subtitle": "انضم لقائمة الانتظار. تهيئة أولوية، 30 يومًا مجانًا، وتأثير على الميزات.",
+      "successTitle": "أنت على القائمة!",
+      "successMessage": "سنتواصل معك على {email} بالخطوات التالية. شكرًا لاهتمامك بـ FertilityOS.",
+      "clinicName": "اسم العيادة / المركز",
+      "clinicPlaceholder": "مثال: مركز الخصوبة المتقدم",
+      "workEmail": "البريد المهني",
+      "emailPlaceholder": "you@yourclinic.com",
+      "phone": "الهاتف",
+      "optional": "اختياري",
+      "phonePlaceholder": "+966 5xx xxx xxxx",
+      "trialDataHint": "يُخزَّن البريد والهاتف لتقديم تجربة 14 يومًا لكل عيادة وتقليل التسجيل المتكرر.",
+      "joinWaitlist": "انضم لقائمة الانتظار",
+      "disclaimer": "بلا بطاقة ائتمان. تجربة 14 يومًا. بلا بريد مزعج.",
+      "socialProof": "{count} عيادة على القائمة بالفعل"
+    },
+    "languagePicker": {
+      "openAria": "اختر المنطقة واللغة",
+      "trigger": "المنطقة واللغة",
+      "title": "اختر المنطقة واللغة",
+      "subtitle": "حدد منطقتك ودولتك ولغتك المفضلة. تُفعَّل اللغات الجديدة بعد مراجعة الترجمات المهنية.",
+      "continent": "القارة / المنطقة",
+      "country": "الدولة",
+      "language": "اللغة",
+      "selectCountry": "اختر الدولة…",
+      "selectLanguage": "اختر اللغة…",
+      "apply": "متابعة",
+      "cancel": "إلغاء",
+      "quick": "تبديل سريع (لغات معتمدة)",
+      "defaultCurrency": "العملة",
+      "noCountriesForLocale": "لا توجد دول في هذه المنطقة تطابق اللغات المفعّلة حاليًا على الموقع.",
+      "continents": {
+        "americas": "الأمريكتان",
+        "europe": "أوروبا",
+        "africa": "أفريقيا",
+        "asia": "آسيا",
+        "oceania": "أوقيانوسيا",
+        "mena": "الشرق الأوسط وشمال أفريقيا"
+      }
+    }
+  },
+  "translatePage": {
+    "title": "ترجمة FertilityOS",
+    "lead": "نصوص الواجهة موجودة في ملفات JSON عامة في المستودع. يمكن للمترجمين المحترفين اقتراح تحديثات؛ نفعّل اللغة في الإنتاج فقط بعد المراجعة.",
+    "whereFiles": "مكان الملفات",
+    "whereFilesBody": "المجلد: website/messages/ — ملف لكل لغة (مثل en.json و es.json و ar.json). الإنجليزية هي الأساس؛ تُدمج الملفات الأخرى فوقها لذا الترجمة الجزئية مسموحة.",
+    "workflowTitle": "مسار العمل المقترح",
+    "workflowSteps": [
+      "انسخ المستودع (أو استخدم فرع ترجمة).",
+      "حرّر أو أضف messages/{locale}.json بنفس بنية en.json.",
+      "افتح طلب دمج مع ملاحظة قصيرة (اللغة، النطاق، المراجع).",
+      "يراجع الفريق الدقة والأسلوب السرير، ثم يُضاف الرمز إلى NEXT_PUBLIC_APPROVED_LOCALES عند الجاهزية للنشر."
+    ],
+    "deployTitle": "بوابة النشر",
+    "deployBody": "حتى لو وُجد ملف لغة، لا يظهر للمستخدمين حتى يُدرج رمزه في NEXT_PUBLIC_APPROVED_LOCALES (راجع website/.env.example).",
+    "readmeLink": "راجع messages/README.md في المستودع لمزيد من التفاصيل للمساهمين."
+  },
+  "app": {
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "patients": "المرضى",
+      "appointments": "المواعيد",
+      "invoices": "الفواتير",
+      "reports": "التقارير",
+      "billing": "الفوترة",
+      "lab": "المختبر",
+      "reportsToApprove": "تقارير للاعتماد",
+      "donors": "المتبرعون",
+      "surrogacy": "الأرحام البديلة",
+      "inventory": "المخزون",
+      "medications": "الصيدلية",
+      "referrals": "الإحالات",
+      "team": "الفريق",
+      "developers": "المطورون",
+      "compliance": "الامتثال",
+      "auditLog": "سجل التدقيق",
+      "accountSecurity": "الحساب والأمان",
+      "emailCampaigns": "حملات البريد",
+      "emailTemplates": "قوالب البريد",
+      "letterhead": "الورق الرسمي والطباعة",
+      "locations": "المواقع",
+      "integrations": "التكاملات",
+      "labIntegration": "تكامل المختبر",
+      "dataRequests": "طلبات البيانات",
+      "settings": "الإعدادات",
+      "securityReport": "تقرير الأمان",
+      "superDashboard": "لوحة المشرف الأعلى",
+      "superOverview": "نظرة عامة",
+      "superClinics": "جميع العيادات",
+      "superComplianceLog": "سجل امتثال المنصة",
+      "superPatientSearch": "بحث مرضى عبر العيادات",
+      "superPromotionCodes": "رموز خصم الدفع",
+      "superLocaleSettings": "اللغات (الموقع العام)",
+      "superPaymentSettings": "بوابات الدفع",
+      "logOut": "تسجيل الخروج",
+      "brand": "FertilityOS",
+      "clinic": "العيادة",
+      "groupMain": "رئيسي",
+      "groupClinical": "سريري",
+      "groupBilling": "الفوترة",
+      "groupLab": "المختبر والبرامج",
+      "groupAdmin": "الإدارة",
+      "groupPlatform": "المنصة"
+    },
+    "common": {
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "submit": "إرسال",
+      "back": "رجوع",
+      "next": "التالي",
+      "delete": "حذف",
+      "edit": "تعديل",
+      "close": "إغلاق"
+    }
+  }
+}

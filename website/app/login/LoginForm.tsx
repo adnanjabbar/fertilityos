@@ -189,19 +189,24 @@ export default function LoginForm({
           <button
             type="submit"
             disabled={loading}
-            className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:pointer-events-none"
+            className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-blue-700 to-blue-800 text-white font-bold hover:from-blue-800 hover:to-blue-900 transition-all shadow-lg shadow-blue-300/40 hover:-translate-y-0.5 disabled:opacity-60 disabled:pointer-events-none"
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>
 
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex flex-col gap-3 pt-2">
             <Link
               href="/forgot-password"
-              className="text-sm font-semibold text-blue-700 hover:underline"
+              className="w-full inline-flex items-center justify-center px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm font-bold text-slate-800 hover:border-blue-400 hover:text-blue-800 transition-colors"
             >
               Forgot password?
             </Link>
-            <span className="text-xs text-slate-500">14-day free trial</span>
+            <div className="rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-emerald-50/80 px-4 py-3 text-center">
+              <p className="text-xs font-bold uppercase tracking-wider text-teal-800">14-day free trial</p>
+              <p className="text-sm text-teal-900/90 mt-1 font-medium">
+                Full access to explore the platform — no card required to start.
+              </p>
+            </div>
           </div>
 
           {(process.env.NEXT_PUBLIC_OAUTH_GOOGLE === "1" ||
@@ -241,15 +246,15 @@ export default function LoginForm({
           )}
         </form>
 
-          <p className="text-center text-slate-600 mt-6 text-sm">
-            Don&apos;t have an account?{" "}
+          <div className="mt-6 space-y-2">
+            <p className="text-center text-slate-600 text-sm">Don&apos;t have an account?</p>
             <Link
               href="/register"
-              className="font-semibold text-blue-700 hover:underline"
+              className="flex w-full items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-blue-600 bg-blue-50 text-blue-900 font-bold text-sm hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors shadow-sm"
             >
-              Sign up and digitalize your clinic today.
+              Sign up — digitalize your clinic
             </Link>
-          </p>
+          </div>
         </div>
       </section>
     </div>

@@ -101,3 +101,56 @@ export function rateLimitSuperApi(
   }
   return { allowed: true };
 }
+
+const publicGeoWindowMs = 15 * 60 * 1000;
+const publicGeoMax = 200;
+
+/**
+ * Rate limit public geography lookups (register / marketing) per IP.
+ * In-memory; use Redis for multi-instance.
+ */
+export function rateLimitPublicGeo(identifier: string): { allowed: boolean } {
+  prune();
+  const key = getKey(identifier, "public-geo");
+  const now = Date.now();
+  const entry = store.get(key);
+  if (!entry) {
+    store.set(key, { count: 1, resetAt: now + publicGeoWindowMs });
+    return { allowed: true };
+  }
+  if (entry.resetAt < now) {
+    store.set(key, { count: 1, resetAt: now + publicGeoWindowMs });
+    return { allowed: true };
+  }
+  entry.count += 1;
+  if (entry.count > publicGeoMax) {
+    return { allowed: false };
+  }
+  return { allowed: true };
+}
+
+const registerWindowMs = 60 * 60 * 1000;
+const registerMax = 10;
+
+/**
+ * Rate limit clinic self-registration per client IP (abuse prevention).
+ */
+export function rateLimitRegister(identifier: string): { allowed: boolean } {
+  prune();
+  const key = getKey(identifier, "register-clinic");
+  const now = Date.now();
+  const entry = store.get(key);
+  if (!entry) {
+    store.set(key, { count: 1, resetAt: now + registerWindowMs });
+    return { allowed: true };
+  }
+  if (entry.resetAt < now) {
+    store.set(key, { count: 1, resetAt: now + registerWindowMs });
+    return { allowed: true };
+  }
+  entry.count += 1;
+  if (entry.count > registerMax) {
+    return { allowed: false };
+  }
+  return { allowed: true };
+}

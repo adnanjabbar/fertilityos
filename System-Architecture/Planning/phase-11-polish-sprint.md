@@ -17,8 +17,14 @@
 | **Super rate limits** | In-memory: patient search (80/15m), delete tenant (15/15m) per super user. |
 | **Stripe webhook audit** | `stripe_subscription_sync` rows on system tenant + `audit_logs` mirror (no PHI). |
 | **Reports CSV export** | `GET /api/app/reports/export` — same period/location as dashboard; UTF-8 BOM for Excel; `report.csv_export` audit. |
+| **Registration geography** | `/register` clinic step: country / state / city via `SearchableGeoSelect` (flags, names, ISO2); public geo APIs `GET /api/public/geo/*` (rate-limited) so unauthenticated registration can load data. |
+| **Registration hardening** | `POST /api/auth/register-clinic`: IP rate limit (10 requests/hour per IP at handler entry); audit `clinic_self_registered` on success. |
+| **Headers** | `Permissions-Policy` added in `next.config.ts` (camera/microphone for telemedicine; restricted geolocation/payment). |
+| **Docs** | `website/SSO-OAUTH.md`, `website/PUBLIC-API.md`; `.env.example` must stay placeholder-only (no real DB URLs). |
 
 ## Suggested next (finish line)
 
 - **Done:** Export reports (CSV) — `GET /api/app/reports/export` + **Download CSV** on `/app/reports` (audited as `report.csv_export`).
 - Redis-backed rate limits for multi-instance DO.
+- **SSO:** Operationalize Google/Azure for all clinics (env + IdP MFA); optional **2FA in-app** after SSO (see `SSO-OAUTH.md`).
+- **SSO-only tenant provisioning** (optional, larger scope): create/link clinic from IdP claims instead of password registration only.

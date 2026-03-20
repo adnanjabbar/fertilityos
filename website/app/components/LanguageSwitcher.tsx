@@ -1,12 +1,15 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
-import { useTransition } from "react";
+import { useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useMemo, useTransition } from "react";
 import type { Locale } from "@/i18n/request";
-
-const LOCALE_COOKIE_NAME = "NEXT_LOCALE";
-const COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year in seconds
+import {
+  COOKIE_MAX_AGE,
+  LOCALE_COOKIE_NAME,
+  LOCALE_DISPLAY,
+} from "@/lib/i18n-config";
+import { useApprovedLocales } from "@/app/components/useApprovedLocales";
 
 function setLocaleCookie(locale: Locale) {
   document.cookie = `${LOCALE_COOKIE_NAME}=${locale}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
@@ -35,10 +38,15 @@ export default function LanguageSwitcher({
     });
   };
 
-  const locales: { value: Locale; label: string }[] = [
-    { value: "en", label: t("en") },
-    { value: "es", label: t("es") },
-  ];
+  const approved = useApprovedLocales();
+  const locales: { value: Locale; label: string }[] = useMemo(
+    () =>
+      approved.map((value) => ({
+        value,
+        label: LOCALE_DISPLAY[value],
+      })),
+    [approved]
+  );
 
   if (variant === "buttons") {
     return (

@@ -25,6 +25,11 @@ const nextConfig: NextConfig = {
             value: "strict-origin-when-cross-origin",
           },
           {
+            key: "Permissions-Policy",
+            value:
+              "camera=(self), microphone=(self), fullscreen=(self), geolocation=(), payment=()",
+          },
+          {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",

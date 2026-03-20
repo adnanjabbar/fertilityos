@@ -80,6 +80,14 @@ export type ModuleSlug = (typeof MODULE_SLUGS)[number];
 export const BILLING_PLANS = ["free", "basic", "pro", "enterprise"] as const;
 export type BillingPlan = (typeof BILLING_PLANS)[number];
 
+/** Key-value platform config (super admin). e.g. `approved_locales` → string[] of locale codes. */
+export const platformSettings = pgTable("platform_settings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  settingKey: varchar("setting_key", { length: 64 }).notNull().unique(),
+  value: jsonb("value").notNull().$type<unknown>(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const tenants = pgTable("tenants", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -88,6 +96,9 @@ export const tenants = pgTable("tenants", {
   city: varchar("city", { length: 128 }),
   state: varchar("state", { length: 128 }),
   country: varchar("country", { length: 2 }).notNull(),
+  /** Optional GPS pin from self-service registration (decimal degrees as string). */
+  latitude: varchar("latitude", { length: 32 }),
+  longitude: varchar("longitude", { length: 32 }),
   postalCode: varchar("postal_code", { length: 32 }),
   specialty: varchar("specialty", { length: 255 }),
   licenseInfo: text("license_info"),
@@ -576,6 +587,35 @@ export const platformAdminAuditLog = pgTable(
     index("platform_admin_audit_log_created_idx").on(table.createdAt),
     index("platform_admin_audit_log_actor_idx").on(table.actorUserId),
     index("platform_admin_audit_log_event_idx").on(table.eventType),
+  ]
+);
+
+/** Marketing / platform discounts for Stripe Checkout (created by super admin). */
+export const platformPromotionCodes = pgTable(
+  "platform_promotion_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: varchar("code", { length: 64 }).notNull().unique(),
+    stripeCouponId: varchar("stripe_coupon_id", { length: 255 }).notNull(),
+    stripePromotionCodeId: varchar("stripe_promotion_code_id", { length: 255 }).notNull().unique(),
+    active: boolean("active").notNull().default(true),
+    percentOff: integer("percent_off"),
+    amountOffCents: integer("amount_off_cents"),
+    currency: varchar("currency", { length: 3 }),
+    duration: varchar("duration", { length: 32 }).notNull(),
+    durationInMonths: integer("duration_in_months"),
+    maxRedemptions: integer("max_redemptions"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    internalNote: text("internal_note"),
+    createdByUserId: uuid("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("platform_promotion_codes_active_idx").on(table.active),
+    index("platform_promotion_codes_created_idx").on(table.createdAt),
   ]
 );
 

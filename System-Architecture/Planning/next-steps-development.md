@@ -58,6 +58,8 @@
 
 **Phase 11 (polish sprint):** Stronger tenant patient search (MR#, phone, limits); super-admin cross-clinic patient search with audit; reports outstanding/unpaid invoice KPIs; super clinics table map links; registration step indicator; super-admin clinic delete; reports **CSV export** (`GET /api/app/reports/export`, audited). See `System-Architecture/Planning/phase-11-polish-sprint.md`.
 
+**Phase 11.1 (security, docs, registration UX):** Public geo endpoints for `/register`; clinic location via searchable country/state/city (flags + ISO2); admin phone with country selector; registration IP rate limit + `clinic_self_registered` audit; `Permissions-Policy` header; integration docs `website/PUBLIC-API.md` and `website/SSO-OAUTH.md` (2FA planned after SSO). See `phase-11-polish-sprint.md` and `website/SECURITY-AND-COMPLIANCE.md`.
+
 ---
 
 ## Implementation notes
