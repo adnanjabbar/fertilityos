@@ -29,6 +29,15 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 - [SSO / OAuth (Google & Microsoft)](./SSO-OAUTH.md) — env vars, callbacks, account linking.
 - [API marketplace / integrations](./API-MARKETPLACE.md) — product catalog at `/integrations`.
 
+### Clinic subdomains (`ERR_NAME_NOT_RESOLVED`)
+
+After sign-in or registration on **www**, staff are redirected to **`https://{clinic-slug}.thefertilityos.com/app/...`**. If you see **`ERR_NAME_NOT_RESOLVED`**, the subdomain does not exist in public DNS yet.
+
+1. **Proper fix:** Add a **wildcard** record so `*.thefertilityos.com` resolves to the same place as your app (e.g. Vercel “wildcard domain” + DNS `CNAME` / ALIAS as your host documents).
+2. **Until DNS is ready:** Set environment variable **`DISABLE_TENANT_SUBDOMAIN_REDIRECT=1`** (or `true`) in production. Users then stay on **www**; the session still carries the correct tenant (see `middleware.ts`).
+
+The Chrome message *“Unsafe attempt to load URL … from frame with URL chrome-error://chromewebdata/”* appears because the browser is on an **internal network error page** after DNS failed; it is not a separate app bug.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

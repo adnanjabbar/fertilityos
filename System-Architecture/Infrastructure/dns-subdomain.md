@@ -25,6 +25,24 @@ Examples:
 
 After propagation, `anything.thefertilityos.com` will resolve to the same app.
 
+### Common mistake: wildcard CNAME → apex (`thefertilityos.com`) while `www` → App Platform
+
+If **`*.thefertilityos.com`** is a CNAME to **`thefertilityos.com`**, and the **apex** uses **A/AAAA records** (e.g. to **Cloudflare**), then:
+
+- **`www.thefertilityos.com`** may work because it CNAMEs **directly** to `fertilityos-xxxxx.ondigitalocean.app`.
+- **`ivfexperts.thefertilityos.com`** follows: wildcard → apex → those A/AAAA IPs. Traffic hits **Cloudflare** (or whatever sits in front of the apex), not necessarily the same path as `www`. If that layer is not set up for arbitrary `*.thefertilityos.com` hostnames (DNS, SSL, origin), you can see failures. Some users also report odd resolver behavior with **CNAME → apex** chains.
+
+**Recommended fix:** Point the **wildcard CNAME to the same target as `www`** — the App Platform default hostname, e.g. **`fertilityos-jqotv.ondigitalocean.app`** — **not** to `thefertilityos.com`. Then add **`*.thefertilityos.com`** under the app’s **Settings → Domains** so DigitalOcean can issue a **wildcard TLS certificate** for clinic subdomains.
+
+Verify from your machine:
+
+```bash
+nslookup ivfexperts.thefertilityos.com
+# or: dig ivfexperts.thefertilityos.com +short
+```
+
+You should see names/IPs that ultimately reach your app host. If lookup fails → DNS still wrong for that chain; if lookup succeeds but the browser errors → check HTTPS / certificate / App Platform domain list.
+
 ---
 
 ## 2. DigitalOcean App Platform — Domains

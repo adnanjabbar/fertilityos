@@ -34,6 +34,7 @@ Set these in the App’s **Settings → App-Level Environment Variables** (or co
 | **`AUTH_TRUST_HOST`** | `true` | **Required** to avoid 503 UntrustedHost on non-Vercel hosts |
 | **`RESEND_API_KEY`** | `re_...` | **Required for email:** confirmation links, password reset, reminders. From [Resend](https://resend.com); add domain and DNS (SPF/DKIM). See **`Infrastructure/email-and-domain.md`**. |
 | **`NPM_CONFIG_LEGACY_PEER_DEPS`** | `true` | Optional: set if the build fails with npm peer dependency conflict (repo also has `.npmrc` with `legacy-peer-deps=true`) |
+| **`DISABLE_TENANT_SUBDOMAIN_REDIRECT`** | `1` or `true` | **Optional stopgap:** if wildcard DNS for `*.thefertilityos.com` is not live yet, set this so clinic users stay on **www** after login (avoids **`ERR_NAME_NOT_RESOLVED`** on `{slug}.thefertilityos.com`). Remove when wildcard DNS + app domain config are correct. |
 
 Without `AUTH_TRUST_HOST=true` and `AUTH_URL`, the site can return **503** when calling `/api/auth/session` or signing in. If the **build** fails with "upstream dependency conflict" or "eresolve", add `NPM_CONFIG_LEGACY_PEER_DEPS=true` and redeploy.
 
@@ -98,6 +99,8 @@ After a successful clean deploy, all `_next/static/chunks/*.js` files from that 
 - **Iteration:** Pull from GitHub before changes; push after changes to keep production in sync.
 
 ## Subdomain (clinic URLs)
+
+After login on **www**, non–super-admin users are redirected to **`https://{clinic-slug}.thefertilityos.com`**. If **`ERR_NAME_NOT_RESOLVED`** appears, DNS for that hostname is missing — configure wildcard DNS below, or temporarily set **`DISABLE_TENANT_SUBDOMAIN_REDIRECT=1`** (see env table).
 
 To support clinic subdomains (e.g. `demo-clinic.thefertilityos.com`):
 

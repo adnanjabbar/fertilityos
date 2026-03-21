@@ -8,8 +8,11 @@ import { db } from "@/db";
 import { emailVerificationCodes, verifiedEmails } from "@/db/schema";
 import { and, eq, gt } from "drizzle-orm";
 import { sendEmail } from "@/lib/email";
+import { renderPlatformEmailTemplate } from "@/lib/platform-email-templates";
 
 const CODE_EXPIRY_MINUTES = 15;
+/** Super Admin platform template key; if missing, inline HTML is used. */
+const CLINIC_REGISTER_EMAIL_TEMPLATE_KEY = "clinic_register_verification";
 const RATE_LIMIT_WINDOW_MINUTES = 15;
 const RATE_LIMIT_MAX_SENDS = 3;
 
@@ -63,13 +66,28 @@ export async function createAndSendEmailVerification(params: {
     expiresAt,
   });
 
-  const subject = "Your verification code – FertilityOS";
-  const html = `
+  const rendered = await renderPlatformEmailTemplate({
+    key: CLINIC_REGISTER_EMAIL_TEMPLATE_KEY,
+    vars: {
+      brandName: "FertilityOS",
+      code,
+      expiresMinutes: String(CODE_EXPIRY_MINUTES),
+    },
+  });
+
+  const subject = rendered.ok
+    ? rendered.subject
+    : "Your verification code – FertilityOS";
+  const html = rendered.ok
+    ? rendered.html
+    : `
     <p>Your verification code is: <strong>${code}</strong></p>
     <p>It expires in ${CODE_EXPIRY_MINUTES} minutes. If you didn't request this, you can ignore this email.</p>
     <p>— FertilityOS</p>
   `;
-  const text = `Your verification code is ${code}. It expires in ${CODE_EXPIRY_MINUTES} minutes.`;
+  const text = rendered.ok
+    ? rendered.text
+    : `Your verification code is ${code}. It expires in ${CODE_EXPIRY_MINUTES} minutes.`;
 
   const result = await sendEmail({ to: email, subject, html, text });
   if (!result.ok) return { ok: false, error: result.error ?? "Could not send email" };

@@ -18,6 +18,12 @@ function getSubdomainSlug(hostname: string): string | null {
 
 const CANONICAL_HOST = "www.thefertilityos.com";
 
+/** Until wildcard DNS exists for *.{ROOT_DOMAIN}, set DISABLE_TENANT_SUBDOMAIN_REDIRECT=1 so clinic users stay on www. */
+function tenantSubdomainRedirectDisabled() {
+  const v = process.env.DISABLE_TENANT_SUBDOMAIN_REDIRECT;
+  return v === "1" || v === "true";
+}
+
 export default auth((req) => {
   const hostname = req.nextUrl.hostname;
   // Normalize thefertilityos.com → www so the document always loads from www (avoids CORS on RSC/fetch)
@@ -45,8 +51,14 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth || hasSessionCookie;
 
   // Auth V2: Tenants always log in on www, then get routed to their tenant subdomain.
-  // Super-admin stays on www.
-  if (hostname === CANONICAL_HOST && !!req.auth && isApp && req.auth.user.roleSlug !== "super_admin") {
+  // Super-admin stays on www. Requires DNS: *.thefertilityos.com → your host (or set DISABLE_TENANT_SUBDOMAIN_REDIRECT).
+  if (
+    !tenantSubdomainRedirectDisabled() &&
+    hostname === CANONICAL_HOST &&
+    !!req.auth &&
+    isApp &&
+    req.auth.user.roleSlug !== "super_admin"
+  ) {
     const tSlug = (req.auth?.user as { tenantSlug?: string })?.tenantSlug;
     if (tSlug && tSlug !== "system") {
       const target = new URL(req.nextUrl.pathname + req.nextUrl.search, `https://${tSlug}.${ROOT_DOMAIN}`);

@@ -2,13 +2,14 @@ import { db } from "@/db";
 import { platformEmailTemplates } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export type PlatformEmailTemplateKey = "staff_forgot_password";
+/** Built-in keys used in code; any string key may exist in `platform_email_templates`. */
+export type PlatformEmailTemplateKey = string;
 
 export type RenderPlatformEmailResult =
   | { ok: true; subject: string; html: string; text?: string }
   | { ok: false; error: string };
 
-export async function getPlatformEmailTemplateByKey(key: PlatformEmailTemplateKey) {
+export async function getPlatformEmailTemplateByKey(key: string) {
   const [row] = await db
     .select({
       id: platformEmailTemplates.id,
@@ -33,7 +34,7 @@ function renderString(template: string, vars: Record<string, string>): string {
 }
 
 export async function renderPlatformEmailTemplate(params: {
-  key: PlatformEmailTemplateKey;
+  key: string;
   vars: Record<string, string>;
 }): Promise<RenderPlatformEmailResult> {
   const tpl = await getPlatformEmailTemplateByKey(params.key);

@@ -5,6 +5,7 @@ import { platformEmailTemplates } from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { sendEmail } from "@/lib/email";
+import { buildTestVarsForTemplate } from "@/lib/platform-email-template-test-vars";
 import { renderPlatformEmailTemplate } from "@/lib/platform-email-templates";
 
 function requireSuperAdmin(session: Awaited<ReturnType<typeof auth>>) {
@@ -36,8 +37,14 @@ export async function GET() {
   return NextResponse.json({ templates: rows });
 }
 
+const templateKeySchema = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z][a-z0-9_]*$/, "Use lowercase letters, numbers, underscore; start with a letter");
+
 const upsertSchema = z.object({
-  templateKey: z.string().min(1).max(64),
+  templateKey: templateKeySchema,
   name: z.string().min(1).max(128),
   subject: z.string().min(1).max(255),
   html: z.string().min(1),
@@ -76,7 +83,7 @@ export async function PUT(req: Request) {
 }
 
 const testSchema = z.object({
-  templateKey: z.string().min(1).max(64),
+  templateKey: templateKeySchema,
   to: z.string().email(),
   vars: z.record(z.string()).optional(),
 });
@@ -93,19 +100,27 @@ export async function POST(req: Request) {
   }
 
   const { templateKey, to, vars } = parsed.data;
-  // Only allow known keys for now.
-  if (templateKey !== "staff_forgot_password") {
-    return NextResponse.json({ error: "Unknown template key" }, { status: 400 });
+
+  const [tpl] = await db
+    .select({
+      subject: platformEmailTemplates.subject,
+      html: platformEmailTemplates.html,
+      text: platformEmailTemplates.text,
+    })
+    .from(platformEmailTemplates)
+    .where(eq(platformEmailTemplates.templateKey, templateKey))
+    .limit(1);
+
+  if (!tpl) {
+    return NextResponse.json({ error: "Template not found. Save the template first or pick another key." }, { status: 404 });
   }
 
+  const autoVars = buildTestVarsForTemplate(tpl.subject, tpl.html, tpl.text);
+  const mergedVars = { ...autoVars, ...(vars ?? {}) };
+
   const rendered = await renderPlatformEmailTemplate({
-    key: "staff_forgot_password",
-    vars: {
-      brandName: "TheFertilityOS",
-      resetUrl: "https://www.thefertilityos.com/reset-password?token=TEST_TOKEN",
-      name: "Dr Adnan",
-      ...(vars ?? {}),
-    },
+    key: templateKey,
+    vars: mergedVars,
   });
   if (!rendered.ok) {
     return NextResponse.json({ error: rendered.error }, { status: 400 });
@@ -124,3 +139,25 @@ export async function POST(req: Request) {
   return NextResponse.json({ success: true });
 }
 
+const deleteSchema = z.object({
+  templateKey: templateKeySchema,
+});
+
+/** DELETE — body: { templateKey } */
+export async function DELETE(req: Request) {
+  const session = await auth();
+  const guard = requireSuperAdmin(session);
+  if (!guard.ok) return guard.res;
+
+  const body = await req.json().catch(() => ({}));
+  const parsed = deleteSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten().fieldErrors }, { status: 400 });
+  }
+
+  await db
+    .delete(platformEmailTemplates)
+    .where(eq(platformEmailTemplates.templateKey, parsed.data.templateKey));
+
+  return NextResponse.json({ success: true });
+}
