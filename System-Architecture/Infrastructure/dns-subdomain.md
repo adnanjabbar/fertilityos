@@ -51,6 +51,12 @@ You should see names/IPs that ultimately reach your app host. If lookup fails �
 - Add **thefertilityos.com** and **www.thefertilityos.com** if not already added.
 - For **wildcard** (`*.thefertilityos.com`): If the UI allows adding a wildcard domain, add it so DO can issue a certificate covering all subdomains. If not, you can add individual subdomains (e.g. `demo-clinic.thefertilityos.com`) in the Domains list so each gets a cert; the wildcard CNAME above still routes traffic.
 
+### Auth session on subdomains (required)
+
+DNS + TLS can be correct and the page still “does not work” (redirect to login, blank session): sign-in on **www** sets a **host-only** cookie by default, so **`ivfexperts.thefertilityos.com` does not receive it**.
+
+Set app env **`AUTH_COOKIE_DOMAIN=.thefertilityos.com`** (leading dot) so the session cookie is valid for all subdomains. See **`website/auth.ts`** and **`deployment.md`**. Redeploy, then sign in **once** on www so the browser stores the new cookie.
+
 ---
 
 ## 3. App behavior (already implemented)

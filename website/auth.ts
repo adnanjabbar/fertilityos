@@ -117,8 +117,36 @@ async function applyRevocationIfNeeded(token: import("@auth/core/jwt").JWT) {
 }
 
 // Production (e.g. DigitalOcean): set AUTH_TRUST_HOST=true and AUTH_URL in env to avoid 503 UntrustedHost.
+
+/** Share session across clinic subdomains (e.g. www + ivfexperts). Without this, login on www leaves no cookie on *.thefertilityos.com. */
+function normalizeAuthCookieDomain(raw: string | undefined): string | undefined {
+  const d = raw?.trim().toLowerCase();
+  if (!d) return undefined;
+  if (d === "localhost" || d.includes("localhost")) return undefined;
+  return d.startsWith(".") ? d : `.${d}`;
+}
+
+const useSecureCookies = process.env.NODE_ENV === "production";
+const authCookieDomain = normalizeAuthCookieDomain(process.env.AUTH_COOKIE_DOMAIN);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  ...(authCookieDomain
+    ? {
+        cookies: {
+          sessionToken: {
+            name: useSecureCookies ? "__Secure-authjs.session-token" : "authjs.session-token",
+            options: {
+              httpOnly: true,
+              sameSite: "lax",
+              path: "/",
+              secure: useSecureCookies,
+              domain: authCookieDomain,
+            },
+          },
+        },
+      }
+    : {}),
   providers: [
     ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
       ? [

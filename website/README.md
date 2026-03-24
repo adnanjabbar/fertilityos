@@ -35,6 +35,7 @@ After sign-in or registration on **www**, staff are redirected to **`https://{cl
 
 1. **Proper fix:** Add a **wildcard** record so `*.thefertilityos.com` resolves to the same place as your app (e.g. Vercel “wildcard domain” + DNS `CNAME` / ALIAS as your host documents).
 2. **Until DNS is ready:** Set environment variable **`DISABLE_TENANT_SUBDOMAIN_REDIRECT=1`** (or `true`) in production. Users then stay on **www**; the session still carries the correct tenant (see `middleware.ts`).
+3. **DNS works but subdomain still fails (login loop / not signed in):** Set **`AUTH_COOKIE_DOMAIN=.thefertilityos.com`** in production so the session cookie is shared between **www** and **`{slug}.thefertilityos.com`** (see `auth.ts`). Redeploy and sign in once on www.
 
 The Chrome message *“Unsafe attempt to load URL … from frame with URL chrome-error://chromewebdata/”* appears because the browser is on an **internal network error page** after DNS failed; it is not a separate app bug.
 

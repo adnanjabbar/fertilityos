@@ -35,6 +35,7 @@ Set these in the App’s **Settings → App-Level Environment Variables** (or co
 | **`RESEND_API_KEY`** | `re_...` | **Required for email:** confirmation links, password reset, reminders. From [Resend](https://resend.com); add domain and DNS (SPF/DKIM). See **`Infrastructure/email-and-domain.md`**. |
 | **`NPM_CONFIG_LEGACY_PEER_DEPS`** | `true` | Optional: set if the build fails with npm peer dependency conflict (repo also has `.npmrc` with `legacy-peer-deps=true`) |
 | **`DISABLE_TENANT_SUBDOMAIN_REDIRECT`** | `1` or `true` | **Optional stopgap:** if wildcard DNS for `*.thefertilityos.com` is not live yet, set this so clinic users stay on **www** after login (avoids **`ERR_NAME_NOT_RESOLVED`** on `{slug}.thefertilityos.com`). Remove when wildcard DNS + app domain config are correct. |
+| **`AUTH_COOKIE_DOMAIN`** | `.thefertilityos.com` | **Required for tenant subdomains:** Auth session must be shared across `www` and `{slug}.thefertilityos.com`. Set to your **registrable domain with a leading dot** (see `website/auth.ts`). Without this, DNS can be correct but `/app/dashboard` on a subdomain still bounces to login or looks “not logged in”. After enabling, users sign in once to refresh the cookie scope. |
 
 Without `AUTH_TRUST_HOST=true` and `AUTH_URL`, the site can return **503** when calling `/api/auth/session` or signing in. If the **build** fails with "upstream dependency conflict" or "eresolve", add `NPM_CONFIG_LEGACY_PEER_DEPS=true` and redeploy.
 
